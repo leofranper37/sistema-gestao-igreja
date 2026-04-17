@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LDFP - Modulo em construcao</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .construction-wrap {
+            padding: 28px;
+        }
+
+        .construction-card {
+            max-width: 760px;
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 26px;
+            box-shadow: 0 14px 28px rgba(15, 23, 42, 0.08);
+        }
+
+        .construction-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 14px;
+        }
+
+        .construction-badge {
+            width: 52px;
+            height: 52px;
+            border-radius: 12px;
+            display: grid;
+            place-items: center;
+            color: #ffffff;
+            font-size: 1.35rem;
+            background: linear-gradient(135deg, #0ea5e9 0%, #14b8a6 100%);
+            box-shadow: 0 10px 18px rgba(20, 184, 166, 0.25);
+        }
+
+        .construction-title {
+            margin: 0;
+            color: #0f172a;
+            font-size: 1.55rem;
+        }
+
+        .construction-subtitle {
+            margin: 4px 0 0;
+            color: #475569;
+            font-size: 0.92rem;
+        }
+
+        .construction-description {
+            margin: 16px 0;
+            line-height: 1.6;
+            color: #334155;
+        }
+
+        .construction-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .construction-btn {
+            border: 0;
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .construction-btn-primary {
+            background: #0f766e;
+            color: #ffffff;
+            box-shadow: 0 8px 16px rgba(15, 118, 110, 0.28);
+        }
+
+        .construction-btn-secondary {
+            background: #e2e8f0;
+            color: #1e293b;
+        }
+
+        .construction-btn:hover {
+            transform: translateY(-1px);
+        }
+
+        @media (max-width: 900px) {
+            .construction-wrap {
+                padding: 18px;
+            }
+
+            .construction-card {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body class="theme-petroleo" data-shell-title="Modulo em construcao" data-shell-breadcrumb="LDFP / Secretaria" data-shell-chip="Em desenvolvimento" data-shell-role="Administrador">
+    <main class="main-content enterprise-main">
+        <section class="construction-wrap">
+            <article class="construction-card">
+                <header class="construction-header">
+                    <div class="construction-badge"><i class="fa-solid fa-hammer"></i></div>
+                    <div>
+                        <h2 id="moduleName" class="construction-title">Agenda</h2>
+                        <p class="construction-subtitle">Este menu esta sendo preparado para uma versao completa.</p>
+                    </div>
+                </header>
+
+                <p class="construction-description">
+                    O modulo <strong id="moduleNameText">Agenda</strong> ainda nao foi disponibilizado nesta versao.
+                    Enquanto isso, voce pode continuar utilizando os demais recursos do sistema normalmente.
+                </p>
+
+                <div class="construction-actions">
+                    <a class="construction-btn construction-btn-primary" href="dashboard.html">
+                        <i class="fa-solid fa-house"></i> Ir para Visao Geral
+                    </a>
+                    <button class="construction-btn construction-btn-secondary" type="button" onclick="history.back()">
+                        <i class="fa-solid fa-arrow-left"></i> Voltar
+                    </button>
+                </div>
+            </article>
+        </section>
+    </main>
+
+    <script src="session.js"></script>
+    <script src="enterprise-shell.js"></script>
+    <script>
+        requireAuthSession();
+
+        const params = new URLSearchParams(window.location.search);
+        const pageName = (params.get('pag') || 'Modulo').trim();
+        const safeName = pageName || 'Modulo';
+        const title = `${safeName} - Em construcao`;
+
+        document.title = `LDFP - ${title}`;
+        document.body.dataset.shellTitle = title;
+        document.body.dataset.shellBreadcrumb = `LDFP / ${safeName}`;
+
+        const moduleName = document.getElementById('moduleName');
+        const moduleNameText = document.getElementById('moduleNameText');
+
+        if (moduleName) {
+            moduleName.textContent = safeName;
+        }
+
+        if (moduleNameText) {
+            moduleNameText.textContent = safeName;
+        }
+    </script>
+</body>
+</html>

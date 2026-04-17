@@ -1,0 +1,244 @@
+﻿<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Planos - LDFP</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f3f4f6; color: #222; }
+        
+        /* HEADER SIMPLES */
+        header { padding: 20px 50px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1e293b; }
+        .logo img { height: 50px; background: rgba(255,255,255,0.9); padding: 5px 10px; border-radius: 5px; }
+        .btn-voltar { color: #94a3b8; text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+        .btn-voltar:hover { color: white; }
+
+        /* CONTEÃšDO */
+        .container { max-width: 1100px; margin: 0 auto; padding: 50px 20px; text-align: center; }
+        
+        h1 { font-size: 36px; margin-bottom: 10px; color: #fff; }
+        h1 span { color: #f59e0b; }
+        p.subtitle { color: #94a3b8; font-size: 18px; margin-bottom: 50px; }
+
+        /* GRID DE PREÃ‡OS */
+        .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        
+        .price-card {
+            background: #1e293b; border-radius: 15px; padding: 30px; text-align: left;
+            border: 1px solid #334155; transition: 0.3s; position: relative; overflow: hidden;
+            display: flex; flex-direction: column;
+        }
+        .price-card:hover { transform: translateY(-10px); border-color: #f59e0b; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+
+        /* DESTAQUE DO MEIO */
+        .price-card.featured { background: linear-gradient(145deg, #1e293b, #0f172a); border: 2px solid #f59e0b; transform: scale(1.05); z-index: 2; }
+        .badge {
+            position: absolute; top: 0; right: 0; background: #f59e0b; color: #000;
+            font-size: 11px; font-weight: bold; padding: 5px 10px; border-bottom-left-radius: 10px;
+        }
+
+        .plan-name { font-size: 20px; font-weight: 700; color: #fff; margin-bottom: 5px; }
+        .plan-price { font-size: 32px; font-weight: 800; color: #f59e0b; margin-bottom: 20px; }
+        .plan-price span { font-size: 14px; color: #94a3b8; font-weight: normal; }
+
+        .features { list-style: none; padding: 0; margin-bottom: 30px; flex: 1; }
+        .features li { margin-bottom: 12px; color: #cbd5e1; font-size: 14px; display: flex; align-items: center; gap: 10px; }
+        .features li i { color: #f59e0b; }
+        .features li i.off { color: #475569; }
+
+        /* BOTÃƒO */
+        .btn-select {
+            background: transparent; border: 1px solid #f59e0b; color: #f59e0b;
+            width: 100%; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer;
+            transition: 0.2s; text-align: center; text-decoration: none; display: block;
+        }
+        .btn-select:hover { background: #f59e0b; color: #000; }
+        
+        .btn-select.filled { background: #f59e0b; color: #000; }
+        .btn-select.filled:hover { background: #d97706; color: #fff; }
+
+    </style>
+</head>
+<body class="theme-petroleo">
+
+
+    <aside style="position:fixed;left:0;top:0;height:100vh;width:260px;background:#1e293b;padding:30px 0 0 0;z-index:10;display:flex;flex-direction:column;align-items:center;gap:20px;box-shadow:2px 0 16px #0002;">
+        <div class="logo" style="margin-bottom:30px;">
+            <img src="logo.png" alt="LDFP" style="height:50px;background:rgba(255,255,255,0.9);padding:5px 10px;border-radius:5px;">
+        </div>
+        <nav style="width:100%;">
+            <a href="dashboard.html" style="display:block;padding:12px 30px;color:#fff;text-decoration:none;font-weight:600;">Visao Geral</a>
+            <a href="novidades.html" style="display:block;padding:12px 30px;color:#fff;text-decoration:none;font-weight:600;">Novidades</a>
+            <a href="meu_plano.html" style="display:block;padding:12px 30px;color:#f59e0b;text-decoration:none;font-weight:700;background:#0f172a;">Meu Plano</a>
+            <a href="configuracoes.html" style="display:block;padding:12px 30px;color:#fff;text-decoration:none;font-weight:600;">Configuracoes</a>
+            <a href="index.html" style="display:block;padding:12px 30px;color:#fff;text-decoration:none;font-weight:600;">Sair</a>
+        </nav>
+        <!-- Banner compacto de upgrade de plano -->
+        <div style="background:#fbbf24;color:#111;padding:10px 8px 8px 8px;border-radius:8px;margin:18px 8px 0 8px;box-shadow:0 2px 8px #0001;width:90%;font-size:12px;line-height:1.3;display:flex;flex-direction:column;align-items:flex-start;gap:4px;">
+            <div style="font-size:13px;font-weight:700;margin-bottom:2px;">Plano limitado</div>
+            <div style="font-size:12px;">Atualize e desbloqueie todos os recursos.</div>
+            <a href="#planos" style="background:#0f172a;color:#fff;padding:5px 12px;border-radius:6px;font-weight:600;text-decoration:none;font-size:12px;margin-top:4px;align-self:center;">Ver Planos</a>
+        </div>
+    </aside>
+
+    <div style="margin-left:260px;">
+        <header>
+            <div class="logo">
+                <img src="logo.png" alt="LDFP">
+            </div>
+            <a href="index.html" class="btn-voltar"><i class="fa-solid fa-arrow-left"></i> Voltar</a>
+        </header>
+
+    <div class="container">
+        <div style="max-width:800px;margin:0 auto;">
+            <div style="background:linear-gradient(90deg,#fbbf24 0%,#f59e0b 100%);color:#222;padding:32px 24px 24px 24px;border-radius:18px 18px 0 0;box-shadow:0 4px 24px #0001;display:flex;align-items:center;justify-content:space-between;">
+                <div style="font-size:26px;font-weight:700;">Gratuito com AnÃºncios</div>
+                <div style="font-size:28px;font-weight:900;">R$ 0,00 <span style='font-size:16px;font-weight:400;'>/mÃªs</span></div>
+                <button id="btnAlterarPlano" style="background:#fff;color:#f59e0b;font-weight:700;padding:10px 22px;border-radius:8px;border:1px solid #fbbf24;box-shadow:0 2px 8px #0002;cursor:pointer;">Alterar Plano</button>
+            </div>
+            <div style="background:#fff;padding:32px 24px 40px 24px;border-radius:0 0 18px 18px;box-shadow:0 4px 24px #0001;">
+                <div style="font-size:18px;font-weight:600;color:#222;margin-bottom:24px;text-align:left;">&bull; Detalhes do seu plano</div>
+                <div style="display:flex;gap:24px;justify-content:center;flex-wrap:wrap;">
+                    <div style="background:#fff;border-radius:12px;padding:24px 18px;min-width:170px;text-align:center;box-shadow:0 2px 8px #0001;">
+                        <div style="font-size:36px;margin-bottom:8px;"><i class='fa-solid fa-database'></i></div>
+                        <div style="font-size:28px;font-weight:700;color:#222;">40</div>
+                        <div style="font-size:14px;color:#666;">TOTAL DE CADASTROS</div>
+                    </div>
+                    <div style="background:#fff;border-radius:12px;padding:24px 18px;min-width:170px;text-align:center;box-shadow:0 2px 8px #0001;">
+                        <div style="font-size:36px;margin-bottom:8px;"><i class='fa-solid fa-house'></i></div>
+                        <div style="font-size:28px;font-weight:700;color:#222;">1</div>
+                        <div style="font-size:14px;color:#666;">CONGREGAÃ‡Ã•ES</div>
+                    </div>
+                    <div style="background:#fff;border-radius:12px;padding:24px 18px;min-width:170px;text-align:center;box-shadow:0 2px 8px #0001;">
+                        <div style="font-size:36px;margin-bottom:8px;"><i class='fa-solid fa-mobile-screen-button'></i></div>
+                        <div style="font-size:28px;font-weight:700;color:#e11d48;"><i class='fa-solid fa-xmark'></i></div>
+                        <div style="font-size:14px;color:#666;">APP DO MEMBRO</div>
+                    </div>
+                    <div style="background:#fff;border-radius:12px;padding:24px 18px;min-width:170px;text-align:center;box-shadow:0 2px 8px #0001;">
+                        <div style="font-size:36px;margin-bottom:8px;"><i class='fa-solid fa-life-ring'></i></div>
+                        <div style="font-size:20px;color:#e11d48;margin-bottom:4px;">
+                            <span style='display:block;'><i class='fa-solid fa-xmark'></i> E-mail</span>
+                            <span style='display:block;'><i class='fa-solid fa-xmark'></i> WhatsApp</span>
+                            <span style='display:block;'><i class='fa-solid fa-xmark'></i> Telefone</span>
+                        </div>
+                        <div style="font-size:14px;color:#666;">CANAIS DE SUPORTE</div>
+                    </div>
+                </div>
+                <div style="margin-top:32px;text-align:center;">
+                            <!-- Modal de alteraÃ§Ã£o de planos -->
+                            <div id="modalAlterarPlano" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.85);z-index:2000;align-items:center;justify-content:center;">
+                                <div style="background:#fff;padding:40px 20px 30px 20px;border-radius:16px;max-width:1100px;width:98vw;box-shadow:0 8px 40px #000;position:relative;">
+                                    <button onclick="document.getElementById('modalAlterarPlano').style.display='none'" style="position:absolute;top:18px;right:18px;background:none;border:none;color:#222;font-size:22px;cursor:pointer;">&times;</button>
+                                    <h2 style="color:#f59e0b;text-align:center;margin-bottom:10px;">Escolha seu Plano</h2>
+                                    <div style="display:flex;justify-content:center;align-items:center;margin-bottom:24px;gap:12px;">
+                                        <button id="btnMensal" style="background:#fbbf24;color:#222;font-weight:700;padding:8px 28px;border-radius:20px;border:none;font-size:16px;box-shadow:0 2px 8px #0001;cursor:pointer;">Mensal</button>
+                                        <button id="btnAnual" style="background:#eee;color:#222;font-weight:700;padding:8px 28px;border-radius:20px;border:none;font-size:16px;box-shadow:0 2px 8px #0001;cursor:pointer;">Anual <span style='background:#22c55e;color:#fff;padding:2px 10px;border-radius:10px;font-size:12px;margin-left:8px;'>Economize atÃ© 16%</span></button>
+                                    </div>
+                                    <div id="planosGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px;">
+                                        <!-- Os cards dos planos serÃ£o preenchidos via JS -->
+                                    </div>
+                                </div>
+                            </div>
+                            <script>
+                            // Dados dos planos
+                            // Adicionais para Carmelo
+                            let adicionais = { cadastros: 0, congregacoes: 0 };
+                            const planos = {
+                                mensal: [
+                                    { nome: 'Ararate', cadastros: 100, congregacoes: 1, preco: 50, recursos: ['App do Membro','Suporte via e-mail'], whatsapp: false, telefone: false, popular: false },
+                                    { nome: 'Sinai', cadastros: 300, congregacoes: 5, preco: 80, recursos: ['App do Membro','Suporte via e-mail','Suporte via WhatsApp'], whatsapp: true, telefone: false, popular: true },
+                                    { nome: 'Carmelo', cadastros: 500, congregacoes: 10, preco: 100, recursos: ['App do Membro','Suporte via e-mail','Suporte via WhatsApp','Suporte via Telefone'], whatsapp: true, telefone: true, popular: false }
+                                ],
+                                anual: [
+                                    { nome: 'Ararate', cadastros: 100, congregacoes: 1, preco: 500, recursos: ['App do Membro','Suporte via e-mail'], whatsapp: false, telefone: false, popular: false },
+                                    { nome: 'Sinai', cadastros: 300, congregacoes: 5, preco: 1000, recursos: ['App do Membro','Suporte via e-mail','Suporte via WhatsApp'], whatsapp: true, telefone: false, popular: true },
+                                    { nome: 'Carmelo', cadastros: 500, congregacoes: 10, preco: 1200, recursos: ['App do Membro','Suporte via e-mail','Suporte via WhatsApp','Suporte via Telefone'], whatsapp: true, telefone: true, popular: false }
+                                ]
+                            };
+                            function renderPlanos(tipo) {
+                                const grid = document.getElementById('planosGrid');
+                                grid.innerHTML = '';
+                                planos[tipo].forEach((plano, idx) => {
+                                    const popular = plano.popular ? `<div style='position:absolute;top:-18px;right:-18px;background:#fbbf24;color:#111;font-size:12px;font-weight:700;padding:4px 16px;border-radius:8px 8px 8px 0;box-shadow:0 2px 8px #0002;'>MAIS POPULAR</div>` : '';
+                                    let adicionaisHtml = '';
+                                    let precoFinal = plano.preco;
+                                    if (plano.nome === 'Carmelo') {
+                                        // PreÃ§o dos adicionais
+                                        const precoCadastro = tipo === 'mensal' ? 0.2 : 2; // R$0,20/mÃªs ou R$2,00/ano por cadastro
+                                        const precoCong = tipo === 'mensal' ? 3 : 20; // R$3,00/mÃªs ou R$20,00/ano por congregaÃ§Ã£o
+                                        precoFinal += adicionais.cadastros * precoCadastro + adicionais.congregacoes * precoCong;
+                                        adicionaisHtml = `
+                                            <div style='margin:18px 0 0 0;text-align:left;width:100%;'>
+                                                <div style='font-size:13px;color:#222;font-weight:600;margin-bottom:6px;'>Adicionais</div>
+                                                <label style='font-size:13px;'>Cadastros: <b>${adicionais.cadastros}</b> (+R$ ${(adicionais.cadastros*precoCadastro).toLocaleString('pt-BR',{minimumFractionDigits:2})}/${tipo==='mensal'?'mÃªs':'ano'})</label>
+                                                <input type='range' min='0' max='2000' value='${adicionais.cadastros}' id='sliderCadastros' style='width:100%;margin-bottom:10px;'>
+                                                <label style='font-size:13px;'>CongregaÃ§Ãµes: <b>${adicionais.congregacoes}</b> (+R$ ${(adicionais.congregacoes*precoCong).toLocaleString('pt-BR',{minimumFractionDigits:2})}/${tipo==='mensal'?'mÃªs':'ano'})</label>
+                                                <input type='range' min='0' max='200' value='${adicionais.congregacoes}' id='sliderCongregacoes' style='width:100%;'>
+                                            </div>
+                                        `;
+                                    }
+                                    grid.innerHTML += `
+                                    <div style="background:#fff;border-radius:12px;padding:32px 18px 24px 18px;text-align:center;display:flex;flex-direction:column;align-items:center;box-shadow:0 2px 8px #0001;position:relative;">
+                                        ${popular}
+                                        <div style='font-size:22px;font-weight:700;color:#222;margin-bottom:2px;'>${plano.nome}</div>
+                                        <div style='font-size:13px;color:#fbbf24;margin-bottom:10px;'>AtÃ© ${plano.cadastros + (plano.nome==='Carmelo'?adicionais.cadastros:0)} Cadastros<br>${plano.congregacoes + (plano.nome==='Carmelo'?adicionais.congregacoes:0)} congregaÃ§Ã£o${(plano.congregacoes + (plano.nome==='Carmelo'?adicionais.congregacoes:0))>1?'s':''}</div>
+                                        <div id='precoCarmelo${tipo}' style='font-size:38px;font-weight:900;color:#f59e0b;margin-bottom:2px;'>R$ ${precoFinal.toLocaleString('pt-BR',{minimumFractionDigits:2})} <span style='font-size:14px;color:#94a3b8;'>/${tipo==='mensal'?'mÃªs':'ano'}</span></div>
+                                        <ul style='list-style:none;padding:0;margin-bottom:18px;color:#222;font-size:15px;text-align:left;'>
+                                            <li><span style='color:#22c55e'>âœ”</span> App do Membro</li>
+                                            <li><span style='color:#22c55e'>âœ”</span> ${plano.cadastros + (plano.nome==='Carmelo'?adicionais.cadastros:0)} cadastros</li>
+                                            <li><span style='color:#22c55e'>âœ”</span> ${plano.congregacoes + (plano.nome==='Carmelo'?adicionais.congregacoes:0)} congregaÃ§Ã£o${(plano.congregacoes + (plano.nome==='Carmelo'?adicionais.congregacoes:0))>1?'s':''}</li>
+                                            <li><span style='color:#22c55e'>âœ”</span> Suporte via e-mail</li>
+                                            <li><span style='color:${plano.whatsapp?'#22c55e':'#aaa'}'>${plano.whatsapp?'âœ”':'âœ–'}</span> Suporte via WhatsApp</li>
+                                            <li><span style='color:${plano.telefone?'#22c55e':'#aaa'}'>${plano.telefone?'âœ”':'âœ–'}</span> Suporte via Telefone</li>
+                                        </ul>
+                                        ${adicionaisHtml}
+                                        <button style='background:#fbbf24;color:#222;font-weight:700;padding:12px 0;border-radius:8px;border:none;font-size:16px;width:100%;margin-top:18px;cursor:pointer;box-shadow:0 2px 8px #0001;'>SELECIONAR PLANO</button>
+                                    </div>`;
+                                });
+                                // Eventos dos sliders de adicionais
+                                setTimeout(()=>{
+                                    const sliderCad = document.getElementById('sliderCadastros');
+                                    const sliderCong = document.getElementById('sliderCongregacoes');
+                                    if(sliderCad && sliderCong){
+                                        sliderCad.oninput = function(){ adicionais.cadastros = parseInt(this.value); renderPlanos(tipo); };
+                                        sliderCong.oninput = function(){ adicionais.congregacoes = parseInt(this.value); renderPlanos(tipo); };
+                                    }
+                                }, 100);
+                            }
+                            document.getElementById('btnAlterarPlano').onclick = function() {
+                                document.getElementById('modalAlterarPlano').style.display = 'flex';
+                                renderPlanos('mensal');
+                                document.getElementById('btnMensal').style.background = '#fbbf24';
+                                document.getElementById('btnAnual').style.background = '#eee';
+                            };
+                            document.getElementById('btnMensal').onclick = function() {
+                                renderPlanos('mensal');
+                                this.style.background = '#fbbf24';
+                                document.getElementById('btnAnual').style.background = '#eee';
+                            };
+                            document.getElementById('btnAnual').onclick = function() {
+                                renderPlanos('anual');
+                                this.style.background = '#fbbf24';
+                                document.getElementById('btnMensal').style.background = '#eee';
+                            };
+                            </script>
+                    <span style="background:#22d3ee;color:#222;padding:10px 28px;border-radius:8px;font-weight:700;font-size:18px;">Teste grÃ¡tis de 1 mÃªs</span>
+                </div>
+
+                <div style="margin-top:26px;background:#0f172a;color:#e2e8f0;border-radius:12px;padding:18px 16px;text-align:left;display:flex;flex-wrap:wrap;gap:14px;justify-content:space-between;align-items:center;">
+                    <div style="font-size:14px;font-weight:700;color:#fbbf24;">Contato do responsÃ¡vel</div>
+                    <a href="mailto:leopereita31@gmail.com" style="color:#e2e8f0;text-decoration:none;font-size:14px;display:flex;align-items:center;gap:8px;">
+                        <i class="fa-solid fa-envelope" style="color:#fbbf24;"></i>
+                        leopereita31@gmail.com
+                    </a>
+                    <a href="https://instagram.com/leofranper" target="_blank" rel="noopener noreferrer" style="color:#e2e8f0;text-decoration:none;font-size:14px;display:flex;align-items:center;gap:8px;">
+                        <i class="fa-brands fa-instagram" style="color:#fbbf24;"></i>
+                        @leofranper
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

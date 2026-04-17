@@ -1,0 +1,30 @@
+{
+  "name": "sistema-gestao-igreja",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/server.js",
+  "scripts": {
+    "up": "npm run dev",
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "check:db": "node scripts/check-db.js",
+    "stop": "echo 'Use CTRL+C para parar o servidor.'",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.6",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "joi": "^18.1.2",
+    "jsonwebtoken": "^9.0.3",
+    "mysql2": "^3.17.4",
+    "nodemailer": "^6.10.1",
+    "nodemon": "^3.1.0",
+    "winston": "^3.19.0"
+  }
+}

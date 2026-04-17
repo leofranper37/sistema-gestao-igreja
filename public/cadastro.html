@@ -1,0 +1,512 @@
+﻿<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Zeke - Cadastro de Membros</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* ESTILOS ESPECÃFICOS DO CADASTRO */
+        .form-container {
+            background: white; border: 1px solid #e5e7eb; border-radius: 8px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05); min-height: 600px; padding-bottom: 20px;
+        }
+
+        /* SISTEMA DE ABAS (TABS) */
+        .tabs-header {
+            display: flex; border-bottom: 1px solid #eee; background: #fff;
+            padding: 0 20px; border-radius: 8px 8px 0 0; margin-bottom: 20px;
+        }
+        .tab-btn {
+            background: none; border: none; padding: 15px 20px;
+            font-size: 13px; font-weight: 600; color: #6b7280; cursor: pointer;
+            border-bottom: 2px solid transparent; display: flex; align-items: center; gap: 8px;
+        }
+        .tab-btn:hover { color: #1f2937; }
+        .tab-btn.active { color: #111; border-bottom-color: #00bef0; }
+
+        /* CONTEÃšDO DAS ABAS */
+        .tab-content { display: none; padding: 0 30px; }
+        .tab-content.active { display: block; }
+
+        /* GRID DO FORMULÃRIO */
+        .form-row { display: flex; gap: 20px; margin-bottom: 15px; }
+        .form-group { flex: 1; display: flex; flex-direction: column; }
+        
+        label { font-size: 11px; font-weight: 700; color: #374151; margin-bottom: 5px; }
+        
+        input[type="text"], input[type="date"], input[type="email"], select, textarea {
+            padding: 8px 10px; border: 1px solid #d1d5db; border-radius: 4px;
+            font-size: 13px; color: #374151; outline: none; width: 100%; box-sizing: border-box; background: #fff;
+        }
+        input:focus, select:focus, textarea:focus { border-color: #00bef0; }
+
+        /* BOTÃƒO SALVAR VERDE */
+        .btn-salvar {
+            background-color: #28a745; color: white; border: none; padding: 8px 20px;
+            border-radius: 4px; font-weight: bold; cursor: pointer; margin-top: 20px; font-size: 13px;
+        }
+        .btn-salvar:hover { background-color: #218838; }
+
+        /* Estilos Especiais */
+        .search-input-group { position: relative; }
+        .search-input-group i { position: absolute; right: 10px; top: 10px; color: #999; cursor: pointer; }
+
+        /* Aviso Azul (Ministeriais) */
+        .info-box-blue {
+            background-color: #00bef0; color: white; padding: 15px; border-radius: 4px;
+            font-size: 12px; line-height: 1.5;
+        }
+
+        /* BotÃµes da Foto */
+        .photo-btn-group { display: flex; gap: 5px; margin-bottom: 10px; }
+        .btn-photo {
+            padding: 5px 10px; border: 1px solid #ccc; background: #eee; border-radius: 3px;
+            cursor: pointer; font-size: 12px; display: flex; align-items: center; gap: 5px;
+        }
+        .btn-photo.orange { background: #f0ad4e; color: white; border: none; }
+        .btn-photo.green { background: #5cb85c; color: white; border: none; }
+        
+        .photo-canvas {
+            border: 1px solid #ddd; height: 300px; background: #fafafa; border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="theme-petroleo">
+
+    <aside class="sidebar">
+        <div class="sidebar-profile">
+            <div class="profile-avatar"><i class="fa-solid fa-user"></i></div>
+            <div class="profile-info"><h4>LEONARD FRANCISCO...</h4><span>Online</span></div>
+        </div>
+        <nav class="menu">
+            <button class="dropdown-btn active"><span><i class="fa-solid fa-bars icon-left"></i> Menu</span></button>
+            <div class="dropdown-container" style="display: block;">
+                <a href="index.html"><i class="fa-solid fa-house"></i> Voltar ao InÃ­cio</a>
+                <a href="membros.html"><i class="fa-solid fa-users"></i> Lista de Membros</a>
+            </div>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <header>
+            <div class="header-left"><i class="fa-solid fa-bars"></i></div>
+            <div class="header-right"><span>LEONARD PEREIRA <i class="fa-solid fa-user-circle"></i></span></div>
+        </header>
+
+        <div style="padding: 30px;">
+            <h2 class="page-title" style="font-size: 20px;">Membros <span style="font-weight:400; font-size:16px; color:#777;">Cadastro</span></h2>
+            
+            <div class="form-container">
+                
+                <div class="tabs-header">
+                    <button class="tab-btn active" onclick="abrirAba(event, 'pessoais')"><i class="fa-solid fa-user"></i> Dados Pessoais</button>
+                    <button class="tab-btn" onclick="abrirAba(event, 'familiares')"><i class="fa-solid fa-users"></i> Dados Familiares</button>
+                    <button class="tab-btn" onclick="abrirAba(event, 'ministeriais')"><i class="fa-solid fa-church"></i> Dados Ministeriais</button>
+                    <button class="tab-btn" onclick="abrirAba(event, 'foto')"><i class="fa-solid fa-camera"></i> Foto</button>
+                </div>
+
+                <form id="formCadastro" style="padding-bottom: 20px;">
+                    
+                    <div id="pessoais" class="tab-content active">
+                        <div class="form-row">
+                            <div class="form-group" style="flex: 2;">
+                                <label>Nome</label>
+                                <input type="text" placeholder="Nome do membro">
+                            </div>
+                            <div class="form-group">
+                                <label>Apelido</label>
+                                <input type="text">
+                            </div>
+                            <div class="form-group" style="flex: 0.5;">
+                                <label>Ficha NÂº</label>
+                                <input type="text">
+                            </div>
+                            <div class="form-group">
+                                <label>Nascimento</label>
+                                <input type="date">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Sexo</label>
+                                <select><option>-- Selecione --</option><option>Masculino</option><option>Feminino</option></select>
+                            </div>
+                            <div class="form-group">
+                                <label>Estado Civil</label>
+                                <select><option>Selecione</option><option>Casado(a)</option><option>Solteiro(a)</option></select>
+                            </div>
+                            <div class="form-group" style="flex: 2;">
+                                <label>ProfissÃ£o</label>
+                                <input type="text">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Grau de InstruÃ§Ã£o</label>
+                                <select><option>Selecione</option><option>Ensino MÃ©dio</option><option>Superior</option></select>
+                            </div>
+                            <div class="form-group" style="flex: 0.5;">
+                                <label>Tipo de Sangue</label>
+                                <select><option>-- Selecione --</option><option>A+</option><option>O+</option></select>
+                            </div>
+                            <div class="form-group" style="flex: 2;"></div> </div>
+
+                        <div class="form-row">
+                            <div class="form-group" style="flex: 0.5;">
+                                <label>CEP</label>
+                                <div class="search-input-group">
+                                    <input type="text">
+                                    <i class="fa-solid fa-search"></i>
+                                </div>
+                            </div>
+                            <div class="form-group" style="flex: 2;">
+                                <label>EndereÃ§o</label>
+                                <input type="text">
+                            </div>
+                            <div class="form-group" style="flex: 0.5;">
+                                <label>NÃºmero</label>
+                                <input type="text">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group"><label>Bairro</label><input type="text"></div>
+                            <div class="form-group"><label>Complemento</label><input type="text"></div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group"><label>Cidade</label><input type="text"></div>
+                            <div class="form-group"><label>Estado</label><select><option>-- Selecione --</option><option>RJ</option><option>SP</option></select></div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group"><label>Telefone</label><input type="text"></div>
+                            <div class="form-group"><label>Celular</label><input type="text"></div>
+                            <div class="form-group"><label>Email</label><input type="text"></div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group"><label>CPF</label><input type="text"></div>
+                            <div class="form-group"><label>RG</label><input type="text"></div>
+                            <div class="form-group"><label>Emissor RG</label><input type="text"></div>
+                            <div class="form-group"><label>Dt. EmissÃ£o RG</label><input type="date"></div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group"><label>Nacionalidade</label><input type="text"></div>
+                            <div class="form-group"><label>Natural de</label><input type="text"></div>
+                            <div class="form-group"><label>UF</label><select><option>-- Selecione --</option></select></div>
+                        </div>
+
+                        <button type="button" class="btn-salvar">Salvar</button>
+                    </div>
+
+                    <div id="familiares" class="tab-content">
+                        <div class="form-row">
+                            <div class="form-group" style="flex: 2;">
+                                <label>CÃ´njuge</label>
+                                <input type="text">
+                            </div>
+                            <div class="form-group">
+                                <label>Casamento</label>
+                                <input type="date">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Pai</label>
+                                <input type="text">
+                            </div>
+                            <div class="form-group">
+                                <label>MÃ£e</label>
+                                <input type="text">
+                            </div>
+                        </div>
+                        <button type="button" class="btn-salvar">Salvar</button>
+                    </div>
+
+                    <div id="ministeriais" class="tab-content">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Batismo Ãguas</label>
+                                <input type="date">
+                            </div>
+                            <div class="form-group" style="flex: 2;">
+                                <label>Igreja e Local</label>
+                                <input type="text">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Batizado no EspÃ­rito Santo?</label>
+                                <select><option>Sim</option><option>NÃ£o</option></select>
+                            </div>
+                            <div class="form-group">
+                                <label>Dt. Batismo no EspÃ­rito</label>
+                                <input type="date">
+                            </div>
+                            <div class="form-group">
+                                <label>Local Batismo no EspÃ­rito</label>
+                                <input type="text">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>AdmissÃ£o</label>
+                                <input type="date">
+                            </div>
+                            <div class="form-group">
+                                <label>Tipo de AdmissÃ£o</label>
+                                <select><option>Batismo</option><option>AclamaÃ§Ã£o</option></select>
+                            </div>
+                            <div class="form-group">
+                                <label>Igreja e Local de ProcedÃªncia</label>
+                                <input type="text">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group"><label>EmissÃ£o Carteira</label><input type="date"></div>
+                            <div class="form-group"><label>Vencto Carteira</label><input type="date"></div>
+                            <div class="form-group"><label>SituaÃ§Ã£o</label><select><option>Ativo</option></select></div>
+                            <div class="form-group"><label>Cargo</label><select><option>Membro</option></select></div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>CongregaÃ§Ã£o</label>
+                                <select><option>igreja congregacional de Angra dos Reis</option></select>
+                            </div>
+                            <div class="form-group" style="flex: 1.5;">
+                                <div class="info-box-blue">
+                                    Salve o Cadastro do Membro para Gerenciar seus Grupos e FunÃ§Ãµes.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group" style="flex: 0.5;">
+                                <label>Data da SaÃ­da</label>
+                                <input type="date">
+                            </div>
+                            <div class="form-group" style="flex: 1.5;">
+                                <label>Obs</label>
+                                <textarea rows="3"></textarea>
+                            </div>
+                        </div>
+
+                        <button type="button" class="btn-salvar">Salvar</button>
+                    </div>
+
+                    <div id="foto" class="tab-content">
+                        <div class="photo-btn-group">
+                            <button type="button" class="btn-photo orange"><i class="fa-regular fa-folder-open"></i> Abrir</button>
+                            <button type="button" class="btn-photo green"><i class="fa-solid fa-scissors"></i> Cortar</button>
+                            <button type="button" class="btn-photo orange"><i class="fa-solid fa-rotate-right"></i> Reiniciar</button>
+                            <button type="button" class="btn-photo"><i class="fa-solid fa-minus"></i></button>
+                            <button type="button" class="btn-photo"><i class="fa-solid fa-plus"></i></button>
+                        </div>
+                        
+                        <div class="photo-canvas"></div>
+                        
+                        <button type="button" class="btn-salvar">Salvar</button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // LÃ“GICA DAS ABAS (TABS)
+        function abrirAba(evt, nomeAba) {
+            evt.preventDefault();
+            
+            var conteudos = document.getElementsByClassName("tab-content");
+            for (var i = 0; i < conteudos.length; i++) {
+                conteudos[i].style.display = "none";
+            }
+
+            var botoes = document.getElementsByClassName("tab-btn");
+            for (var i = 0; i < botoes.length; i++) {
+                botoes[i].className = botoes[i].className.replace(" active", "");
+            }
+
+            document.getElementById(nomeAba).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+    </script>
+
+</body>
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Criar Conta</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #e5e7eb;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        .modal-bg {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.45);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            z-index: 10;
+        }
+        .modal {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px #0003;
+            max-width: 420px;
+            width: 100%;
+            padding: 36px 32px 28px 32px;
+            position: relative;
+        }
+        .modal h2 {
+            margin: 0 0 8px 0;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #222;
+            text-align: center;
+        }
+        .modal p.desc {
+            color: #555;
+            font-size: 1rem;
+            margin-bottom: 22px;
+            text-align: center;
+        }
+        .modal label {
+            display: block;
+            margin-bottom: 4px;
+            color: #222;
+            font-weight: 500;
+            font-size: 1rem;
+        }
+        .modal input[type="text"],
+        .modal input[type="email"],
+        .modal input[type="password"],
+        .modal input[type="tel"] {
+            width: 100%;
+            padding: 10px 12px;
+            margin-bottom: 16px;
+            border: 1.5px solid #d1d5db;
+            border-radius: 7px;
+            font-size: 1rem;
+            background: #f9fafb;
+            color: #222;
+            transition: border 0.2s;
+        }
+        .modal input:focus {
+            border-color: #fbbf24;
+            outline: none;
+        }
+        .modal .consent {
+            margin-bottom: 18px;
+            font-size: 0.97rem;
+            color: #444;
+        }
+        .modal .consent label {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            font-weight: 400;
+            font-size: 0.97rem;
+            color: #444;
+        }
+        .modal .consent input[type="checkbox"] {
+            margin-top: 2px;
+        }
+        .modal .termos {
+            background: #f3f4f6;
+            border-radius: 6px;
+            padding: 10px 12px;
+            font-size: 0.93rem;
+            color: #444;
+            max-height: 90px;
+            overflow-y: auto;
+            margin-bottom: 10px;
+            border: 1px solid #e5e7eb;
+        }
+        .modal button {
+            width: 100%;
+            background: #fbbf24;
+            color: #222;
+            border: none;
+            border-radius: 7px;
+            padding: 13px 0;
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-top: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .modal button:hover {
+            background: #f59e0b;
+            color: #fff;
+        }
+        .modal .login-link {
+            text-align: center;
+            margin-top: 18px;
+            font-size: 0.98rem;
+        }
+        .modal .login-link a {
+            color: #fbbf24;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .modal .login-link a:hover {
+            text-decoration: underline;
+        }
+        @media (max-width: 600px) {
+            .modal { padding: 18px 6vw; }
+        }
+    </style>
+</head>
+<body class="theme-petroleo">
+    <div class="modal-bg">
+        <form class="modal" id="cadastroForm">
+            <h2>Comece GrÃ¡tis</h2>
+            <p class="desc">Crie a conta da sua igreja em segundos.</p>
+            <label for="nome">Nome Completo <span style="color:#e11d48;">(obrigatÃ³rio)</span></label>
+            <input type="text" id="nome" name="nome" placeholder="Ex: Pr. Leonardo..." required>
+            <label for="email">E-mail <span style="color:#e11d48;">(obrigatÃ³rio)</span></label>
+            <input type="email" id="email" name="email" placeholder="seu@email.com" required>
+            <label for="telefone">Telefone <span style="color:#e11d48;">(obrigatÃ³rio)</span></label>
+            <input type="tel" id="telefone" name="telefone" placeholder="(99) 99999-9999" required>
+            <label for="igreja">Nome da Igreja <span style="color:#e11d48;">(obrigatÃ³rio)</span></label>
+            <input type="text" id="igreja" name="igreja" placeholder="Ex: Assembleia de Deus..." required>
+            <div class="consent">
+                <div class="termos">
+                    <b>CONTRATO DE CESSÃƒO DE DIREITO DE USO DE SOFTWARE</b><br><br>
+                    PARTES CONTRATANTES:<br>
+                    CEDENTE: Soares e Neves InformÃ¡tica Ltda, empresa devidamente constituÃ­da sob as leis brasileiras, com sede na cidade de Mogi Mirim, estado de SÃ£o Paulo, inscrita no CNPJ sob o n. 05.043.009/0001-11, doravante simplesmente denominada CEDENTE.<br><br>
+                    CESSIONÃRIA: InstituiÃ§Ã£o Religiosa ou de AssistÃªncia Social sem fins lucrativos, cujos dados serÃ£o coletados na conformidade da clÃ¡usula 8Âª que para todos os efeitos serÃ¡ parte integrante deste instrumento, doravante simplesmente denominada CESSIONÃRIA.
+                </div>
+                <label><input type="checkbox" required> Eu concordo com os Termos de Uso.</label>
+            </div>
+            <button type="submit">ComeÃ§ar Gratuitamente</button>
+            <div class="login-link">JÃ¡ tem conta? <a href="login.html">Fazer Login</a></div>
+        </form>
+    </div>
+    <script>
+        document.getElementById('cadastroForm').addEventListener('submit', function(e) {
+            // Aqui vocÃª pode adicionar validaÃ§Ã£o extra ou integraÃ§Ã£o com backend
+            // Exemplo: alert('Cadastro enviado!');
+        });
+    </script>
+</body>
+</html>

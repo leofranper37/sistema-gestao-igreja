@@ -1,0 +1,187 @@
+﻿<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Zeke - Novidades</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* ESTILOS ESPECÃFICOS DA PÃGINA DE NOVIDADES */
+        
+        .news-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        /* 1. O Card de Destaque (Amarelo) */
+        .highlight-card {
+            background-color: #fffbeb; /* Amarelo bem claro */
+            border: 1px solid #fcd34d; /* Borda amarela */
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .highlight-icon { font-size: 24px; color: #d97706; }
+        .highlight-title { font-size: 18px; font-weight: bold; color: #111; margin: 0; }
+        .highlight-desc { font-size: 14px; color: #78716c; margin: 5px 0 0 0; }
+
+        /* 2. Os Cards de NotÃ­cia (Brancos) */
+        .news-card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 30px;
+            margin-bottom: 25px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        .news-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .news-title { font-size: 18px; font-weight: bold; color: #1f2937; margin: 0 0 10px 0; }
+        
+        /* Etiqueta de Data (Amarela) */
+        .date-badge {
+            background-color: #fcd34d;
+            color: #78350f;
+            font-size: 12px;
+            font-weight: bold;
+            padding: 4px 12px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+
+        .news-text { font-size: 14px; color: #4b5563; line-height: 1.6; margin-bottom: 20px; }
+
+        /* Lista de Recursos (Bolinhas) */
+        .features-list {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+        .feature-item { font-size: 13px; color: #d97706; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+        .feature-item::before { content: ''; width: 6px; height: 6px; background: #d97706; border-radius: 50%; }
+
+        /* BotÃ£o Amarelo */
+        .btn-news {
+            background-color: #f59e0b;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: bold;
+            text-decoration: none;
+            display: inline-block;
+            transition: 0.2s;
+        }
+        .btn-news:hover { background-color: #d97706; }
+
+    </style>
+</head>
+<body class="theme-petroleo">
+
+    <aside class="sidebar">
+        <div class="sidebar-profile">
+            <div class="profile-avatar"><i class="fa-solid fa-user"></i></div>
+            <div class="profile-info"><h4>LEONARD FRANCISCO...</h4><span>Online</span></div>
+        </div>
+        <nav class="menu">
+            <button class="dropdown-btn active">
+                <span><i class="fa-solid fa-bars icon-left"></i> Menu</span>
+            </button>
+            <div class="dropdown-container" style="display: block;">
+                <a href="index.html"><i class="fa-solid fa-house"></i> Voltar ao InÃ­cio</a>
+            </div>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <header>
+            <div class="header-left"><i class="fa-solid fa-bars"></i></div>
+            <div class="header-right"><span>LEONARD PEREIRA <i class="fa-solid fa-user-circle"></i></span></div>
+        </header>
+
+        <div style="padding: 30px;">
+            
+            <h2 style="margin-bottom: 5px;">Novidades do Sistema</h2>
+            <p style="color: #666; margin-bottom: 30px; font-size: 14px;">Principais funcionalidades e melhorias</p>
+
+            <div class="news-container">
+
+                <div class="highlight-card">
+                    <i class="fa-solid fa-star highlight-icon"></i>
+                    <div>
+                        <h3 class="highlight-title">Novidades do Sistema</h3>
+                        <p class="highlight-desc">ConheÃ§a as Ãºltimas funcionalidades e melhorias lanÃ§adas.</p>
+                    </div>
+                </div>
+
+                <div class="news-card">
+                    <h3 class="news-title">GestÃ£o de Escalas</h3>
+                    <p style="color: #9ca3af; font-size: 12px; margin-bottom: 10px;">Sistema completo para gerenciamento de escalas e eventos</p>
+                    <span class="date-badge"><i class="fa-regular fa-calendar"></i> 24/01/2026</span>
+                    
+                    <p class="news-text">
+                        Implementamos um sistema completo e profissional para gestÃ£o de escalas e eventos da sua igreja. 
+                        Agora vocÃª tem controle total sobre a organizaÃ§Ã£o de escalas, atribuiÃ§Ãµes de membros e eventos recorrentes.
+                    </p>
+
+                    <div class="features-list">
+                        <div class="feature-item">Eventos Recorrentes</div>
+                        <div class="feature-item">IntegraÃ§Ã£o com Grupos</div>
+                        <div class="feature-item">AtribuiÃ§Ã£o de Membros</div>
+                        <div class="feature-item">Dashboard e VisualizaÃ§Ãµes</div>
+                    </div>
+
+                    <a href="detalhes_escalas.html" class="btn-news">+ Ver Detalhes da GestÃ£o de Escalas</a>
+                </div>
+
+                <div class="news-card">
+                    <h3 class="news-title">MÃ³dulo ContÃ¡bil</h3>
+                    <p style="color: #9ca3af; font-size: 12px; margin-bottom: 10px;">Sistema completo de gestÃ£o contÃ¡bil profissional</p>
+                    <span class="date-badge"><i class="fa-regular fa-calendar"></i> 15/01/2026</span>
+                    
+                    <p class="news-text">
+                        Implementamos um sistema contÃ¡bil completo, seguindo as melhores prÃ¡ticas e normas brasileiras. 
+                        Agora vocÃª tem controle total sobre a contabilidade da sua igreja.
+                    </p>
+
+                    <div class="features-list">
+                        <div class="feature-item">LanÃ§amentos ContÃ¡beis</div>
+                        <div class="feature-item">RelatÃ³rios Oficiais</div>
+                        <div class="feature-item">Balancetes</div>
+                        <div class="feature-item">Livros ContÃ¡beis</div>
+                        <div class="feature-item">IntegraÃ§Ã£o Total</div>
+                    </div>
+
+                    <a href="#" class="btn-news">+ Ver Detalhes da Contabilidade</a>
+                </div>
+
+                <div class="news-card">
+                    <h3 class="news-title"><i class="fa-solid fa-money-bill-wave"></i> Financeiro Reformulado</h3>
+                    <span class="date-badge"><i class="fa-regular fa-calendar"></i> 04/01/2026</span>
+                    
+                    <p class="news-text">
+                        Reformulamos completamente o visual e a estrutura da parte financeira do sistema, visando melhorar significativamente a usabilidade e a experiÃªncia do usuÃ¡rio.
+                    </p>
+                    <div class="features-list">
+                        <div class="feature-item">Design Moderno</div>
+                        <div class="feature-item">Interface Intuitiva</div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+</body>
+</html>

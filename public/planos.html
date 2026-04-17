@@ -1,0 +1,237 @@
+﻿<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planos - LDFP</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f3f4f6; color: #fff; }
+        
+        /* HEADER SIMPLES */
+        header { padding: 20px 50px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1e293b; }
+        .logo-area img { height: 50px; background: rgba(255,255,255,0.9); padding: 5px 10px; border-radius: 5px; }
+        .btn-voltar { color: #94a3b8; text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 8px; transition: 0.3s; }
+        .btn-voltar:hover { color: white; transform: translateX(-5px); }
+
+        /* CONTEÃšDO */
+        .container { max-width: 1200px; margin: 0 auto; padding: 50px 20px; text-align: center; }
+        
+        h1 { font-size: 36px; margin-bottom: 10px; color: #fff; }
+        h1 span { color: #f59e0b; }
+        p.subtitle { color: #94a3b8; font-size: 18px; margin-bottom: 50px; }
+
+        /* GRID DE PREÃ‡OS */
+        .pricing-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px; justify-content: center; }
+        
+        /* CARD DE PREÃ‡O */
+        .price-card {
+            background: #111; border-radius: 15px; padding: 36px 28px 32px 28px; text-align: left;
+            border: 2px solid transparent; transition: 0.3s; position: relative; overflow: hidden;
+            display: flex; flex-direction: column; min-width: 240px;
+            box-shadow: 0 4px 24px #0002;
+        }
+        .price-card:hover { transform: translateY(-10px); border-color: #fbbf24; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        .price-card.featured { border: 2.5px solid #fbbf24; box-shadow: 0 10px 30px #fbbf2422; z-index: 2; }
+        .badge {
+            position: absolute; top: 0; right: 0; background: #f59e0b; color: #000;
+            font-size: 11px; font-weight: bold; padding: 5px 10px; border-bottom-left-radius: 10px;
+        }
+
+        .plan-name { font-size: 22px; font-weight: 700; color: #fff; margin-bottom: 5px; }
+        .plan-price { font-size: 38px; font-weight: 900; color: #fbbf24; margin-bottom: 18px; }
+        .plan-price span { font-size: 16px; color: #fff; font-weight: normal; }
+
+        .features { list-style: none; padding: 0; margin-bottom: 30px; flex: 1; }
+        .features li { margin-bottom: 12px; color: #fff; font-size: 15px; display: flex; align-items: center; gap: 10px; }
+        .features li .check { color: #fbbf24; font-size: 18px; }
+        .features li .x { color: #e11d48; font-size: 18px; }
+
+        /* BOTÃƒO */
+        .btn-select {
+            background: #22c55e; border: none; color: #fff;
+            width: 100%; padding: 14px; border-radius: 8px; font-weight: bold; cursor: pointer;
+            transition: 0.2s; text-align: center; text-decoration: none; display: block;
+            font-size: 17px; margin-top: 18px; box-shadow: 0 2px 8px #0002;
+        }
+        .btn-select:hover { background: #16a34a; color: #fff; }
+        .btn-select.filled { background: #fbbf24; color: #222; }
+        .btn-select.filled:hover { background: #f59e0b; color: #fff; }
+
+        /* RESPONSIVO */
+        @media (max-width: 768px) {
+            .pricing-grid { grid-template-columns: 1fr; }
+            .price-card.featured { transform: scale(1); }
+        }
+    </style>
+</head>
+<body class="theme-petroleo">
+
+    <header>
+        <div class="logo-area">
+            <img src="logo.png" alt="LDFP">
+        </div>
+        <a href="index.html" class="btn-voltar"><i class="fa-solid fa-arrow-left"></i> Voltar</a>
+    </header>
+
+    <div class="container">
+        <h1>Escolha o plano ideal para <span>sua Igreja</span></h1>
+        <p class="subtitle">Teste qualquer plano pago gratuitamente por 7 dias. Sem compromisso.</p>
+
+        <div class="pricing-grid">
+            <!-- Gratuito -->
+            <div class="price-card">
+                <div class="plan-name">Gratuito<br><span style="font-size:13px;color:#fbbf24;">Com AnÃºncios</span></div>
+                <div class="plan-price">R$ 0,00 <span>/mÃªs</span></div>
+                <ul class="features">
+                    <li><span class="check">âœ”</span> App Nativo (iOS/Android)</li>
+                    <li><span class="x">âœ–</span> App do Membro</li>
+                    <li><span class="check">âœ”</span> 30 cadastros</li>
+                    <li><span class="check">âœ”</span> 1 congregaÃ§Ã£o</li>
+                    <li><span class="check">âœ”</span> Escola BÃ­blica Dominical</li>
+                    <li><span class="x">âœ–</span> Credencial de Membro</li>
+                    <li><span class="check">âœ”</span> Grupos/CÃ©lulas</li>
+                    <li><span class="check">âœ”</span> Controle Financeiro (com limites)</li>
+                    <li><span class="check">âœ”</span> Controle ContÃ¡bil (com limites)</li>
+                    <li><span class="check">âœ”</span> RelatÃ³rios (com limites)</li>
+                    <li><span class="x">âœ–</span> Suporte via e-mail</li>
+                    <li><span class="x">âœ–</span> Suporte via WhatsApp</li>
+                    <li><span class="x">âœ–</span> Suporte via Telefone</li>
+                    <li><span class="x">âœ–</span> Consultoria ContÃ¡bil</li>
+                </ul>
+                <a href="criar_conta.html" class="btn-select">Criar Conta</a>
+            </div>
+
+            <!-- Ararate -->
+            <div class="price-card">
+                <div class="plan-name">Ararate<br><span style="font-size:13px;color:#fbbf24;">Igrejas Pequenas</span></div>
+                <div class="plan-price">R$ 50,00 <span>/mÃªs</span></div>
+                <ul class="features">
+                    <li><span class="check">âœ”</span> App Nativo (iOS/Android)</li>
+                    <li><span class="x">âœ–</span> App do Membro</li>
+                    <li><span class="check">âœ”</span> 100 cadastros</li>
+                    <li><span class="check">âœ”</span> 1 congregaÃ§Ã£o</li>
+                    <li><span class="check">âœ”</span> Escola BÃ­blica Dominical</li>
+                    <li><span class="check">âœ”</span> Credencial de Membro</li>
+                    <li><span class="check">âœ”</span> Grupos/CÃ©lulas</li>
+                    <li><span class="check">âœ”</span> Controle Financeiro</li>
+                    <li><span class="check">âœ”</span> Controle ContÃ¡bil</li>
+                    <li><span class="check">âœ”</span> RelatÃ³rios</li>
+                    <li><span class="check">âœ”</span> Suporte via e-mail</li>
+                    <li><span class="x">âœ–</span> Suporte via WhatsApp</li>
+                    <li><span class="x">âœ–</span> Suporte via Telefone</li>
+                    <li><span class="x">âœ–</span> Consultoria ContÃ¡bil</li>
+                </ul>
+                <a href="criar_conta.html" class="btn-select filled">Assinar</a>
+                <div style="margin-top:10px;font-size:13px;color:#94a3b8;">Teste 7 dias</div>
+            </div>
+
+            <!-- Sinai -->
+            <div class="price-card featured">
+                <div class="badge">MAIS POPULAR</div>
+                <div class="plan-name">Sinai<br><span style="font-size:13px;color:#fbbf24;">Igrejas MÃ©dias</span></div>
+                <div class="plan-price">R$ 80,00 <span>/mÃªs</span></div>
+                <ul class="features">
+                    <li><span class="check">âœ”</span> App Nativo (iOS/Android)</li>
+                    <li><span class="check">âœ”</span> App do Membro</li>
+                    <li><span class="check">âœ”</span> 300 cadastros</li>
+                    <li><span class="check">âœ”</span> 5 congregaÃ§Ãµes</li>
+                    <li><span class="check">âœ”</span> Escola BÃ­blica Dominical</li>
+                    <li><span class="check">âœ”</span> Credencial de Membro</li>
+                    <li><span class="check">âœ”</span> Grupos/CÃ©lulas</li>
+                    <li><span class="check">âœ”</span> Controle Financeiro</li>
+                    <li><span class="check">âœ”</span> Controle ContÃ¡bil</li>
+                    <li><span class="check">âœ”</span> RelatÃ³rios</li>
+                    <li><span class="check">âœ”</span> Suporte via e-mail</li>
+                    <li><span class="check">âœ”</span> Suporte via WhatsApp</li>
+                    <li><span class="x">âœ–</span> Suporte via Telefone</li>
+                    <li><span class="x">âœ–</span> Consultoria ContÃ¡bil</li>
+                </ul>
+                <a href="criar_conta.html" class="btn-select filled">Assinar</a>
+                <div style="margin-top:10px;font-size:13px;color:#94a3b8;">Teste 7 dias</div>
+            </div>
+
+            <!-- Carmelo -->
+            <div class="price-card">
+                <div class="plan-name">Carmelo<br><span style="font-size:13px;color:#fbbf24;">Igrejas em Crescimento</span></div>
+                <div class="plan-price">R$ 100,00 <span>/mÃªs</span></div>
+                <ul class="features">
+                    <li><span class="check">âœ”</span> App Nativo (iOS/Android)</li>
+                    <li><span class="check">âœ”</span> App do Membro</li>
+                    <li><span class="check">âœ”</span> 500 cadastros</li>
+                    <li><span class="check">âœ”</span> 10 congregaÃ§Ãµes</li>
+                    <li><span class="check">âœ”</span> Escola BÃ­blica Dominical</li>
+                    <li><span class="check">âœ”</span> Credencial de Membro</li>
+                    <li><span class="check">âœ”</span> Grupos/CÃ©lulas</li>
+                    <li><span class="check">âœ”</span> Controle Financeiro</li>
+                    <li><span class="check">âœ”</span> Controle ContÃ¡bil</li>
+                    <li><span class="check">âœ”</span> RelatÃ³rios</li>
+                    <li><span class="check">âœ”</span> Suporte via e-mail</li>
+                    <li><span class="check">âœ”</span> Suporte via WhatsApp</li>
+                    <li><span class="check">âœ”</span> Suporte via Telefone</li>
+                    <li><span class="x">âœ–</span> Consultoria ContÃ¡bil</li>
+                </ul>
+                <a href="criar_conta.html" class="btn-select filled">Assinar</a>
+                <div style="margin-top:10px;font-size:13px;color:#94a3b8;">Teste 7 dias</div>
+            </div>
+        </div>
+
+        <!-- OpÃ§Ãµes de pagamento mensal/anual e adicionais -->
+        <div style="margin-top:60px;">
+            <h2 style="color:#f59e0b;">Planos Mensal e Anual</h2>
+            <div class="pricing-grid" style="margin-bottom:30px;">
+                <div class="price-card">
+                    <div class="plan-name">Ararate</div>
+                    <div class="plan-price">R$ 50,00 <span>/mÃªs</span><br>R$ 500,00 <span>/ano</span></div>
+                    <ul class="features">
+                        <li><i class="fa-solid fa-check"></i> AtÃ© 100 Cadastros</li>
+                        <li><i class="fa-solid fa-check"></i> 1 congregaÃ§Ã£o</li>
+                        <li><i class="fa-solid fa-check"></i> App do Membro</li>
+                        <li><i class="fa-solid fa-check"></i> Suporte via e-mail</li>
+                        <li><i class="fa-solid fa-check"></i> Suporte via WhatsApp</li>
+                        <li><i class="fa-solid fa-check"></i> Suporte via Telefone</li>
+                    </ul>
+                </div>
+                <div class="price-card featured">
+                    <div class="plan-name">Sinai</div>
+                    <div class="plan-price">R$ 80,00 <span>/mÃªs</span><br>R$ 1.000,00 <span>/ano</span></div>
+                    <ul class="features">
+                        <li><i class="fa-solid fa-check"></i> AtÃ© 300 Cadastros</li>
+                        <li><i class="fa-solid fa-check"></i> 5 congregaÃ§Ãµes</li>
+                        <li><i class="fa-solid fa-check"></i> App do Membro</li>
+                        <li><i class="fa-solid fa-check"></i> Suporte via e-mail</li>
+                        <li><i class="fa-solid fa-check"></i> Suporte via WhatsApp</li>
+                        <li><i class="fa-solid fa-check"></i> Suporte via Telefone</li>
+                    </ul>
+                </div>
+                <div class="price-card">
+                    <div class="plan-name">Carmelo</div>
+                    <div class="plan-price">R$ 100,00 <span>/mÃªs</span><br>R$ 1.200,00 <span>/ano</span></div>
+                    <ul class="features">
+                        <li><i class="fa-solid fa-check"></i> AtÃ© 500 Cadastros</li>
+                        <li><i class="fa-solid fa-check"></i> 10 congregaÃ§Ãµes</li>
+                        <li><i class="fa-solid fa-check"></i> App do Membro</li>
+                        <li><i class="fa-solid fa-check"></i> Suporte via e-mail</li>
+                        <li><i class="fa-solid fa-check"></i> Suporte via WhatsApp</li>
+                        <li><i class="fa-solid fa-check"></i> Suporte via Telefone</li>
+                    </ul>
+                </div>
+            </div>
+            <h2 style="color:#f59e0b;">Adicionais</h2>
+            <div class="pricing-grid" style="grid-template-columns:1fr 1fr;">
+                <div class="price-card">
+                    <div class="plan-name">Cadastros</div>
+                    <div class="plan-price">0 <span>(+R$ 0,00/mÃªs ou ano)</span></div>
+                    <div style="color:#94a3b8;font-size:13px;">0 atÃ© 2.000</div>
+                </div>
+                <div class="price-card">
+                    <div class="plan-name">CongregaÃ§Ãµes</div>
+                    <div class="plan-price">0 <span>(+R$ 0,00/mÃªs ou ano)</span></div>
+                    <div style="color:#94a3b8;font-size:13px;">0 atÃ© 200</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
