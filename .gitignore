@@ -1,0 +1,12 @@
+node_modules/
+.env
+.env.*
+.mysql-data/
+package-lock.json
+npm-debug.log
+combined.log
+error.log
+/.vscode/
+/.idea/
+dist/
+.DS_Store
