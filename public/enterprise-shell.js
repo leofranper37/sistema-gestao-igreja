@@ -10,6 +10,20 @@
         visitante: ['oracoes', 'agenda']
     };
 
+    const ROLE_ALIASES = {
+        administrador: 'admin',
+        adm: 'admin',
+        tesouraria: 'financeiro',
+        financeiro: 'financeiro',
+        secretaria: 'secretaria',
+        pastor: 'pastor',
+        oficial: 'oficial',
+        ministerio: 'ministerio',
+        midia: 'midia',
+        membro: 'membro',
+        visitante: 'visitante'
+    };
+
     function getAuthUser() {
         if (typeof window.getStoredAuth !== 'function') {
             return null;
@@ -23,11 +37,23 @@
     }
 
     function getUserRole(user) {
-        return String(user?.role || user?.perfil || '').trim().toLowerCase() || 'visitante';
+        const rawRole = String(user?.role || user?.perfil || '').trim().toLowerCase();
+        return ROLE_ALIASES[rawRole] || rawRole || 'visitante';
     }
 
     function getVisibleFeatures(user) {
-        return ROLE_FEATURES[getUserRole(user)] || ROLE_FEATURES.visitante;
+        const role = getUserRole(user);
+
+        if (ROLE_FEATURES[role]) {
+            return ROLE_FEATURES[role];
+        }
+
+        // Keep authenticated users productive even if backend sends a custom role label.
+        if (user) {
+            return ROLE_FEATURES.admin;
+        }
+
+        return ROLE_FEATURES.visitante;
     }
 
     function normalizeLinkItem(item) {
@@ -88,7 +114,7 @@
         }).join('');
 
         return `
-            <button class="${buttonClass}">
+            <button class="${buttonClass}" type="button">
                 <span><i class="${icon} icon-left"></i> ${title}</span>
                 <i class="fa-solid fa-chevron-right arrow"></i>
             </button>
@@ -218,7 +244,7 @@
         }).join('');
 
         return `
-            <button class="dropdown-btn ${secretariaHasActive ? 'active' : ''}">
+            <button class="dropdown-btn ${secretariaHasActive ? 'active' : ''}" type="button">
                 <span><i class="fa-solid fa-folder-open icon-left"></i> Secretaria</span>
                 <i class="fa-solid fa-chevron-right arrow"></i>
             </button>
@@ -290,7 +316,7 @@
         ];
 
         const bancosLinks = [
-            ['construcao.html?pag=Lancamentos Bancarios', 'fa-solid fa-file-invoice-dollar', 'Lançamentos Bancários', 'financeiro'],
+            ['bancos_lancamentos.html', 'fa-solid fa-file-invoice-dollar', 'Lançamentos Bancários', 'financeiro'],
             ['banco.html', 'fa-solid fa-building-columns', 'Cadastro de Bancos', 'financeiro'],
             ['construcao.html?pag=Importacao de Extrato', 'fa-solid fa-file-import', 'Importação de Extrato', 'financeiro']
         ];
@@ -338,7 +364,7 @@
         }).join('');
 
         return `
-            <button class="dropdown-btn ${tesourariaActive ? 'active' : ''}">
+            <button class="dropdown-btn ${tesourariaActive ? 'active' : ''}" type="button">
                 <span><i class="fa-solid fa-money-bill-1 icon-left"></i> Tesouraria</span>
                 <i class="fa-solid fa-chevron-right arrow"></i>
             </button>

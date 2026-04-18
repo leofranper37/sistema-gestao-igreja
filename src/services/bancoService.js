@@ -21,10 +21,31 @@ async function deleteConta(id, igrejaId) {
     await bancoModel.deleteConta(id, igrejaId);
 }
 
+async function listLancamentos(contaId, igrejaId) {
+    return bancoModel.listLancamentos(contaId, igrejaId);
+}
+
+async function createLancamento(igrejaId, payload, userId) {
+    const id = await bancoModel.createLancamento({ igrejaId, ...payload, createdBy: userId });
+    return id;
+}
+
+async function deleteLancamento(id, igrejaId) {
+    await bancoModel.deleteLancamento(id, igrejaId);
+}
+
+async function getSaldoConta(contaId, igrejaId) {
+    return bancoModel.getSaldoConta(contaId, igrejaId);
+}
+
 module.exports = {
     listContas,
     getConta,
     createConta,
     updateConta,
-    deleteConta
+    deleteConta,
+    listLancamentos,
+    createLancamento,
+    deleteLancamento,
+    getSaldoConta
 };

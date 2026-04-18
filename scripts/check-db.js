@@ -8,7 +8,7 @@ const parseInteger = (value, fallback) => {
 };
 
 const config = {
-    host: process.env.DB_HOST || process.env.MYSQL_HOST || 'localhost',
+    host: process.env.DB_HOST || process.env.MYSQL_HOST || '127.0.0.1',
     user: process.env.DB_USER || process.env.MYSQL_USER || 'root',
     password: process.env.DB_PASSWORD || process.env.DB_PASS || process.env.MYSQL_PASSWORD || '',
     database: process.env.DB_NAME || process.env.MYSQL_DATABASE || 'ldfp_db',

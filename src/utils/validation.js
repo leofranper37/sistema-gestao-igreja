@@ -363,6 +363,14 @@ const bancoContaSchema = Joi.object({
     observacao: Joi.string().trim().max(2000).allow('', null).optional().label('Observação')
 });
 
+const bancoLancamentoSchema = Joi.object({
+    descricao: Joi.string().trim().min(1).max(255).required().label('Descrição'),
+    tipo: Joi.string().valid('entrada', 'saida').required().label('Tipo'),
+    valor: decimalInput.label('Valor'),
+    dataLancamento: Joi.string().trim().pattern(/^\d{4}-\d{2}-\d{2}$/).required().label('Data'),
+    observacao: Joi.string().trim().max(2000).allow('', null).optional().label('Observação')
+});
+
 const contaPagarSchema = Joi.object({
     descricao: Joi.string().trim().min(2).max(255).required().label('Descrição'),
     fornecedor: Joi.string().trim().max(255).allow('', null).optional().label('Fornecedor'),
@@ -470,6 +478,7 @@ module.exports = {
     saldoInicialSchema,
     transacaoSchema,
     bancoContaSchema,
+    bancoLancamentoSchema,
     contaPagarSchema,
     validateBody,
     validateQuery,

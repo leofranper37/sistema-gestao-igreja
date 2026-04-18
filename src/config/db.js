@@ -592,6 +592,24 @@ async function ensureCoreTables() {
         )
     `);
 
+    // Banco — lançamentos por conta bancária
+    await pool.query(`
+        CREATE TABLE IF NOT EXISTS banco_lancamentos (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            conta_id INT NOT NULL,
+            igreja_id INT NOT NULL DEFAULT 1,
+            descricao VARCHAR(255) NOT NULL,
+            tipo ENUM('entrada','saida') NOT NULL,
+            valor DECIMAL(12,2) NOT NULL,
+            data_lancamento DATE NOT NULL,
+            observacao TEXT DEFAULT NULL,
+            created_by INT DEFAULT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            INDEX idx_bl_conta (conta_id),
+            INDEX idx_bl_igreja (igreja_id)
+        )
+    `);
+
     // Contas a pagar
     await pool.query(`
         CREATE TABLE IF NOT EXISTS contas_pagar (

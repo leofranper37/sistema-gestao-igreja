@@ -7,6 +7,7 @@ class PWAManager {
     constructor() {
         this.deferredPrompt = null;
         this.isInstalled = false;
+        this.swRegistration = null;
         this.init();
     }
 
@@ -34,9 +35,21 @@ class PWAManager {
      * Register service worker
      */
     registerServiceWorker() {
+        const isLocalhost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+
+        // In dev, disable SW to avoid stale cache and make F5 reflect changes immediately.
+        if (isLocalhost && 'serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations()
+                .then((registrations) => Promise.all(registrations.map((r) => r.unregister())))
+                .then(() => console.log('[PWA] Service Worker desativado no localhost (modo desenvolvimento)'))
+                .catch((error) => console.warn('[PWA] Falha ao desativar SW no localhost:', error));
+            return;
+        }
+
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/sw.js')
                 .then((registration) => {
+                    this.swRegistration = registration;
                     console.log('[PWA] Service Worker registrado:', registration);
                     
                     // Check for updates periodically
@@ -176,14 +189,14 @@ class PWAManager {
      */
     async syncPendingData() {
         try {
-            if ('serviceWorker' in navigator) {
+            if ('serviceWorker' in navigator && this.swRegistration) {
                 await navigator.serviceWorker.ready;
                 
                 if ('SyncManager' in window) {
                     // Trigger background sync
                     try {
-                        await registration.sync.register('sync-oracoes');
-                        await registration.sync.register('sync-visitantes');
+                        await this.swRegistration.sync.register('sync-oracoes');
+                        await this.swRegistration.sync.register('sync-visitantes');
                     } catch (error) {
                         console.warn('[PWA] Background sync não disponível:', error);
                     }

@@ -118,10 +118,10 @@
 
             try {
                 // Substitua a URL pela sua rota real
-                const resp = await fetch('/api/caixa', {
+                const resp = await fetch('/transacoes', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ data, doc, historico, valor, tipo })
+                    body: JSON.stringify({ descricao: historico, valor, tipo: tipo.toLowerCase() })
                 });
 
                 if (!resp.ok) throw new Error('Erro ao salvar');

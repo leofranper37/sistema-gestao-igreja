@@ -47,7 +47,7 @@
       const tbody = document.getElementById('tabelaBancos');
       tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;padding:40px;color:#999;">Carregando...</td></tr>`;
       try {
-        const resp = await fetch('/api/bancos' + (filter ? '?q='+encodeURIComponent(filter) : ''));
+        const resp = await fetch('/banco/contas' + (filter ? '?q='+encodeURIComponent(filter) : ''));
         if (!resp.ok) throw new Error('Erro');
         const data = await resp.json();
         if (!data.length) {
