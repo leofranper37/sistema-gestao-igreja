@@ -1,12 +1,8 @@
-node_modules/
 .env
-.env.*
+node_modules/
 .mysql-data/
-package-lock.json
-npm-debug.log
-combined.log
-error.log
-/.vscode/
-/.idea/
-dist/
+logs/
+*.log
 .DS_Store
+.idea/
+.vscode/
