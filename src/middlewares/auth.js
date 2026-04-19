@@ -19,9 +19,11 @@ async function requireAuth(req, res, next) {
     try {
         const payload = jwt.verify(token, config.security.jwtSecret);
         const [rows] = await pool.query(
-            `SELECT id, nome, email, igreja, igreja_id, role
-             FROM users
-             WHERE id = ?
+            `SELECT u.id, u.nome, u.email, u.igreja, u.igreja_id, u.role,
+                    i.plano, i.status_assinatura, i.trial_starts_at, i.trial_ends_at, i.max_cadastros, i.max_congregacoes
+             FROM users u
+             LEFT JOIN igrejas i ON i.id = u.igreja_id
+             WHERE u.id = ?
              LIMIT 1`,
             [payload.sub]
         );
@@ -39,7 +41,13 @@ async function requireAuth(req, res, next) {
             email: user.email,
             igreja: user.igreja,
             igrejaId: user.igreja_id,
-            role: user.role
+            role: user.role,
+            plano: user.plano || 'teste-7-dias',
+            statusAssinatura: user.status_assinatura || 'trial',
+            trialStartsAt: user.trial_starts_at || null,
+            trialEndsAt: user.trial_ends_at || null,
+            maxCadastros: user.max_cadastros || 40,
+            maxCongregacoes: user.max_congregacoes || 1
         };
 
         next();

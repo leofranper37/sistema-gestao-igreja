@@ -238,7 +238,13 @@ async function getAuthMe(req, res) {
         email: req.auth.email,
         igreja: req.auth.igreja,
         igrejaId: req.auth.igrejaId,
-        role: req.auth.role
+        role: req.auth.role,
+        plano: req.auth.plano,
+        statusAssinatura: req.auth.statusAssinatura,
+        trialStartsAt: req.auth.trialStartsAt,
+        trialEndsAt: req.auth.trialEndsAt,
+        maxCadastros: req.auth.maxCadastros,
+        maxCongregacoes: req.auth.maxCongregacoes
     });
 }
 

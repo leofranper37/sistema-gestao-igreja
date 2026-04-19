@@ -22,9 +22,37 @@ const app = express();
 
 const allowedOrigins = config.cors.allowedOrigins;
 
+const getHostname = value => {
+    try {
+        return new URL(value).hostname.toLowerCase();
+    } catch (error) {
+        return '';
+    }
+};
+
+const getProjectSlugFromAppBaseUrl = () => {
+    const appBaseHostname = getHostname(process.env.APP_BASE_URL || '');
+    return appBaseHostname.replace(/\.vercel\.app$/, '');
+};
+
+const isAllowedVercelPreviewOrigin = origin => {
+    const originHostname = getHostname(origin);
+    const projectSlug = getProjectSlugFromAppBaseUrl();
+
+    if (!originHostname || !projectSlug) {
+        return false;
+    }
+
+    if (!originHostname.endsWith('.vercel.app')) {
+        return false;
+    }
+
+    return originHostname === projectSlug || originHostname.startsWith(`${projectSlug}-`);
+};
+
 app.use(cors(allowedOrigins.length ? {
     origin(origin, callback) {
-        if (!origin || allowedOrigins.includes(origin)) {
+        if (!origin || allowedOrigins.includes(origin) || isAllowedVercelPreviewOrigin(origin)) {
             return callback(null, true);
         }
 

@@ -34,6 +34,12 @@ async function ensureCoreTables() {
         CREATE TABLE IF NOT EXISTS igrejas (
             id INT AUTO_INCREMENT PRIMARY KEY,
             nome VARCHAR(255) NOT NULL UNIQUE,
+            plano VARCHAR(100) NOT NULL DEFAULT 'teste-7-dias',
+            status_assinatura ENUM('trial','ativa','cancelada','inadimplente','expirada') NOT NULL DEFAULT 'trial',
+            trial_starts_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            trial_ends_at DATETIME NULL,
+            max_cadastros INT NOT NULL DEFAULT 40,
+            max_congregacoes INT NOT NULL DEFAULT 1,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     `);
@@ -392,6 +398,12 @@ async function ensureCoreTables() {
     await runAlterIgnore('ALTER TABLE users ADD COLUMN igreja_id INT NOT NULL DEFAULT 1');
     await runAlterIgnore("ALTER TABLE users ADD COLUMN role ENUM('admin','financeiro','secretaria','membro') NOT NULL DEFAULT 'admin'");
     await runAlterIgnore("ALTER TABLE users MODIFY COLUMN role ENUM('admin','financeiro','secretaria','membro','pastor','oficial','ministerio','midia','visitante') NOT NULL DEFAULT 'admin'", ['ER_TRUNCATED_WRONG_VALUE']);
+    await runAlterIgnore("ALTER TABLE igrejas ADD COLUMN plano VARCHAR(100) NOT NULL DEFAULT 'teste-7-dias'");
+    await runAlterIgnore("ALTER TABLE igrejas ADD COLUMN status_assinatura ENUM('trial','ativa','cancelada','inadimplente','expirada') NOT NULL DEFAULT 'trial'");
+    await runAlterIgnore('ALTER TABLE igrejas ADD COLUMN trial_starts_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP');
+    await runAlterIgnore('ALTER TABLE igrejas ADD COLUMN trial_ends_at DATETIME NULL');
+    await runAlterIgnore('ALTER TABLE igrejas ADD COLUMN max_cadastros INT NOT NULL DEFAULT 40');
+    await runAlterIgnore('ALTER TABLE igrejas ADD COLUMN max_congregacoes INT NOT NULL DEFAULT 1');
     await runAlterIgnore(
         'ALTER TABLE users ADD CONSTRAINT fk_users_igreja FOREIGN KEY (igreja_id) REFERENCES igrejas(id)',
         ['ER_DUP_KEYNAME', 'ER_FK_DUP_NAME', 'ER_CANT_CREATE_TABLE']

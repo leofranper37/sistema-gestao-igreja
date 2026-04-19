@@ -11,7 +11,13 @@ function buildAuthResponse(userRecord) {
         email: userRecord.email,
         igreja: userRecord.igreja,
         igrejaId: userRecord.igreja_id,
-        role: userRecord.role
+        role: userRecord.role,
+        plano: userRecord.plano || 'teste-7-dias',
+        statusAssinatura: userRecord.status_assinatura || 'trial',
+        trialStartsAt: userRecord.trial_starts_at || null,
+        trialEndsAt: userRecord.trial_ends_at || null,
+        maxCadastros: userRecord.max_cadastros || 40,
+        maxCongregacoes: userRecord.max_congregacoes || 1
     };
 
     const token = jwt.sign(
@@ -21,7 +27,9 @@ function buildAuthResponse(userRecord) {
             igreja: userRecord.igreja,
             igrejaId: userRecord.igreja_id,
             role: userRecord.role,
-            nome: userRecord.nome
+            nome: userRecord.nome,
+            plano: user.plano,
+            statusAssinatura: user.statusAssinatura
         },
         config.security.jwtSecret,
         { expiresIn: config.security.jwtExpiresIn }
@@ -35,9 +43,11 @@ async function registerAccount(payload) {
 
     const existingChurch = await accountModel.findChurchByName(payload.igreja);
     let igrejaId = existingChurch?.id;
+    let churchMetadata = existingChurch || null;
 
     if (!igrejaId) {
         igrejaId = await accountModel.createChurch(payload.igreja);
+        churchMetadata = await accountModel.findChurchByName(payload.igreja);
     }
 
     const userId = await accountModel.createUser({
@@ -55,7 +65,13 @@ async function registerAccount(payload) {
         igreja_id: igrejaId,
         nome: payload.nome,
         email: payload.email,
-        role: 'admin'
+        role: 'admin',
+        plano: churchMetadata?.plano,
+        status_assinatura: churchMetadata?.status_assinatura,
+        trial_starts_at: churchMetadata?.trial_starts_at,
+        trial_ends_at: churchMetadata?.trial_ends_at,
+        max_cadastros: churchMetadata?.max_cadastros,
+        max_congregacoes: churchMetadata?.max_congregacoes
     });
 }
 
