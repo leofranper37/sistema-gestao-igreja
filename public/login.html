@@ -116,7 +116,12 @@
                 status.style.color = '#15803d';
                 status.textContent = 'Login realizado com sucesso!';
                 setTimeout(() => {
-                    window.location.href = 'dashboard.html';
+                    const role = data.user?.role || '';
+                    if (role === 'super-admin' || role === 'master' || role === 'owner') {
+                        window.location.href = 'super-admin.htm';
+                    } else {
+                        window.location.href = 'dashboard.html';
+                    }
                 }, 600);
             } catch (err) {
                 status.textContent = err.message || 'Erro inesperado ao tentar entrar.';
