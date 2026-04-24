@@ -17,6 +17,7 @@ const missionariosRoutes = require('./routes/missionariosRoutes');
 const outrasIgrejasRoutes = require('./routes/outrasIgrejasRoutes');
 const realtimeRoutes = require('./routes/realtimeRoutes');
 const systemRoutes = require('./routes/systemRoutes');
+const superAdminRoutes = require('./routes/superAdminRoutes');
 
 const app = express();
 
@@ -107,6 +108,7 @@ app.use(missionariosRoutes);
 app.use(outrasIgrejasRoutes);
 app.use(realtimeRoutes);
 app.use(systemRoutes);
+app.use(superAdminRoutes);
 
 app.use((req, res, next) => {
     next(createHttpError(404, 'Rota não encontrada.'));

@@ -499,6 +499,35 @@ async function initializeDatabase() {
 
         await activePgPool.query(`CREATE INDEX IF NOT EXISTS idx_oracao_intercessores_pedido ON oracao_intercessores (pedido_id)`);
 
+        await activePgPool.query(`CREATE TABLE IF NOT EXISTS saas_planos (
+            id SERIAL PRIMARY KEY,
+            slug VARCHAR(50) NOT NULL UNIQUE,
+            nome VARCHAR(120) NOT NULL,
+            subtitulo VARCHAR(255),
+            versículo TEXT,
+            preco_mensal DECIMAL(10,2) NOT NULL DEFAULT 0,
+            preco_anual DECIMAL(10,2) NOT NULL DEFAULT 0,
+            max_cadastros INTEGER NOT NULL DEFAULT 30,
+            max_congregacoes INTEGER NOT NULL DEFAULT 1,
+            modulo_app_membro SMALLINT NOT NULL DEFAULT 0,
+            features_json TEXT,
+            ativo SMALLINT NOT NULL DEFAULT 1,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )`);
+        await activePgPool.query(`INSERT INTO saas_planos (slug,nome,subtitulo,preco_mensal,preco_anual,max_cadastros,max_congregacoes,modulo_app_membro,features_json) VALUES
+            ('eden','Éden','O começo de tudo',0,0,30,1,0,'["App Web (PWA)","Até 30 cadastros","1 congregação","EBD Dominical","Grupos/Células","Financeiro (com limites)","Relatórios (com limites)"]'),
+            ('hebrom','Hebrom','Igrejas em formação',50,500,150,1,0,'["App Web (PWA)","Até 150 cadastros","1 congregação","EBD Dominical","Credencial de Membro","Grupos/Células","Financeiro completo","Relatórios completos","Suporte via e-mail"]'),
+            ('betel','Betel','Igrejas em crescimento',80,800,300,5,1,'["App Web (PWA)","App do Membro","Até 300 cadastros","Até 5 congregações","EBD Dominical","Credencial de Membro","Grupos/Células","Financeiro completo","Relatórios completos","Suporte via WhatsApp"]'),
+            ('siao','Sião','Igrejas consolidadas',100,1000,500,10,1,'["App Web (PWA)","App do Membro","Até 500 cadastros","Até 10 congregações","EBD Dominical","Credencial de Membro","Grupos/Células","Financeiro completo","Relatórios completos","Suporte via Telefone","Consultoria Contábil"]')
+            ON CONFLICT (slug) DO NOTHING`);
+        try { await activePgPool.query(`ALTER TABLE igrejas ADD COLUMN responsavel VARCHAR(255)`); } catch(_){}
+        try { await activePgPool.query(`ALTER TABLE igrejas ADD COLUMN email_admin VARCHAR(255)`); } catch(_){}
+        try { await activePgPool.query(`ALTER TABLE igrejas ADD COLUMN telefone VARCHAR(60)`); } catch(_){}
+        try { await activePgPool.query(`ALTER TABLE igrejas ADD COLUMN cnpj VARCHAR(30)`); } catch(_){}
+        try { await activePgPool.query(`ALTER TABLE igrejas ADD COLUMN mensalidade_valor DECIMAL(10,2) NOT NULL DEFAULT 0`); } catch(_){}
+        try { await activePgPool.query(`ALTER TABLE igrejas ADD COLUMN ultimo_pagamento TIMESTAMP`); } catch(_){}
+        try { await activePgPool.query(`ALTER TABLE igrejas ADD COLUMN proximo_vencimento TIMESTAMP`); } catch(_){}
+
         console.log('✅ Tabelas principais verificadas/criadas no PostgreSQL.');
         return;
     }
@@ -616,6 +645,34 @@ async function initializeDatabase() {
             data_intercessao DATETIME DEFAULT CURRENT_TIMESTAMP,
             INDEX idx_oracao_intercessores_pedido (pedido_id)
         )`);
+
+        await activeMysqlPool.query(`CREATE TABLE IF NOT EXISTS saas_planos (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            slug VARCHAR(50) NOT NULL UNIQUE,
+            nome VARCHAR(120) NOT NULL,
+            subtitulo VARCHAR(255),
+            versículo TEXT,
+            preco_mensal DECIMAL(10,2) NOT NULL DEFAULT 0,
+            preco_anual DECIMAL(10,2) NOT NULL DEFAULT 0,
+            max_cadastros INT NOT NULL DEFAULT 30,
+            max_congregacoes INT NOT NULL DEFAULT 1,
+            modulo_app_membro TINYINT(1) NOT NULL DEFAULT 0,
+            features_json LONGTEXT,
+            ativo TINYINT(1) NOT NULL DEFAULT 1,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )`);
+        await activeMysqlPool.query(`INSERT IGNORE INTO saas_planos (slug,nome,subtitulo,preco_mensal,preco_anual,max_cadastros,max_congregacoes,modulo_app_membro,features_json) VALUES
+            ('eden','Éden','O começo de tudo',0,0,30,1,0,'["App Web (PWA)","Até 30 cadastros","1 congregação","EBD Dominical","Grupos/Células","Financeiro (com limites)","Relatórios (com limites)"]'),
+            ('hebrom','Hebrom','Igrejas em formação',50,500,150,1,0,'["App Web (PWA)","Até 150 cadastros","1 congregação","EBD Dominical","Credencial de Membro","Grupos/Células","Financeiro completo","Relatórios completos","Suporte via e-mail"]'),
+            ('betel','Betel','Igrejas em crescimento',80,800,300,5,1,'["App Web (PWA)","App do Membro","Até 300 cadastros","Até 5 congregações","EBD Dominical","Credencial de Membro","Grupos/Células","Financeiro completo","Relatórios completos","Suporte via WhatsApp"]'),
+            ('siao','Sião','Igrejas consolidadas',100,1000,500,10,1,'["App Web (PWA)","App do Membro","Até 500 cadastros","Até 10 congregações","EBD Dominical","Credencial de Membro","Grupos/Células","Financeiro completo","Relatórios completos","Suporte via Telefone","Consultoria Contábil"]')`);
+        try { await activeMysqlPool.query(`ALTER TABLE igrejas ADD COLUMN responsavel VARCHAR(255)`); } catch(_){}
+        try { await activeMysqlPool.query(`ALTER TABLE igrejas ADD COLUMN email_admin VARCHAR(255)`); } catch(_){}
+        try { await activeMysqlPool.query(`ALTER TABLE igrejas ADD COLUMN telefone VARCHAR(60)`); } catch(_){}
+        try { await activeMysqlPool.query(`ALTER TABLE igrejas ADD COLUMN cnpj VARCHAR(30)`); } catch(_){}
+        try { await activeMysqlPool.query(`ALTER TABLE igrejas ADD COLUMN mensalidade_valor DECIMAL(10,2) NOT NULL DEFAULT 0`); } catch(_){}
+        try { await activeMysqlPool.query(`ALTER TABLE igrejas ADD COLUMN ultimo_pagamento DATETIME`); } catch(_){}
+        try { await activeMysqlPool.query(`ALTER TABLE igrejas ADD COLUMN proximo_vencimento DATETIME`); } catch(_){}
 
         console.log('✅ Tabelas principais verificadas/criadas no MySQL.');
         return;
@@ -788,6 +845,35 @@ async function initializeDatabase() {
             )`);
 
             db.run(`CREATE INDEX IF NOT EXISTS idx_oracao_intercessores_pedido ON oracao_intercessores (pedido_id)`);
+
+            db.run(`CREATE TABLE IF NOT EXISTS saas_planos (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                slug TEXT NOT NULL UNIQUE,
+                nome TEXT NOT NULL,
+                subtitulo TEXT,
+                versiculo TEXT,
+                preco_mensal REAL NOT NULL DEFAULT 0,
+                preco_anual REAL NOT NULL DEFAULT 0,
+                max_cadastros INTEGER NOT NULL DEFAULT 30,
+                max_congregacoes INTEGER NOT NULL DEFAULT 1,
+                modulo_app_membro INTEGER NOT NULL DEFAULT 0,
+                features_json TEXT,
+                ativo INTEGER NOT NULL DEFAULT 1,
+                updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+            )`);
+            db.run(`INSERT OR IGNORE INTO saas_planos (slug,nome,subtitulo,preco_mensal,preco_anual,max_cadastros,max_congregacoes,modulo_app_membro,features_json) VALUES
+                ('eden','Éden','O começo de tudo',0,0,30,1,0,'["App Web (PWA)","Até 30 cadastros","1 congregação","EBD Dominical","Grupos/Células","Financeiro (com limites)","Relatórios (com limites)"]'),
+                ('hebrom','Hebrom','Igrejas em formação',50,500,150,1,0,'["App Web (PWA)","Até 150 cadastros","1 congregação","EBD Dominical","Credencial de Membro","Grupos/Células","Financeiro completo","Relatórios completos","Suporte via e-mail"]'),
+                ('betel','Betel','Igrejas em crescimento',80,800,300,5,1,'["App Web (PWA)","App do Membro","Até 300 cadastros","Até 5 congregações","EBD Dominical","Credencial de Membro","Grupos/Células","Financeiro completo","Relatórios completos","Suporte via WhatsApp"]'),
+                ('siao','Sião','Igrejas consolidadas',100,1000,500,10,1,'["App Web (PWA)","App do Membro","Até 500 cadastros","Até 10 congregações","EBD Dominical","Credencial de Membro","Grupos/Células","Financeiro completo","Relatórios completos","Suporte via Telefone","Consultoria Contábil"]')`
+            );
+            safeAlter('ALTER TABLE igrejas ADD COLUMN responsavel TEXT');
+            safeAlter('ALTER TABLE igrejas ADD COLUMN email_admin TEXT');
+            safeAlter('ALTER TABLE igrejas ADD COLUMN telefone TEXT');
+            safeAlter('ALTER TABLE igrejas ADD COLUMN cnpj TEXT');
+            safeAlter('ALTER TABLE igrejas ADD COLUMN mensalidade_valor REAL NOT NULL DEFAULT 0');
+            safeAlter('ALTER TABLE igrejas ADD COLUMN ultimo_pagamento TEXT');
+            safeAlter('ALTER TABLE igrejas ADD COLUMN proximo_vencimento TEXT');
 
             // Sentinela: garante que todos os comandos acima já foram executados antes de resolver.
             db.run('SELECT 1', (err) => {
