@@ -110,6 +110,63 @@ app.use(realtimeRoutes);
 app.use(systemRoutes);
 app.use(superAdminRoutes);
 
+/* ------------------------------------------------------------------ */
+/*  ROTA DE BOOTSTRAP — cria o primeiro super-admin se não existir     */
+/*  Desativa automaticamente após o primeiro uso                       */
+/* ------------------------------------------------------------------ */
+app.post('/api/setup/super-admin', express.json(), async (req, res) => {
+    try {
+        const bcrypt = require('bcryptjs');
+        const { pool } = require('./config/db');
+
+        // Verificar se já existe algum super-admin
+        const [existing] = await pool.query(
+            "SELECT id FROM usuarios WHERE role = 'super-admin' LIMIT 1"
+        );
+        if (existing && existing.length > 0) {
+            return res.status(403).json({ error: 'Setup já realizado. Rota desativada.' });
+        }
+
+        const { nome, email, senha, setup_key } = req.body || {};
+
+        // Chave de proteção mínima contra bots
+        const expectedKey = process.env.SETUP_KEY || 'ldfp-setup-2026';
+        if (!setup_key || setup_key !== expectedKey) {
+            return res.status(401).json({ error: 'setup_key inválida.' });
+        }
+
+        if (!nome || !email || !senha || senha.length < 8) {
+            return res.status(400).json({ error: 'Campos obrigatórios: nome, email, senha (min 8 chars), setup_key.' });
+        }
+
+        // Garantir que a "LDFP Master" existe
+        let igrejaId;
+        const [igRows] = await pool.query("SELECT id FROM igrejas WHERE nome = 'LDFP Master' LIMIT 1");
+        if (igRows && igRows.length > 0) {
+            igrejaId = igRows[0].id;
+        } else {
+            const [igRes] = await pool.query(
+                "INSERT INTO igrejas (nome, plano, status_assinatura, max_cadastros, max_congregacoes) VALUES ('LDFP Master', 'siao', 'ativa', 999999, 999)"
+            );
+            igrejaId = igRes.insertId;
+        }
+
+        const hash = await bcrypt.hash(senha, 12);
+        const [result] = await pool.query(
+            'INSERT INTO usuarios (igreja, igreja_id, nome, email, password_hash, role) VALUES (?, ?, ?, ?, ?, ?)',
+            ['LDFP Master', igrejaId, nome, email.toLowerCase().trim(), hash, 'super-admin']
+        );
+
+        return res.status(201).json({
+            message: 'Super-admin criado com sucesso! Esta rota está agora desativada.',
+            id: result.insertId,
+            email: email.toLowerCase().trim()
+        });
+    } catch (err) {
+        return res.status(500).json({ error: 'Erro interno: ' + err.message });
+    }
+});
+
 app.use((req, res, next) => {
     next(createHttpError(404, 'Rota não encontrada.'));
 });
