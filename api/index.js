@@ -1,11 +1,27 @@
-const app = require('../src/app');
 const { initializeDatabase } = require('../src/config/db');
 
 let databaseReadyPromise;
+let appInstance;
+const DATABASE_BOOT_TIMEOUT_MS = 12000;
+
+function getApp() {
+    if (!appInstance) {
+        appInstance = require('../src/app');
+    }
+
+    return appInstance;
+}
 
 function ensureDatabaseReady() {
     if (!databaseReadyPromise) {
-        databaseReadyPromise = initializeDatabase().catch(error => {
+        const bootPromise = initializeDatabase();
+        const timeoutPromise = new Promise((_, reject) => {
+            setTimeout(() => {
+                reject(new Error('Database initialization timeout'));
+            }, DATABASE_BOOT_TIMEOUT_MS);
+        });
+
+        databaseReadyPromise = Promise.race([bootPromise, timeoutPromise]).catch(error => {
             databaseReadyPromise = null;
             throw error;
         });
@@ -15,6 +31,27 @@ function ensureDatabaseReady() {
 }
 
 module.exports = async (req, res) => {
-    await ensureDatabaseReady();
-    return app(req, res);
+    try {
+        await ensureDatabaseReady();
+    } catch (error) {
+        res.statusCode = 503;
+        res.setHeader('Content-Type', 'application/json; charset=utf-8');
+        res.end(JSON.stringify({
+            error: 'Banco de dados indisponível no momento.',
+            detail: error.message
+        }));
+        return;
+    }
+
+    try {
+        const app = getApp();
+        return app(req, res);
+    } catch (error) {
+        res.statusCode = 500;
+        res.setHeader('Content-Type', 'application/json; charset=utf-8');
+        res.end(JSON.stringify({
+            error: 'Falha ao inicializar aplicação.',
+            detail: error?.message || 'Erro desconhecido.'
+        }));
+    }
 };
