@@ -71,6 +71,11 @@ app.use((req, res, next) => {
 
     next();
 });
+
+app.get(['/index.htm', '/INDEX.HTM'], (req, res) => {
+    res.redirect(301, '/index.html');
+});
+
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
 app.use((req, res, next) => {

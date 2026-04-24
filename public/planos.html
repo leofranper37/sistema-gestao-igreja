@@ -3,237 +3,499 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Planos - LDFP</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Planos &amp; Preços - LDFP</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
-        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f3f4f6; color: #fff; }
-        
-        /* HEADER SIMPLES */
-        header { padding: 20px 50px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1e293b; }
-        .logo-area img { height: 50px; background: rgba(255,255,255,0.9); padding: 5px 10px; border-radius: 5px; }
-        .btn-voltar { color: #94a3b8; text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 8px; transition: 0.3s; }
-        .btn-voltar:hover { color: white; transform: translateX(-5px); }
-
-        /* CONTEUDO */
-        .container { max-width: 1200px; margin: 0 auto; padding: 50px 20px; text-align: center; }
-        
-        h1 { font-size: 36px; margin-bottom: 10px; color: #fff; }
-        h1 span { color: #f59e0b; }
-        p.subtitle { color: #94a3b8; font-size: 18px; margin-bottom: 50px; }
-
-        /* GRID DE PRECOS */
-        .pricing-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px; justify-content: center; }
-        
-        /* CARD DE PRECO */
-        .price-card {
-            background: #111; border-radius: 15px; padding: 36px 28px 32px 28px; text-align: left;
-            border: 2px solid transparent; transition: 0.3s; position: relative; overflow: hidden;
-            display: flex; flex-direction: column; min-width: 240px;
-            box-shadow: 0 4px 24px #0002;
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --gold: #f59e0b;
+            --gold-light: #fbbf24;
+            --gold-dark: #d97706;
+            --bg: #07090f;
+            --bg2: #0d1117;
+            --surface: #111827;
+            --surface2: #1a2235;
+            --border: rgba(255,255,255,0.07);
+            --text: #f1f5f9;
+            --text-muted: #64748b;
+            --green: #22c55e;
+            --red: #ef4444;
+            --radius: 16px;
         }
-        .price-card:hover { transform: translateY(-10px); border-color: #fbbf24; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
-        .price-card.featured { border: 2.5px solid #fbbf24; box-shadow: 0 10px 30px #fbbf2422; z-index: 2; }
-        .badge {
-            position: absolute; top: 0; right: 0; background: #f59e0b; color: #000;
-            font-size: 11px; font-weight: bold; padding: 5px 10px; border-bottom-left-radius: 10px;
+        html { scroll-behavior: smooth; }
+        body { font-family: 'Inter', 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+
+        /* ───── NAVBAR FLUTUANTE ───── */
+        .navbar {
+            position: fixed; top: 16px; left: 50%; transform: translateX(-50%);
+            width: min(960px, calc(100% - 32px));
+            background: rgba(13,17,23,0.72); backdrop-filter: blur(20px) saturate(160%);
+            -webkit-backdrop-filter: blur(20px) saturate(160%);
+            border: 1px solid rgba(245,158,11,0.18);
+            border-radius: 100px; padding: 12px 24px;
+            display: flex; align-items: center; justify-content: space-between; gap: 16px;
+            z-index: 1000;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.45), 0 0 0 1px rgba(245,158,11,0.06);
+            transition: background 0.3s;
+        }
+        .navbar.scrolled { background: rgba(7,9,15,0.92); }
+        .navbar-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+        .navbar-logo img { height: 36px; filter: drop-shadow(0 0 8px rgba(245,158,11,0.35)); }
+        .navbar-logo span { font-weight: 800; font-size: 16px; color: var(--text); letter-spacing: -0.3px; }
+        .navbar-logo span em { color: var(--gold); font-style: normal; }
+        .navbar-links { display: flex; align-items: center; gap: 8px; }
+        .navbar-links a {
+            color: var(--text-muted); text-decoration: none; font-size: 14px; font-weight: 500;
+            padding: 8px 16px; border-radius: 100px; transition: all 0.2s;
+        }
+        .navbar-links a:hover { color: var(--text); background: rgba(255,255,255,0.06); }
+        .navbar-links a.active { color: var(--gold); }
+        .navbar-cta {
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            color: #000 !important; font-weight: 700 !important;
+            padding: 9px 20px !important; border-radius: 100px !important;
+            box-shadow: 0 4px 14px rgba(245,158,11,0.35);
+            transition: all 0.2s !important;
+        }
+        .navbar-cta:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(245,158,11,0.45) !important; background: rgba(0,0,0,0) !important; background: linear-gradient(135deg, #fbbf24, #f59e0b) !important; }
+        .navbar-back {
+            display: flex; align-items: center; gap: 6px;
+            color: var(--text-muted); text-decoration: none; font-size: 14px; font-weight: 500;
+            padding: 8px 14px; border-radius: 100px; border: 1px solid var(--border);
+            transition: all 0.2s;
+        }
+        .navbar-back:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
+
+        /* ───── HERO ───── */
+        .hero {
+            padding: 140px 24px 60px;
+            text-align: center;
+            background: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(245,158,11,0.08) 0%, transparent 70%);
+        }
+        .hero-eyebrow {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.25);
+            color: var(--gold-light); font-size: 12px; font-weight: 600; letter-spacing: 1.2px;
+            text-transform: uppercase; padding: 6px 16px; border-radius: 100px; margin-bottom: 24px;
+        }
+        .hero h1 { font-size: clamp(32px, 5vw, 52px); font-weight: 900; line-height: 1.1; letter-spacing: -1.5px; margin-bottom: 16px; }
+        .hero h1 span { color: var(--gold); }
+        .hero p { color: var(--text-muted); font-size: 18px; max-width: 560px; margin: 0 auto 36px; line-height: 1.6; }
+
+        /* ───── TOGGLE MENSAL / ANUAL ───── */
+        .billing-toggle {
+            display: inline-flex; align-items: center; gap: 14px;
+            background: var(--surface); border: 1px solid var(--border);
+            padding: 6px; border-radius: 100px; margin-bottom: 56px;
+            position: relative;
+        }
+        .billing-toggle button {
+            background: none; border: none; color: var(--text-muted); font-family: 'Inter', sans-serif;
+            font-size: 14px; font-weight: 600; padding: 9px 22px; border-radius: 100px; cursor: pointer;
+            transition: all 0.25s; position: relative; z-index: 1;
+        }
+        .billing-toggle button.active { color: #000; }
+        .toggle-slider {
+            position: absolute; top: 6px; left: 6px; height: calc(100% - 12px);
+            background: linear-gradient(135deg, var(--gold-light), var(--gold-dark));
+            border-radius: 100px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 10px rgba(245,158,11,0.4);
+        }
+        .discount-badge {
+            background: rgba(34,197,94,0.15); border: 1px solid rgba(34,197,94,0.3);
+            color: var(--green); font-size: 11px; font-weight: 700;
+            padding: 3px 10px; border-radius: 100px; margin-left: 4px;
         }
 
-        .plan-name { font-size: 22px; font-weight: 700; color: #fff; margin-bottom: 5px; }
-        .plan-price { font-size: 38px; font-weight: 900; color: #fbbf24; margin-bottom: 18px; }
-        .plan-price span { font-size: 16px; color: #fff; font-weight: normal; }
+        /* ───── PRICING GRID ───── */
+        .pricing-section { max-width: 1240px; margin: 0 auto; padding: 0 24px 100px; }
+        .pricing-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; align-items: end; }
 
-        .features { list-style: none; padding: 0; margin-bottom: 30px; flex: 1; }
-        .features li { margin-bottom: 12px; color: #fff; font-size: 15px; display: flex; align-items: center; gap: 10px; }
-        .features li .check { color: #fbbf24; font-size: 18px; }
-        .features li .x { color: #e11d48; font-size: 18px; }
-
-        /* BOTAO */
-        .btn-select {
-            background: #22c55e; border: none; color: #fff;
-            width: 100%; padding: 14px; border-radius: 8px; font-weight: bold; cursor: pointer;
-            transition: 0.2s; text-align: center; text-decoration: none; display: block;
-            font-size: 17px; margin-top: 18px; box-shadow: 0 2px 8px #0002;
+        /* CARD */
+        .plan-card {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 32px 28px 28px;
+            display: flex; flex-direction: column; gap: 0;
+            transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
+            position: relative; overflow: hidden;
+            animation: fadeUp 0.5s ease both;
         }
-        .btn-select:hover { background: #16a34a; color: #fff; }
-        .btn-select.filled { background: #fbbf24; color: #222; }
-        .btn-select.filled:hover { background: #f59e0b; color: #fff; }
+        .plan-card:hover { transform: translateY(-8px); box-shadow: 0 24px 48px rgba(0,0,0,0.4); border-color: rgba(245,158,11,0.3); }
+        .plan-card.featured {
+            background: linear-gradient(160deg, #1a2235 0%, #111827 100%);
+            border: 2px solid var(--gold-light);
+            box-shadow: 0 0 0 1px rgba(245,158,11,0.1), 0 20px 48px rgba(0,0,0,0.4), 0 0 80px rgba(245,158,11,0.06);
+            transform: translateY(-12px);
+        }
+        .plan-card.featured:hover { transform: translateY(-20px); }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .plan-card:nth-child(1) { animation-delay: 0s; }
+        .plan-card:nth-child(2) { animation-delay: 0.08s; }
+        .plan-card:nth-child(3) { animation-delay: 0.16s; }
+        .plan-card:nth-child(4) { animation-delay: 0.24s; }
 
-        /* RESPONSIVO */
-        @media (max-width: 768px) {
+        /* BADGE POPULAR */
+        .popular-badge {
+            position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+            background: linear-gradient(90deg, var(--gold-light), var(--gold-dark));
+            color: #000; font-size: 10px; font-weight: 800; letter-spacing: 1px;
+            text-transform: uppercase; padding: 4px 18px;
+            border-bottom-left-radius: 10px; border-bottom-right-radius: 10px;
+            white-space: nowrap;
+        }
+
+        /* PLANO HEADER */
+        .plan-icon { font-size: 28px; margin-bottom: 12px; }
+        .plan-name-tag {
+            display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 1px;
+            text-transform: uppercase; color: var(--gold-light); background: rgba(245,158,11,0.1);
+            border: 1px solid rgba(245,158,11,0.2); padding: 3px 10px; border-radius: 100px;
+            margin-bottom: 8px;
+        }
+        .plan-name { font-size: 26px; font-weight: 800; color: var(--text); letter-spacing: -0.5px; margin-bottom: 4px; }
+        .plan-subtitle { color: var(--text-muted); font-size: 13px; margin-bottom: 20px; }
+        .plan-verse { font-style: italic; font-size: 12px; color: rgba(245,158,11,0.7); margin-bottom: 20px; border-left: 2px solid rgba(245,158,11,0.3); padding-left: 10px; line-height: 1.5; }
+
+        /* PRICE */
+        .plan-price-block { margin-bottom: 24px; }
+        .plan-price-block .currency { font-size: 18px; font-weight: 700; color: var(--gold-light); vertical-align: top; margin-top: 6px; display: inline-block; }
+        .plan-price-block .amount { font-size: 48px; font-weight: 900; color: var(--text); letter-spacing: -2px; line-height: 1; }
+        .plan-price-block .amount.free { color: var(--gold-light); font-size: 40px; }
+        .plan-price-block .period { font-size: 14px; color: var(--text-muted); font-weight: 500; display: block; margin-top: 4px; }
+        .plan-price-block .annual-note { font-size: 12px; color: var(--green); font-weight: 600; margin-top: 2px; display: block; }
+
+        /* DIVIDER */
+        .plan-divider { border: none; border-top: 1px solid var(--border); margin: 16px 0 20px; }
+
+        /* FEATURES */
+        .plan-features { list-style: none; flex: 1; margin-bottom: 28px; display: flex; flex-direction: column; gap: 10px; }
+        .plan-features li { display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--text); }
+        .plan-features li.disabled { color: var(--text-muted); text-decoration: line-through; opacity: 0.5; }
+        .feat-icon { width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; flex-shrink: 0; }
+        .feat-icon.yes { background: rgba(34,197,94,0.15); color: var(--green); }
+        .feat-icon.no { background: rgba(239,68,68,0.1); color: var(--red); }
+
+        /* CTA BUTTON */
+        .plan-btn {
+            display: block; text-align: center; text-decoration: none; font-family: 'Inter', sans-serif;
+            font-weight: 700; font-size: 15px; padding: 14px 24px; border-radius: 10px;
+            cursor: pointer; border: none; transition: all 0.2s;
+        }
+        .plan-btn.outline { background: transparent; border: 1.5px solid rgba(255,255,255,0.15); color: var(--text); }
+        .plan-btn.outline:hover { border-color: var(--gold); color: var(--gold); background: rgba(245,158,11,0.05); }
+        .plan-btn.primary { background: linear-gradient(135deg, var(--gold-light), var(--gold-dark)); color: #000; box-shadow: 0 4px 16px rgba(245,158,11,0.3); }
+        .plan-btn.primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(245,158,11,0.45); }
+        .plan-btn.ghost { background: rgba(245,158,11,0.08); border: 1.5px solid rgba(245,158,11,0.2); color: var(--gold-light); }
+        .plan-btn.ghost:hover { background: rgba(245,158,11,0.15); border-color: var(--gold); }
+        .trial-note { text-align: center; font-size: 11px; color: var(--text-muted); margin-top: 10px; }
+
+        /* ───── FAQ / GARANTIA ───── */
+        .bottom-section { max-width: 1000px; margin: 0 auto; padding: 0 24px 80px; }
+        .guarantee-band {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 32px 40px;
+            display: flex; align-items: center; gap: 24px; margin-bottom: 60px;
+        }
+        .guarantee-icon { font-size: 48px; flex-shrink: 0; }
+        .guarantee-text h3 { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
+        .guarantee-text p { color: var(--text-muted); font-size: 14px; line-height: 1.6; }
+
+        .faq-section h2 { font-size: 28px; font-weight: 800; text-align: center; margin-bottom: 32px; letter-spacing: -0.5px; }
+        .faq-item { border-bottom: 1px solid var(--border); }
+        .faq-question {
+            width: 100%; display: flex; justify-content: space-between; align-items: center;
+            padding: 18px 0; background: none; border: none; color: var(--text);
+            font-family: 'Inter', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer;
+            text-align: left; gap: 16px;
+        }
+        .faq-question .faq-icon { color: var(--gold); font-size: 13px; transition: transform 0.3s; flex-shrink: 0; }
+        .faq-question.open .faq-icon { transform: rotate(45deg); }
+        .faq-answer { max-height: 0; overflow: hidden; transition: max-height 0.35s ease, padding 0.35s ease; }
+        .faq-answer p { color: var(--text-muted); font-size: 14px; line-height: 1.7; padding-bottom: 18px; }
+
+        /* ───── FOOTER ───── */
+        .page-footer { text-align: center; padding: 32px; border-top: 1px solid var(--border); color: var(--text-muted); font-size: 13px; }
+        .page-footer a { color: var(--gold); text-decoration: none; }
+
+        /* ───── RESPONSIVE ───── */
+        @media (max-width: 1100px) { .pricing-grid { grid-template-columns: repeat(2, 1fr); } .plan-card.featured { transform: none; } }
+        @media (max-width: 640px) {
             .pricing-grid { grid-template-columns: 1fr; }
-            .price-card.featured { transform: scale(1); }
+            .navbar-links { display: none; }
+            .guarantee-band { flex-direction: column; text-align: center; }
         }
     </style>
 </head>
-<body class="theme-petroleo">
+<body>
 
-    <header>
-        <div class="logo-area">
+    <!-- NAVBAR FLUTUANTE -->
+    <nav class="navbar" id="navbar">
+        <a href="index.html" class="navbar-logo">
             <img src="logo.png" alt="LDFP">
+            <span>LDF<em>P</em></span>
+        </a>
+        <div class="navbar-links">
+            <a href="index.html">Início</a>
+            <a href="planos.html" class="active">Planos</a>
+            <a href="login.html">Área do Cliente</a>
+            <a href="criar_conta.html" class="navbar-cta">Começar Agora</a>
         </div>
-        <a href="index.html" class="btn-voltar"><i class="fa-solid fa-arrow-left"></i> Voltar</a>
-    </header>
+        <a href="index.html" class="navbar-back"><i class="fa-solid fa-arrow-left"></i> Voltar</a>
+    </nav>
 
-    <div class="container">
-        <h1>Escolha o plano ideal para <span>sua Igreja</span></h1>
-        <p class="subtitle">Teste qualquer plano pago gratuitamente por 7 dias. Sem compromisso.</p>
+    <!-- HERO -->
+    <div class="hero">
+        <div class="hero-eyebrow"><i class="fa-solid fa-star"></i> Planos &amp; Preços</div>
+        <h1>O plano certo para<br><span>cada ministério</span></h1>
+        <p>Comece gratuitamente. Escale conforme sua igreja cresce. Cancele quando quiser.</p>
 
-        <div class="pricing-grid">
-            <!-- Gratuito -->
-            <div class="price-card">
-                <div class="plan-name">Gratuito<br><span style="font-size:13px;color:#fbbf24;">Com Anuncios</span></div>
-                <div class="plan-price">R$ 0,00 <span>/mes</span></div>
-                <ul class="features">
-                    <li><span class="check">✓</span> App Web Instalavel (PWA)</li>
-                    <li><span class="x">✖</span> App do Membro</li>
-                    <li><span class="check">✓</span> 30 cadastros</li>
-                    <li><span class="check">✓</span> 1 congregacao</li>
-                    <li><span class="check">✓</span> Escola Biblica Dominical</li>
-                    <li><span class="x">✖</span> Credencial de Membro</li>
-                    <li><span class="check">✓</span> Grupos/Celulas</li>
-                    <li><span class="check">✓</span> Controle Financeiro (com limites)</li>
-                    <li><span class="check">✓</span> Controle Contabil (com limites)</li>
-                    <li><span class="check">✓</span> Relatorios (com limites)</li>
-                    <li><span class="x">✖</span> Suporte via e-mail</li>
-                    <li><span class="x">✖</span> Suporte via WhatsApp</li>
-                    <li><span class="x">✖</span> Suporte via Telefone</li>
-                    <li><span class="x">✖</span> Consultoria Contabil</li>
+        <!-- TOGGLE MENSAL / ANUAL -->
+        <div class="billing-toggle" id="billingToggle">
+            <div class="toggle-slider" id="toggleSlider"></div>
+            <button class="active" id="btnMensal" onclick="setBilling('mensal')">Mensal</button>
+            <button id="btnAnual" onclick="setBilling('anual')">Anual <span class="discount-badge">-17%</span></button>
+        </div>
+    </div>
+
+    <!-- PRICING GRID -->
+    <section class="pricing-section">
+        <div class="pricing-grid" id="pricingGrid">
+
+            <!-- PLANO ÉDEN -->
+            <div class="plan-card">
+                <div class="plan-icon">🌿</div>
+                <div class="plan-name-tag">Gratuito</div>
+                <div class="plan-name">Éden</div>
+                <div class="plan-subtitle">O começo de tudo</div>
+                <p class="plan-verse">"No princípio, Deus criou..." — Gn 1:1</p>
+                <div class="plan-price-block">
+                    <span class="currency">R$</span><span class="amount free">0</span>
+                    <span class="period">para sempre · com anúncios</span>
+                </div>
+                <hr class="plan-divider">
+                <ul class="plan-features">
+                    <li><span class="feat-icon yes"><i class="fa-solid fa-check"></i></span> App Web Instalável (PWA)</li>
+                    <li class="disabled"><span class="feat-icon no"><i class="fa-solid fa-xmark"></i></span> App do Membro</li>
+                    <li><span class="feat-icon yes"><i class="fa-solid fa-check"></i></span> Até 30 cadastros</li>
+                    <li><span class="feat-icon yes"><i class="fa-solid fa-check"></i></span> 1 congregação</li>
+                    <li><span class="feat-icon yes"><i class="fa-solid fa-check"></i></span> EBD Dominical</li>
+                    <li class="disabled"><span class="feat-icon no"><i class="fa-solid fa-xmark"></i></span> Credencial de Membro</li>
+                    <li><span class="feat-icon yes"><i class="fa-solid fa-check"></i></span> Grupos / Células</li>
+                    <li><span class="feat-icon yes"><i class="fa-solid fa-check"></i></span> Financeiro (com limites)</li>
+                    <li><span class="feat-icon yes"><i class="fa-solid fa-check"></i></span> Relatórios (com limites)</li>
+                    <li class="disabled"><span class="feat-icon no"><i class="fa-solid fa-xmark"></i></span> Suporte prioritário</li>
                 </ul>
-                <a href="criar_conta.html" class="btn-select">Criar Conta</a>
+                <a href="criar_conta.html" class="plan-btn outline">Criar conta grátis</a>
             </div>
 
-            <!-- Ararate -->
-            <div class="price-card">
-                <div class="plan-name">Ararate<br><span style="font-size:13px;color:#fbbf24;">Igrejas Pequenas</span></div>
-                <div class="plan-price">R$ 50,00 <span>/mes</span></div>
-                <ul class="features">
-                    <li><span class="check">✓</span> App Web Instalavel (PWA)</li>
-                    <li><span class="x">✖</span> App do Membro</li>
-                    <li><span class="check">✓</span> 150 cadastros</li>
-                    <li><span class="check">✓</span> 1 congregacao</li>
-                    <li><span class="check">✓</span> Escola Biblica Dominical</li>
-                    <li><span class="check">✓</span> Credencial de Membro</li>
-                    <li><span class="check">✓</span> Grupos/Celulas</li>
-                    <li><span class="check">✓</span> Controle Financeiro</li>
-                    <li><span class="check">✓</span> Controle Contabil</li>
-                    <li><span class="check">✓</span> Relatorios</li>
-                    <li><span class="check">✓</span> Suporte via e-mail</li>
-                    <li><span class="x">✖</span> Suporte via WhatsApp</li>
-                    <li><span class="x">✖</span> Suporte via Telefone</li>
-                    <li><span class="x">✖</span> Consultoria Contabil</li>
+            <!-- PLANO HEBROM -->
+            <div class="plan-card">
+                <div class="plan-icon">⛰️</div>
+                <div class="plan-name-tag">Básico</div>
+                <div class="plan-name">Hebrom</div>
+                <div class="plan-subtitle">Igrejas em formação</div>
+                <p class="plan-verse">"Ali Abraão construiu um altar ao Senhor..." — Gn 13:18</p>
+                <div class="plan-price-block">
+                    <span class="currency">R$</span><span class="amount" id="price-hebrom">50</span>
+                    <span class="period" id="period-hebrom">por mês · cobrado mensalmente</span>
+                    <span class="annual-note" id="annual-hebrom" style="display:none;">equivale a R$ 42/mês · cobrado R$ 500/ano</span>
+                </div>
+                <hr class="plan-divider">
+                <ul class="plan-features">
+                    <li><span class="feat-icon yes"><i class="fa-solid fa-check"></i></span> App Web Instalável (PWA)</li>
+                    <li class="disabled"><span class="feat-icon no"><i class="fa-solid fa-xmark"></i></span> App do Membro</li>
+                    <li><span class="feat-icon yes"><i class="fa-solid fa-check"></i></span> Até 150 cadastros</li>
+                    <li><span class="feat-icon yes"><i class="fa-solid fa-check"></i></span> 1 congregação</li>
+                    <li><span class="feat-icon yes"><i class="fa-solid fa-check"></i></span> EBD Dominical</li>
+                    <li><span class="feat-icon yes"><i class="fa-solid fa-check"></i></span> Credencial de Membro</li>
+                    <li><span class="feat-icon yes"><i class="fa-solid fa-check"></i></span> Grupos / Células</li>
+                    <li><span class="feat-icon yes"><i class="fa-solid fa-check"></i></span> Financeiro completo</li>
+                    <li><span class="feat-icon yes"><i class="fa-solid fa-check"></i></span> Relatórios completos</li>
+                    <li><span class="feat-icon yes"><i class="fa-solid fa-check"></i></span> Suporte via e-mail</li>
                 </ul>
-                <a href="criar_conta.html" class="btn-select filled">Assinar</a>
-                <div style="margin-top:10px;font-size:13px;color:#94a3b8;">Teste 7 dias</div>
+                <a href="criar_conta.html" class="plan-btn ghost">Assinar Hebrom</a>
+                <p class="trial-note">✦ 7 dias de teste gratuito</p>
             </div>
 
-            <!-- Sinai -->
-            <div class="price-card featured">
-                <div class="badge">MAIS POPULAR</div>
-                <div class="plan-name">Sinai<br><span style="font-size:13px;color:#fbbf24;">Igrejas Medias</span></div>
-                <div class="plan-price">R$ 80,00 <span>/mes</span></div>
-                <ul class="features">
-                    <li><span class="check">✓</span> App Web Instalavel (PWA)</li>
-                    <li><span class="check">✓</span> App do Membro</li>
-                    <li><span class="check">✓</span> 300 cadastros</li>
-                    <li><span class="check">✓</span> 5 congregacoes</li>
-                    <li><span class="check">✓</span> Escola Biblica Dominical</li>
-                    <li><span class="check">✓</span> Credencial de Membro</li>
-                    <li><span class="check">✓</span> Grupos/Celulas</li>
-                    <li><span class="check">✓</span> Controle Financeiro</li>
-                    <li><span class="check">✓</span> Controle Contabil</li>
-                    <li><span class="check">✓</span> Relatorios</li>
-                    <li><span class="check">✓</span> Suporte via e-mail</li>
-                    <li><span class="check">✓</span> Suporte via WhatsApp</li>
-                    <li><span class="x">✖</span> Suporte via Telefone</li>
-                    <li><span class="x">✖</span> Consultoria Contabil</li>
+            <!-- PLANO BETEL — DESTAQUE -->
+            <div class="plan-card featured">
+                <div class="popular-badge">✦ Mais Popular</div>
+                <div class="plan-icon" style="margin-top:12px;">🏛️</div>
+                <div class="plan-name-tag">Recomendado</div>
+                <div class="plan-name">Betel</div>
+                <div class="plan-subtitle">Igrejas em crescimento</div>
+                <p class="plan-verse">"Esta é a casa de Deus e a porta do céu." — Gn 28:17</p>
+                <div class="plan-price-block">
+                    <span class="currency">R$</span><span class="amount" id="price-betel">80</span>
+                    <span class="period" id="period-betel">por mês · cobrado mensalmente</span>
+                    <span class="annual-note" id="annual-betel" style="display:none;">equivale a R$ 67/mês · cobrado R$ 800/ano</span>
+                </div>
+                <hr class="plan-divider">
+                <ul class="plan-features">
+                    <li><span class="feat-icon yes"><i class="fa-solid fa-check"></i></span> App Web Instalável (PWA)</li>
+                    <li><span class="feat-icon yes"><i class="fa-solid fa-check"></i></span> App do Membro</li>
+                    <li><span class="feat-icon yes"><i class="fa-solid fa-check"></i></span> Até 300 cadastros</li>
+                    <li><span class="feat-icon yes"><i class="fa-solid fa-check"></i></span> Até 5 congregações</li>
+                    <li><span class="feat-icon yes"><i class="fa-solid fa-check"></i></span> EBD Dominical</li>
+                    <li><span class="feat-icon yes"><i class="fa-solid fa-check"></i></span> Credencial de Membro</li>
+                    <li><span class="feat-icon yes"><i class="fa-solid fa-check"></i></span> Grupos / Células</li>
+                    <li><span class="feat-icon yes"><i class="fa-solid fa-check"></i></span> Financeiro completo</li>
+                    <li><span class="feat-icon yes"><i class="fa-solid fa-check"></i></span> Relatórios completos</li>
+                    <li><span class="feat-icon yes"><i class="fa-solid fa-check"></i></span> Suporte via WhatsApp</li>
                 </ul>
-                <a href="criar_conta.html" class="btn-select filled">Assinar</a>
-                <div style="margin-top:10px;font-size:13px;color:#94a3b8;">Teste 7 dias</div>
+                <a href="criar_conta.html" class="plan-btn primary">Assinar Betel</a>
+                <p class="trial-note">✦ 7 dias de teste gratuito</p>
             </div>
 
-            <!-- Carmelo -->
-            <div class="price-card">
-                <div class="plan-name">Carmelo<br><span style="font-size:13px;color:#fbbf24;">Igrejas em Crescimento</span></div>
-                <div class="plan-price">R$ 100,00 <span>/mes</span></div>
-                <ul class="features">
-                    <li><span class="check">✓</span> App Web Instalavel (PWA)</li>
-                    <li><span class="check">✓</span> App do Membro</li>
-                    <li><span class="check">✓</span> 500 cadastros</li>
-                    <li><span class="check">✓</span> 10 congregacoes</li>
-                    <li><span class="check">✓</span> Escola Biblica Dominical</li>
-                    <li><span class="check">✓</span> Credencial de Membro</li>
-                    <li><span class="check">✓</span> Grupos/Celulas</li>
-                    <li><span class="check">✓</span> Controle Financeiro</li>
-                    <li><span class="check">✓</span> Controle Contabil</li>
-                    <li><span class="check">✓</span> Relatorios</li>
-                    <li><span class="check">✓</span> Suporte via e-mail</li>
-                    <li><span class="check">✓</span> Suporte via WhatsApp</li>
-                    <li><span class="check">✓</span> Suporte via Telefone</li>
-                    <li><span class="x">✖</span> Consultoria Contabil</li>
+            <!-- PLANO SIÃO -->
+            <div class="plan-card">
+                <div class="plan-icon">👑</div>
+                <div class="plan-name-tag">Premium</div>
+                <div class="plan-name">Sião</div>
+                <div class="plan-subtitle">Igrejas consolidadas</div>
+                <p class="plan-verse">"O Senhor reina em Sião para sempre." — Sl 146:10</p>
+                <div class="plan-price-block">
+                    <span class="currency">R$</span><span class="amount" id="price-siao">100</span>
+                    <span class="period" id="period-siao">por mês · cobrado mensalmente</span>
+                    <span class="annual-note" id="annual-siao" style="display:none;">equivale a R$ 83/mês · cobrado R$ 1.000/ano</span>
+                </div>
+                <hr class="plan-divider">
+                <ul class="plan-features">
+                    <li><span class="feat-icon yes"><i class="fa-solid fa-check"></i></span> App Web Instalável (PWA)</li>
+                    <li><span class="feat-icon yes"><i class="fa-solid fa-check"></i></span> App do Membro</li>
+                    <li><span class="feat-icon yes"><i class="fa-solid fa-check"></i></span> Até 500 cadastros</li>
+                    <li><span class="feat-icon yes"><i class="fa-solid fa-check"></i></span> Até 10 congregações</li>
+                    <li><span class="feat-icon yes"><i class="fa-solid fa-check"></i></span> EBD Dominical</li>
+                    <li><span class="feat-icon yes"><i class="fa-solid fa-check"></i></span> Credencial de Membro</li>
+                    <li><span class="feat-icon yes"><i class="fa-solid fa-check"></i></span> Grupos / Células</li>
+                    <li><span class="feat-icon yes"><i class="fa-solid fa-check"></i></span> Financeiro completo</li>
+                    <li><span class="feat-icon yes"><i class="fa-solid fa-check"></i></span> Relatórios completos</li>
+                    <li><span class="feat-icon yes"><i class="fa-solid fa-check"></i></span> Suporte via Telefone</li>
+                    <li><span class="feat-icon yes"><i class="fa-solid fa-check"></i></span> Consultoria Contábil</li>
                 </ul>
-                <a href="criar_conta.html" class="btn-select filled">Assinar</a>
-                <div style="margin-top:10px;font-size:13px;color:#94a3b8;">Teste 7 dias</div>
+                <a href="criar_conta.html" class="plan-btn ghost">Assinar Sião</a>
+                <p class="trial-note">✦ 7 dias de teste gratuito</p>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- GARANTIA + FAQ -->
+    <div class="bottom-section">
+        <div class="guarantee-band">
+            <div class="guarantee-icon">🛡️</div>
+            <div class="guarantee-text">
+                <h3>Garantia de 7 dias — sem risco</h3>
+                <p>Teste qualquer plano pago por 7 dias completamente grátis. Se não gostar, basta cancelar antes do vencimento e você não paga nada. Sem letras miúdas, sem burocracia.</p>
             </div>
         </div>
 
-        <!-- Opcoes de pagamento mensal/anual e adicionais -->
-        <div style="margin-top:60px;">
-            <h2 style="color:#f59e0b;">Planos Mensal e Anual</h2>
-            <div class="pricing-grid" style="margin-bottom:30px;">
-                <div class="price-card">
-                    <div class="plan-name">Ararate</div>
-                    <div class="plan-price">R$ 50,00 <span>/mes</span><br>R$ 500,00 <span>/ano</span></div>
-                    <ul class="features">
-                        <li><i class="fa-solid fa-check"></i> Ate 150 Cadastros</li>
-                        <li><i class="fa-solid fa-check"></i> 1 congregacao</li>
-                        <li><i class="fa-solid fa-xmark"></i> App do Membro</li>
-                        <li><i class="fa-solid fa-check"></i> Suporte via e-mail</li>
-                        <li><i class="fa-solid fa-check"></i> Suporte via WhatsApp</li>
-                        <li><i class="fa-solid fa-check"></i> Suporte via Telefone</li>
-                    </ul>
-                </div>
-                <div class="price-card featured">
-                    <div class="plan-name">Sinai</div>
-                    <div class="plan-price">R$ 80,00 <span>/mes</span><br>R$ 1.000,00 <span>/ano</span></div>
-                    <ul class="features">
-                        <li><i class="fa-solid fa-check"></i> Ate 300 Cadastros</li>
-                        <li><i class="fa-solid fa-check"></i> 5 congregacoes</li>
-                        <li><i class="fa-solid fa-check"></i> App do Membro</li>
-                        <li><i class="fa-solid fa-check"></i> Suporte via e-mail</li>
-                        <li><i class="fa-solid fa-check"></i> Suporte via WhatsApp</li>
-                        <li><i class="fa-solid fa-check"></i> Suporte via Telefone</li>
-                    </ul>
-                </div>
-                <div class="price-card">
-                    <div class="plan-name">Carmelo</div>
-                    <div class="plan-price">R$ 100,00 <span>/mes</span><br>R$ 1.200,00 <span>/ano</span></div>
-                    <ul class="features">
-                        <li><i class="fa-solid fa-check"></i> Ate 500 Cadastros</li>
-                        <li><i class="fa-solid fa-check"></i> 10 congregacoes</li>
-                        <li><i class="fa-solid fa-check"></i> App do Membro</li>
-                        <li><i class="fa-solid fa-check"></i> Suporte via e-mail</li>
-                        <li><i class="fa-solid fa-check"></i> Suporte via WhatsApp</li>
-                        <li><i class="fa-solid fa-check"></i> Suporte via Telefone</li>
-                    </ul>
-                </div>
+        <div class="faq-section">
+            <h2>Perguntas frequentes</h2>
+            <div class="faq-item">
+                <button class="faq-question" onclick="toggleFaq(this)">
+                    Posso mudar de plano depois?
+                    <i class="fa-solid fa-plus faq-icon"></i>
+                </button>
+                <div class="faq-answer"><p>Sim. Você pode fazer upgrade ou downgrade do seu plano a qualquer momento. O valor é ajustado proporcionalmente no ciclo atual.</p></div>
             </div>
-            <h2 style="color:#f59e0b;">Adicionais</h2>
-            <div class="pricing-grid" style="grid-template-columns:1fr 1fr;">
-                <div class="price-card">
-                    <div class="plan-name">Cadastros</div>
-                    <div class="plan-price">0 <span>(+R$ 0,00/mes ou ano)</span></div>
-                    <div style="color:#94a3b8;font-size:13px;">0 ate 2.000</div>
-                </div>
-                <div class="price-card">
-                    <div class="plan-name">Congregacoes</div>
-                    <div class="plan-price">0 <span>(+R$ 0,00/mes ou ano)</span></div>
-                    <div style="color:#94a3b8;font-size:13px;">0 ate 200</div>
-                </div>
+            <div class="faq-item">
+                <button class="faq-question" onclick="toggleFaq(this)">
+                    O que acontece se eu ultrapassar o limite de cadastros?
+                    <i class="fa-solid fa-plus faq-icon"></i>
+                </button>
+                <div class="faq-answer"><p>O sistema avisa quando você está próximo do limite. Você pode fazer upgrade de plano a qualquer hora para ampliar a capacidade.</p></div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-question" onclick="toggleFaq(this)">
+                    Quais formas de pagamento são aceitas?
+                    <i class="fa-solid fa-plus faq-icon"></i>
+                </button>
+                <div class="faq-answer"><p>Aceitamos cartão de crédito, boleto bancário e Pix. Para planos anuais, há desconto especial no pagamento à vista via Pix ou boleto.</p></div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-question" onclick="toggleFaq(this)">
+                    Meus dados ficam seguros?
+                    <i class="fa-solid fa-plus faq-icon"></i>
+                </button>
+                <div class="faq-answer"><p>Todos os dados são armazenados com criptografia e backups automáticos diários. Sua igreja tem total propriedade das informações cadastradas.</p></div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-question" onclick="toggleFaq(this)">
+                    Existe contrato de fidelidade?
+                    <i class="fa-solid fa-plus faq-icon"></i>
+                </button>
+                <div class="faq-answer"><p>Não. Os planos mensais podem ser cancelados a qualquer momento. Planos anuais têm desconto justamente pelo comprometimento de 12 meses.</p></div>
             </div>
         </div>
     </div>
 
-    <script src="speed-insights.js" defer></script>
+    <footer class="page-footer">
+        Copyright &copy; 2026 LDFP — <a href="mailto:contato@ldfp.com.br">contato@ldfp.com.br</a>
+    </footer>
 
+    <script src="speed-insights.js" defer></script>
+    <script>
+        // ── Navbar scroll ──
+        const navbar = document.getElementById('navbar');
+        window.addEventListener('scroll', () => {
+            navbar.classList.toggle('scrolled', window.scrollY > 40);
+        });
+
+        // ── Toggle Mensal / Anual ──
+        let billing = 'mensal';
+        const btnMensal = document.getElementById('btnMensal');
+        const btnAnual  = document.getElementById('btnAnual');
+        const slider    = document.getElementById('toggleSlider');
+
+        function setBilling(mode) {
+            billing = mode;
+            if (mode === 'mensal') {
+                btnMensal.classList.add('active');
+                btnAnual.classList.remove('active');
+                slider.style.left = '6px';
+                slider.style.width = btnMensal.offsetWidth + 'px';
+                setPrice('hebrom', '50', false);
+                setPrice('betel',  '80', false);
+                setPrice('siao',  '100', false);
+            } else {
+                btnAnual.classList.add('active');
+                btnMensal.classList.remove('active');
+                slider.style.left = (btnMensal.offsetWidth + 6) + 'px';
+                slider.style.width = btnAnual.offsetWidth + 'px';
+                setPrice('hebrom', '42', true);
+                setPrice('betel',  '67', true);
+                setPrice('siao',   '83', true);
+            }
+        }
+
+        function setPrice(plan, value, isAnnual) {
+            document.getElementById('price-' + plan).textContent = value;
+            document.getElementById('period-' + plan).style.display  = isAnnual ? 'none' : 'block';
+            document.getElementById('annual-' + plan).style.display  = isAnnual ? 'block' : 'none';
+        }
+
+        // Inicializa slider na posição correta
+        window.addEventListener('DOMContentLoaded', () => {
+            slider.style.width = btnMensal.offsetWidth + 'px';
+        });
+
+        // ── FAQ accordion ──
+        function toggleFaq(btn) {
+            const answer = btn.nextElementSibling;
+            const isOpen = btn.classList.contains('open');
+            // Fecha todos
+            document.querySelectorAll('.faq-question.open').forEach(q => {
+                q.classList.remove('open');
+                q.nextElementSibling.style.maxHeight = null;
+            });
+            if (!isOpen) {
+                btn.classList.add('open');
+                answer.style.maxHeight = answer.scrollHeight + 'px';
+            }
+        }
+    </script>
 </body>
 </html>
