@@ -7,7 +7,10 @@
     "up": "npm run dev",
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
+    "dev:ctrlf5": "nodemon --watch src --watch public --ext js,json,html,css src/server.js",
+    "init:db": "node scripts/init-db.js",
     "check:db": "node scripts/check-db.js",
+    "migrate": "node scripts/migrar-schema.js",
     "stop": "echo 'Use CTRL+C para parar o servidor.'",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -25,6 +28,9 @@
     "mysql2": "^3.17.4",
     "nodemailer": "^6.10.1",
     "nodemon": "^3.1.0",
+    "pg": "^8.20.0",
+    "sqlite": "^5.1.1",
+    "sqlite3": "^6.0.1",
     "winston": "^3.19.0"
   }
 }

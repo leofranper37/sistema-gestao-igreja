@@ -1,5 +1,11 @@
 ﻿const path = require('path');
 const mysql = require('mysql2/promise');
+let pg;
+try {
+    pg = require('pg');
+} catch (_) {
+    pg = null;
+}
 let sqlite3;
 
 try {
@@ -72,6 +78,69 @@ const parseDbUrl = () => {
 const dbUrl = parseDbUrl();
 let mysqlPool = null;
 let mysqlPoolInitError = null;
+let pgPool = null;
+let pgPoolInitError = null;
+
+function getPostgresPool() {
+    if (!pg || !pg.Pool) return null;
+    if (pgPool) return pgPool;
+    if (pgPoolInitError) return null;
+
+    const pgUrl = readEnv(
+        'DATABASE_URL',
+        'POSTGRES_URL',
+        'POSTGRES_PRISMA_URL',
+        'POSTGRES_URL_NON_POOLING',
+        'PG_URL'
+    );
+
+    if (!pgUrl || !/^postgres(?:ql)?:\/\//i.test(pgUrl)) return null;
+
+    try {
+        pgPool = new pg.Pool({
+            connectionString: pgUrl,
+            ssl: { rejectUnauthorized: false },
+            max: Number.parseInt(process.env.DB_CONNECTION_LIMIT || '5', 10)
+        });
+        console.log('✅ PostgreSQL pool ativado (Neon/prod).');
+        return pgPool;
+    } catch (error) {
+        pgPoolInitError = error;
+        console.error('❌ Falha ao iniciar pool PostgreSQL:', error?.message || error);
+        return null;
+    }
+}
+
+function adaptSqlForPostgres(sql) {
+    const hasInsertIgnore = /INSERT\s+(?:OR\s+)?IGNORE\b/i.test(sql);
+    let s = normalizeSql(sql)
+        .replace(/INSERT\s+OR\s+IGNORE\b/gi, 'INSERT')
+        .replace(/INSERT\s+IGNORE\b/gi, 'INSERT')
+        .replace(/\bDATETIME\s+DEFAULT\s+CURRENT_TIMESTAMP/gi, 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP')
+        .replace(/\bDATETIME\b/gi, 'TIMESTAMP')
+        .replace(/\bTINYINT\(\d+\)/gi, 'SMALLINT')
+        .replace(/\bLONGTEXT\b/gi, 'TEXT')
+        .replace(/datetime\('now'\s*,\s*'\+(\d+)\s+days'\)/gi, "(NOW() + INTERVAL '$1 days')")
+        .replace(/datetime\('now'\)/gi, 'NOW()')
+        .replace(/date\('now'\)/gi, 'CURRENT_DATE')
+        .replace(/\bDATE_ADD\(NOW\(\),\s*INTERVAL\s+(\d+)\s+DAY\)/gi, "(NOW() + INTERVAL '$1 days')");
+
+    if (hasInsertIgnore && !/ON\s+CONFLICT\b/i.test(s)) {
+        s = s.trimEnd() + ' ON CONFLICT DO NOTHING';
+    }
+
+    let idx = 0;
+    s = s.replace(/\?/g, () => `$${++idx}`);
+    return s;
+}
+
+function pgInsertReturning(sql) {
+    const trimmed = sql.trimEnd().replace(/;\s*$/, '');
+    if (/^\s*INSERT\b/i.test(trimmed) && !/RETURNING\b/i.test(trimmed)) {
+        return trimmed + ' RETURNING id';
+    }
+    return trimmed;
+}
 
 function buildMysqlConfig() {
     const hostRaw = readEnv('DB_HOST', 'MYSQL_HOST', 'MYSQLHOST', 'HOST_DO_BANCO_DE_DADOS');
@@ -205,6 +274,19 @@ function runAsync(sql, params = []) {
 
 const pool = {
     async query(sql, params = []) {
+        const activePgPool = getPostgresPool();
+
+        if (activePgPool) {
+            const adapted = adaptSqlForPostgres(pgInsertReturning(sql));
+            const result = await activePgPool.query(adapted, params);
+            const stmt = sql.trim().toUpperCase();
+            if (stmt.startsWith('SELECT') || stmt.startsWith('WITH') || stmt.startsWith('PRAGMA')) {
+                return [result.rows];
+            }
+            const insertId = result.rows && result.rows.length > 0 ? result.rows[0].id : null;
+            return [{ insertId, affectedRows: result.rowCount, changes: result.rowCount }];
+        }
+
         const activeMysqlPool = getMysqlPool();
 
         if (activeMysqlPool) {
@@ -224,6 +306,27 @@ const pool = {
     },
 
     async getConnection() {
+        const activePgPool = getPostgresPool();
+
+        if (activePgPool) {
+            const client = await activePgPool.connect();
+            return {
+                query: async (sql, qParams = []) => {
+                    const adapted = adaptSqlForPostgres(pgInsertReturning(sql));
+                    const result = await client.query(adapted, qParams);
+                    const stmt = sql.trim().toUpperCase();
+                    if (stmt.startsWith('SELECT') || stmt.startsWith('WITH')) {
+                        return [result.rows];
+                    }
+                    const insertId = result.rows && result.rows.length > 0 ? result.rows[0].id : null;
+                    return [{ insertId, affectedRows: result.rowCount, changes: result.rowCount }];
+                },
+                release() {
+                    client.release();
+                }
+            };
+        }
+
         const activeMysqlPool = getMysqlPool();
 
         if (activeMysqlPool) {
@@ -248,6 +351,12 @@ const pool = {
     },
 
     async end() {
+        if (pgPool) {
+            await pgPool.end();
+            pgPool = null;
+            return;
+        }
+
         if (mysqlPool) {
             await mysqlPool.end();
             mysqlPool = null;
@@ -272,6 +381,128 @@ const pool = {
 };
 
 async function initializeDatabase() {
+    const activePgPool = getPostgresPool();
+
+    if (activePgPool) {
+        await activePgPool.query(`CREATE TABLE IF NOT EXISTS igrejas (
+            id SERIAL PRIMARY KEY,
+            nome VARCHAR(255) NOT NULL UNIQUE,
+            plano VARCHAR(100) NOT NULL DEFAULT 'teste-7-dias',
+            status_assinatura VARCHAR(30) NOT NULL DEFAULT 'trial',
+            trial_starts_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            trial_ends_at TIMESTAMP NULL,
+            max_cadastros INTEGER NOT NULL DEFAULT 40,
+            max_congregacoes INTEGER NOT NULL DEFAULT 1,
+            modulo_app_membro SMALLINT NOT NULL DEFAULT 0,
+            modulo_app_midia SMALLINT NOT NULL DEFAULT 0,
+            modulo_ebd SMALLINT NOT NULL DEFAULT 0,
+            modulo_agenda_eventos SMALLINT NOT NULL DEFAULT 1,
+            modulo_escala_culto SMALLINT NOT NULL DEFAULT 0,
+            modulo_pedidos_oracao SMALLINT NOT NULL DEFAULT 1,
+            modulo_mural_oracao SMALLINT NOT NULL DEFAULT 1,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )`);
+
+        await activePgPool.query(`INSERT INTO igrejas (id, nome) VALUES (1, 'Igreja Padrão') ON CONFLICT DO NOTHING`);
+
+        await activePgPool.query(`CREATE TABLE IF NOT EXISTS membros (
+            id SERIAL PRIMARY KEY,
+            igreja_id INTEGER NOT NULL DEFAULT 1,
+            nome VARCHAR(255) NOT NULL,
+            email VARCHAR(255) NULL,
+            telefone VARCHAR(60) NULL,
+            apelido VARCHAR(120) NULL,
+            nascimento VARCHAR(30) NULL,
+            sexo VARCHAR(30) NULL,
+            estado_civil VARCHAR(50) NULL,
+            profissao VARCHAR(120) NULL,
+            cep VARCHAR(30) NULL,
+            endereco VARCHAR(255) NULL,
+            numero VARCHAR(30) NULL,
+            bairro VARCHAR(120) NULL,
+            cidade VARCHAR(120) NULL,
+            estado VARCHAR(60) NULL,
+            celular VARCHAR(60) NULL,
+            cpf VARCHAR(30) NULL,
+            rg VARCHAR(30) NULL,
+            nacionalidade VARCHAR(120) NULL,
+            naturalidade VARCHAR(120) NULL,
+            data_nascimento VARCHAR(30) NULL,
+            situacao VARCHAR(30) DEFAULT 'Ativo',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )`);
+
+        await activePgPool.query(`CREATE INDEX IF NOT EXISTS idx_membros_igreja ON membros (igreja_id)`);
+
+        await activePgPool.query(`CREATE TABLE IF NOT EXISTS usuarios (
+            id SERIAL PRIMARY KEY,
+            igreja VARCHAR(255) NOT NULL,
+            igreja_id INTEGER NOT NULL,
+            nome VARCHAR(255) NOT NULL,
+            email VARCHAR(255) NOT NULL UNIQUE,
+            password_hash VARCHAR(255) NOT NULL,
+            role VARCHAR(50) NOT NULL DEFAULT 'admin',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )`);
+
+        await activePgPool.query(`CREATE TABLE IF NOT EXISTS payment_links (
+            id SERIAL PRIMARY KEY,
+            igreja_id INTEGER NOT NULL,
+            descricao VARCHAR(255) NOT NULL,
+            valor DECIMAL(12,2) NOT NULL,
+            provider VARCHAR(50) NOT NULL,
+            payment_method VARCHAR(30) DEFAULT 'pix',
+            status VARCHAR(30) NOT NULL DEFAULT 'pendente',
+            reference_code VARCHAR(255) NOT NULL UNIQUE,
+            provider_external_id VARCHAR(255) NULL,
+            url TEXT NULL,
+            qr_code TEXT NULL,
+            qr_code_base64 TEXT NULL,
+            status_detail TEXT NULL,
+            plano_destino VARCHAR(120) NULL,
+            plano_duracao_dias INTEGER NOT NULL DEFAULT 30,
+            modulos_json TEXT NULL,
+            paid_at TIMESTAMP NULL,
+            created_by INTEGER NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )`);
+
+        await activePgPool.query(`CREATE INDEX IF NOT EXISTS idx_payment_links_igreja ON payment_links (igreja_id)`);
+        await activePgPool.query(`CREATE INDEX IF NOT EXISTS idx_payment_links_reference ON payment_links (reference_code)`);
+
+        await activePgPool.query(`CREATE TABLE IF NOT EXISTS pedidos_oracao (
+            id SERIAL PRIMARY KEY,
+            igreja_id INTEGER NOT NULL DEFAULT 1,
+            solicitante VARCHAR(255) NOT NULL,
+            alvo_oracao VARCHAR(255) NOT NULL,
+            descricao TEXT NULL,
+            status VARCHAR(30) NOT NULL DEFAULT 'ativo',
+            is_private SMALLINT NOT NULL DEFAULT 0,
+            resposta TEXT NULL,
+            intercessores INTEGER NOT NULL DEFAULT 0,
+            usuario_id INTEGER NULL,
+            user_name VARCHAR(255) NULL,
+            data_pedido TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            data_atualizado TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )`);
+
+        await activePgPool.query(`CREATE INDEX IF NOT EXISTS idx_pedidos_oracao_igreja ON pedidos_oracao (igreja_id)`);
+        await activePgPool.query(`CREATE INDEX IF NOT EXISTS idx_pedidos_oracao_status ON pedidos_oracao (status)`);
+
+        await activePgPool.query(`CREATE TABLE IF NOT EXISTS oracao_intercessores (
+            id SERIAL PRIMARY KEY,
+            pedido_id INTEGER NOT NULL,
+            usuario_id INTEGER NULL,
+            nome_intercessor VARCHAR(255) NULL,
+            data_intercessao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )`);
+
+        await activePgPool.query(`CREATE INDEX IF NOT EXISTS idx_oracao_intercessores_pedido ON oracao_intercessores (pedido_id)`);
+
+        console.log('✅ Tabelas principais verificadas/criadas no PostgreSQL.');
+        return;
+    }
+
     const activeMysqlPool = getMysqlPool();
 
     if (activeMysqlPool) {
