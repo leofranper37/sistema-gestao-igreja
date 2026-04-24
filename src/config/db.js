@@ -1,4 +1,5 @@
 ﻿const path = require('path');
+const mysql = require('mysql2/promise');
 let sqlite3;
 
 try {
@@ -26,9 +27,78 @@ const db = sqlite3 ? new sqlite3.Database(dbPath, (err) => {
 
 const sqliteUnavailableError = () => new Error('SQLite indisponível no runtime atual.');
 
+const pickFirstValue = (...values) => {
+    for (const value of values) {
+        if (value !== undefined && value !== null && String(value).trim() !== '') {
+            return String(value).trim();
+        }
+    }
+
+    return undefined;
+};
+
+const readEnv = (...keys) => pickFirstValue(...keys.map((key) => process.env[key]));
+
+const parseDbUrl = () => {
+    const rawUrl = readEnv(
+        'DB_URL',
+        'DATABASE_URL',
+        'MYSQL_URL',
+        'MYSQL_PUBLIC_URL',
+        'MYSQLPRIVATE_URL',
+        'URL_PUBLICA_DO_MYSQL',
+        'URL_PÚBLICA_DO_MYSQL'
+    );
+
+    if (!rawUrl) {
+        return null;
+    }
+
+    try {
+        const parsed = new URL(rawUrl);
+        return {
+            host: parsed.hostname || undefined,
+            user: parsed.username ? decodeURIComponent(parsed.username) : undefined,
+            password: parsed.password ? decodeURIComponent(parsed.password) : undefined,
+            database: parsed.pathname ? decodeURIComponent(parsed.pathname.replace(/^\//, '')) : undefined,
+            port: parsed.port ? Number.parseInt(parsed.port, 10) : undefined
+        };
+    } catch (_) {
+        return null;
+    }
+};
+
+const dbUrl = parseDbUrl();
+
+const mysqlConfig = {
+    host: readEnv('DB_HOST', 'MYSQL_HOST', 'MYSQLHOST', 'HOST_DO_BANCO_DE_DADOS') || dbUrl?.host,
+    user: readEnv('DB_USER', 'MYSQL_USER', 'MYSQLUSER', 'USUARIO_DO_BANCO_DE_DADOS', 'USUÁRIO_DO_BANCO_DE_DADOS') || dbUrl?.user,
+    password: readEnv('DB_PASSWORD', 'DB_PASS', 'MYSQL_PASSWORD', 'MYSQLPASSWORD', 'SENHA_DO_BANCO_DE_DADOS') || dbUrl?.password,
+    database: readEnv('DB_NAME', 'MYSQL_DATABASE', 'MYSQLDATABASE', 'NOME_DO_BANCO_DE_DADOS') || dbUrl?.database,
+    port: Number.parseInt(readEnv('DB_PORT', 'MYSQL_PORT', 'MYSQLPORT', 'PORTA_DO_BANCO_DE_DADOS') || dbUrl?.port || '3306', 10),
+    waitForConnections: true,
+    connectionLimit: Number.parseInt(process.env.DB_CONNECTION_LIMIT || '10', 10),
+    queueLimit: 0
+};
+
+const shouldUseMysqlFallback = !db && !!(mysqlConfig.host && mysqlConfig.user && mysqlConfig.database);
+const mysqlPool = shouldUseMysqlFallback ? mysql.createPool(mysqlConfig) : null;
+
+if (mysqlPool) {
+    console.log('✅ Fallback MySQL ativado para runtime sem sqlite3.');
+}
+
 function normalizeSql(sql) {
     // Accept legacy Postgres-style placeholders ($1, $2...) and convert to SQLite style (?).
     return String(sql).replace(/\$\d+/g, '?');
+}
+
+function adaptSqlForMysql(sql) {
+    return normalizeSql(sql)
+        .replace(/INSERT\s+OR\s+IGNORE/gi, 'INSERT IGNORE')
+        .replace(/datetime\('now'\s*,\s*'\+(\d+)\s+days'\)/gi, 'DATE_ADD(NOW(), INTERVAL $1 DAY)')
+        .replace(/datetime\('now'\)/gi, 'NOW()')
+        .replace(/date\('now'\)/gi, 'CURDATE()');
 }
 
 function allAsync(sql, params = []) {
@@ -71,6 +141,11 @@ function runAsync(sql, params = []) {
 
 const pool = {
     async query(sql, params = []) {
+        if (mysqlPool) {
+            const [rows] = await mysqlPool.query(adaptSqlForMysql(sql), params);
+            return [rows];
+        }
+
         const statement = normalizeSql(sql).trim().toUpperCase();
 
         if (statement.startsWith('SELECT') || statement.startsWith('PRAGMA') || statement.startsWith('WITH')) {
@@ -83,6 +158,19 @@ const pool = {
     },
 
     async getConnection() {
+        if (mysqlPool) {
+            const connection = await mysqlPool.getConnection();
+            return {
+                query: async (sql, params = []) => {
+                    const [rows] = await connection.query(adaptSqlForMysql(sql), params);
+                    return [rows];
+                },
+                release() {
+                    connection.release();
+                }
+            };
+        }
+
         return {
             query: (sql, params = []) => pool.query(sql, params),
             release() {
@@ -92,6 +180,11 @@ const pool = {
     },
 
     async end() {
+        if (mysqlPool) {
+            await mysqlPool.end();
+            return;
+        }
+
         if (!db) {
             return Promise.resolve();
         }
@@ -110,8 +203,124 @@ const pool = {
 };
 
 async function initializeDatabase() {
-    if (!db) {
+    if (mysqlPool) {
+        await mysqlPool.query(`CREATE TABLE IF NOT EXISTS igrejas (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            nome VARCHAR(255) NOT NULL UNIQUE,
+            plano VARCHAR(100) NOT NULL DEFAULT 'teste-7-dias',
+            status_assinatura VARCHAR(30) NOT NULL DEFAULT 'trial',
+            trial_starts_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            trial_ends_at DATETIME NULL,
+            max_cadastros INT NOT NULL DEFAULT 40,
+            max_congregacoes INT NOT NULL DEFAULT 1,
+            modulo_app_membro TINYINT(1) NOT NULL DEFAULT 0,
+            modulo_app_midia TINYINT(1) NOT NULL DEFAULT 0,
+            modulo_ebd TINYINT(1) NOT NULL DEFAULT 0,
+            modulo_agenda_eventos TINYINT(1) NOT NULL DEFAULT 1,
+            modulo_escala_culto TINYINT(1) NOT NULL DEFAULT 0,
+            modulo_pedidos_oracao TINYINT(1) NOT NULL DEFAULT 1,
+            modulo_mural_oracao TINYINT(1) NOT NULL DEFAULT 1,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )`);
+
+        await mysqlPool.query(`INSERT IGNORE INTO igrejas (id, nome) VALUES (1, 'Igreja Padrão')`);
+
+        await mysqlPool.query(`CREATE TABLE IF NOT EXISTS membros (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            igreja_id INT NOT NULL DEFAULT 1,
+            nome VARCHAR(255) NOT NULL,
+            email VARCHAR(255) NULL,
+            telefone VARCHAR(60) NULL,
+            apelido VARCHAR(120) NULL,
+            nascimento VARCHAR(30) NULL,
+            sexo VARCHAR(30) NULL,
+            estado_civil VARCHAR(50) NULL,
+            profissao VARCHAR(120) NULL,
+            cep VARCHAR(30) NULL,
+            endereco VARCHAR(255) NULL,
+            numero VARCHAR(30) NULL,
+            bairro VARCHAR(120) NULL,
+            cidade VARCHAR(120) NULL,
+            estado VARCHAR(60) NULL,
+            celular VARCHAR(60) NULL,
+            cpf VARCHAR(30) NULL,
+            rg VARCHAR(30) NULL,
+            nacionalidade VARCHAR(120) NULL,
+            naturalidade VARCHAR(120) NULL,
+            data_nascimento VARCHAR(30) NULL,
+            situacao VARCHAR(30) DEFAULT 'Ativo',
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            INDEX idx_membros_igreja (igreja_id)
+        )`);
+
+        await mysqlPool.query(`CREATE TABLE IF NOT EXISTS usuarios (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            igreja VARCHAR(255) NOT NULL,
+            igreja_id INT NOT NULL,
+            nome VARCHAR(255) NOT NULL,
+            email VARCHAR(255) NOT NULL UNIQUE,
+            password_hash VARCHAR(255) NOT NULL,
+            role VARCHAR(50) NOT NULL DEFAULT 'admin',
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )`);
+
+        await mysqlPool.query(`CREATE TABLE IF NOT EXISTS payment_links (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            igreja_id INT NOT NULL,
+            descricao VARCHAR(255) NOT NULL,
+            valor DECIMAL(12,2) NOT NULL,
+            provider VARCHAR(50) NOT NULL,
+            payment_method VARCHAR(30) DEFAULT 'pix',
+            status VARCHAR(30) NOT NULL DEFAULT 'pendente',
+            reference_code VARCHAR(255) NOT NULL UNIQUE,
+            provider_external_id VARCHAR(255) NULL,
+            url TEXT NULL,
+            qr_code TEXT NULL,
+            qr_code_base64 LONGTEXT NULL,
+            status_detail TEXT NULL,
+            plano_destino VARCHAR(120) NULL,
+            plano_duracao_dias INT NOT NULL DEFAULT 30,
+            modulos_json LONGTEXT NULL,
+            paid_at DATETIME NULL,
+            created_by INT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            INDEX idx_payment_links_igreja (igreja_id),
+            INDEX idx_payment_links_reference (reference_code)
+        )`);
+
+        await mysqlPool.query(`CREATE TABLE IF NOT EXISTS pedidos_oracao (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            igreja_id INT NOT NULL DEFAULT 1,
+            solicitante VARCHAR(255) NOT NULL,
+            alvo_oracao VARCHAR(255) NOT NULL,
+            descricao TEXT NULL,
+            status VARCHAR(30) NOT NULL DEFAULT 'ativo',
+            is_private TINYINT(1) NOT NULL DEFAULT 0,
+            resposta TEXT NULL,
+            intercessores INT NOT NULL DEFAULT 0,
+            usuario_id INT NULL,
+            user_name VARCHAR(255) NULL,
+            data_pedido DATETIME DEFAULT CURRENT_TIMESTAMP,
+            data_atualizado DATETIME DEFAULT CURRENT_TIMESTAMP,
+            INDEX idx_pedidos_oracao_igreja (igreja_id),
+            INDEX idx_pedidos_oracao_status (status)
+        )`);
+
+        await mysqlPool.query(`CREATE TABLE IF NOT EXISTS oracao_intercessores (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            pedido_id INT NOT NULL,
+            usuario_id INT NULL,
+            nome_intercessor VARCHAR(255) NULL,
+            data_intercessao DATETIME DEFAULT CURRENT_TIMESTAMP,
+            INDEX idx_oracao_intercessores_pedido (pedido_id)
+        )`);
+
+        console.log('✅ Tabelas principais verificadas/criadas no MySQL.');
         return;
+    }
+
+    if (!db) {
+        throw sqliteUnavailableError();
     }
 
     return new Promise((resolve, reject) => {
