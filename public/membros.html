@@ -35,6 +35,13 @@
             font-size: 13px;
         }
 
+        .page-top-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
         /* ---- Form Card ---- */
         .member-form-card {
             background: #fff;
@@ -211,6 +218,33 @@
             cursor: pointer;
         }
 
+        .btn-primary {
+            background: #0284c7;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 16px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .btn-danger {
+            background: #fff;
+            color: #dc2626;
+            border: 1px solid #dc2626;
+            border-radius: 8px;
+            padding: 10px 16px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+            color: #fff;
+        }
+
         .form-status {
             font-size: 13px;
             color: #047857;
@@ -272,7 +306,8 @@
             border: 1px solid #e2e8f0;
             border-radius: 14px;
             box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
-            overflow: hidden;
+            overflow-x: auto;
+            overflow-y: hidden;
         }
 
         .table-card-header {
@@ -302,6 +337,7 @@
 
         .members-table {
             width: 100%;
+            min-width: 680px;
             border-collapse: collapse;
         }
 
@@ -312,6 +348,19 @@
             font-size: 13px;
             color: #334155;
             text-align: left;
+        }
+
+        .members-table tbody tr {
+            cursor: pointer;
+        }
+
+        .members-table tbody tr:hover {
+            background: #f8fafc;
+        }
+
+        .members-table tbody tr.is-selected {
+            background: #ecfeff;
+            box-shadow: inset 3px 0 0 #0284c7;
         }
 
         .members-table th {
@@ -335,9 +384,20 @@
                     <h2>Ficha Cadastral de Membro</h2>
                     <p>Preencha os dados pessoais, familiares, ministeriais e a foto do membro.</p>
                 </div>
-                <button class="btn-save" type="button" id="btnSalvarTopo">
-                    <i class="fa-solid fa-floppy-disk"></i> Salvar Cadastro
-                </button>
+                <div class="page-top-actions">
+                    <button class="btn-ghost" type="button" id="btnImprimirTopo">
+                        <i class="fa-solid fa-print"></i> Imprimir
+                    </button>
+                    <button class="btn-primary" type="button" id="btnEditarTopo">
+                        <i class="fa-solid fa-pen"></i> Editar
+                    </button>
+                    <button class="btn-danger" type="button" id="btnExcluirTopo">
+                        <i class="fa-solid fa-trash"></i> Excluir
+                    </button>
+                    <button class="btn-save" type="button" id="btnSalvarTopo">
+                        <i class="fa-solid fa-floppy-disk"></i> Salvar Cadastro
+                    </button>
+                </div>
             </div>
 
             <div class="member-form-card">
@@ -700,6 +760,15 @@
 
                     <!-- ======================== AÇÕES ======================== -->
                     <div class="form-actions">
+                        <button class="btn-ghost" type="button" id="btnImprimir">
+                            <i class="fa-solid fa-print"></i> Imprimir
+                        </button>
+                        <button class="btn-primary" type="button" id="btnEditar">
+                            <i class="fa-solid fa-pen"></i> Editar
+                        </button>
+                        <button class="btn-danger" type="button" id="btnExcluir">
+                            <i class="fa-solid fa-trash"></i> Excluir
+                        </button>
                         <button class="btn-save" type="button" id="btnSalvar">
                             <i class="fa-solid fa-floppy-disk"></i> Salvar Cadastro
                         </button>
@@ -802,6 +871,59 @@
         };
 
         const extractError = (data, fallback) => (data?.error || data?.message || fallback);
+        let loadedMembers = [];
+        let selectedMemberId = null;
+
+        const memberIdOf = (row) => Number(row?.id || row?.membro_id || row?.member_id || 0);
+
+        const fillMemberForm = (row) => {
+            const form = document.getElementById('memberForm');
+            if (!form || !row) {
+                return;
+            }
+
+            const setValue = (name, value) => {
+                const field = form.elements.namedItem(name);
+                if (!field) {
+                    return;
+                }
+                field.value = value ?? '';
+            };
+
+            setValue('nome', row.full_name || row.nome);
+            setValue('email', row.email);
+            setValue('telefone', row.phone || row.telefone);
+            setValue('celular', row.mobile_phone || row.celular);
+            setValue('apelido', row.nickname || row.apelido);
+            setValue('nascimento', row.birth_date || row.nascimento);
+            setValue('sexo', row.gender || row.sexo);
+            setValue('estadoCivil', row.marital_status || row.estado_civil || row.estadoCivil);
+            setValue('profissao', row.profession || row.profissao);
+            setValue('cep', row.zip_code || row.cep);
+            setValue('endereco', row.address || row.endereco);
+            setValue('numero', row.address_number || row.numero);
+            setValue('bairro', row.neighborhood || row.bairro);
+            setValue('cidade', row.city || row.cidade);
+            setValue('estado', row.state || row.estado);
+            setValue('cpf', row.cpf);
+            setValue('rg', row.rg);
+            setValue('nacionalidade', row.nationality || row.nacionalidade);
+            setValue('naturalidade', row.birth_place || row.naturalidade);
+
+            setStatus(`Membro selecionado para edição: ${row.full_name || row.nome || 'Sem nome'}`);
+        };
+
+        const selectMemberById = (id) => {
+            selectedMemberId = Number(id || 0) || null;
+            document.querySelectorAll('#membersTableBody tr[data-member-id]').forEach((row) => {
+                row.classList.toggle('is-selected', Number(row.dataset.memberId) === selectedMemberId);
+            });
+
+            const selected = loadedMembers.find((row) => memberIdOf(row) === selectedMemberId);
+            if (selected) {
+                fillMemberForm(selected);
+            }
+        };
 
         /* ---- Montar payload ---- */
         const getFormData = () => {
@@ -843,20 +965,81 @@
                 if (!resp.ok) throw new Error(extractError(data, 'Erro ao carregar membros.'));
 
                 if (!data.length) {
+                    loadedMembers = [];
+                    selectedMemberId = null;
                     tbody.innerHTML = '<tr><td colspan="4" class="muted">Nenhum membro cadastrado.</td></tr>';
                     return;
                 }
 
-                tbody.innerHTML = data.map((row) => `
+                loadedMembers = data;
+
+                tbody.innerHTML = data.map((row) => {
+                    return `
                     <tr>
                         <td>${row.full_name || row.nome || ''}</td>
                         <td>${row.email || '-'}</td>
                         <td>${row.phone || row.mobile_phone || '-'}</td>
                         <td>${row.city || row.cidade || '-'}</td>
                     </tr>
-                `).join('');
+                `;
+                }).join('');
+
+                const rows = Array.from(tbody.querySelectorAll('tr'));
+                rows.forEach((tr, idx) => {
+                    const id = Number(memberIdOf(data[idx]));
+                    tr.dataset.memberId = String(id || '');
+                    tr.addEventListener('click', () => selectMemberById(id));
+                    if (selectedMemberId && id === selectedMemberId) {
+                        tr.classList.add('is-selected');
+                    }
+                });
             } catch (err) {
                 tbody.innerHTML = `<tr><td colspan="4" class="muted">${err.message}</td></tr>`;
+            }
+        };
+
+        const imprimirFicha = () => {
+            window.print();
+        };
+
+        const habilitarEdicao = () => {
+            const nome = document.querySelector('[name="nome"]');
+            if (nome) {
+                nome.focus();
+                nome.select();
+            }
+            if (selectedMemberId) {
+                setStatus('Modo de edição habilitado para o membro selecionado.');
+            } else {
+                setStatus('Modo de edição habilitado. Selecione um membro da lista para carregar os dados.');
+            }
+        };
+
+        const excluirMembroSelecionado = async () => {
+            if (!selectedMemberId) {
+                setStatus('Selecione um membro na lista para excluir.', true);
+                return;
+            }
+
+            const selected = loadedMembers.find((row) => memberIdOf(row) === selectedMemberId);
+            const nome = selected?.full_name || selected?.nome || `ID ${selectedMemberId}`;
+            const ok = window.confirm(`Tem certeza que deseja excluir o membro ${nome}? Esta ação não pode ser desfeita.`);
+            if (!ok) {
+                return;
+            }
+
+            try {
+                const resp = await fetch(`/membros/${selectedMemberId}`, { method: 'DELETE' });
+                const data = await resp.json().catch(() => ({}));
+                if (!resp.ok) {
+                    throw new Error(extractError(data, 'Não foi possível excluir o membro.'));
+                }
+
+                selectedMemberId = null;
+                setStatus('Membro excluído com sucesso.');
+                await carregarMembros();
+            } catch (err) {
+                setStatus(err.message || 'Erro ao excluir membro.', true);
             }
         };
 
@@ -904,8 +1087,15 @@
         document.getElementById('btnSalvar').addEventListener('click', salvarMembro);
         document.getElementById('btnSalvarTopo').addEventListener('click', salvarMembro);
         document.getElementById('btnRecarregar').addEventListener('click', carregarMembros);
+        document.getElementById('btnImprimir').addEventListener('click', imprimirFicha);
+        document.getElementById('btnImprimirTopo').addEventListener('click', imprimirFicha);
+        document.getElementById('btnEditar').addEventListener('click', habilitarEdicao);
+        document.getElementById('btnEditarTopo').addEventListener('click', habilitarEdicao);
+        document.getElementById('btnExcluir').addEventListener('click', excluirMembroSelecionado);
+        document.getElementById('btnExcluirTopo').addEventListener('click', excluirMembroSelecionado);
 
         carregarMembros();
     </script>
+    <script src="speed-insights.js" defer></script>
 </body>
 </html>

@@ -45,6 +45,7 @@ const parseDbUrl = () => {
         'DATABASE_URL',
         'MYSQL_URL',
         'MYSQL_PUBLIC_URL',
+        'MYSQL_PRIVATE_URL',
         'MYSQLPRIVATE_URL',
         'URL_PUBLICA_DO_MYSQL',
         'URL_PÚBLICA_DO_MYSQL'
@@ -99,16 +100,23 @@ function buildMysqlConfig() {
     const portRaw = readEnv('DB_PORT', 'MYSQL_PORT', 'MYSQLPORT', 'PORTA_DO_BANCO_DE_DADOS') || parsedFromHostUrl?.port || dbUrl?.port || '3306';
     const port = Number.parseInt(String(portRaw), 10);
 
-    if (!host || !user || !database || Number.isNaN(port)) {
+    // In production/serverless, ignore localhost-style host when URL-based config exists.
+    const isServerRuntime = Boolean(process.env.VERCEL || process.env.RAILWAY_ENVIRONMENT || process.env.NODE_ENV === 'production');
+    const isLocalHostValue = typeof host === 'string' && ['localhost', '127.0.0.1', '::1'].includes(host.trim().toLowerCase());
+
+    const finalHost = (isServerRuntime && isLocalHostValue && dbUrl?.host) ? dbUrl.host : host;
+    const finalPort = (isServerRuntime && isLocalHostValue && dbUrl?.port) ? dbUrl.port : port;
+
+    if (!finalHost || !user || !database || Number.isNaN(finalPort)) {
         return null;
     }
 
     return {
-        host,
+        host: finalHost,
         user,
         password: password || '',
         database,
-        port,
+        port: finalPort,
         waitForConnections: true,
         connectionLimit: Number.parseInt(process.env.DB_CONNECTION_LIMIT || '10', 10),
         queueLimit: 0
