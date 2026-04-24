@@ -12,11 +12,22 @@ async function findChurchByName(name) {
 }
 
 async function createChurch(name) {
+    const now = new Date();
+    const trialEndsAt = new Date(now.getTime() + (7 * 24 * 60 * 60 * 1000));
+
     const [result] = await pool.query(
         `INSERT INTO igrejas (
             nome, plano, status_assinatura, trial_starts_at, trial_ends_at, max_cadastros, max_congregacoes
-        ) VALUES (?, 'teste-7-dias', 'trial', NOW(), DATE_ADD(NOW(), INTERVAL 7 DAY), 40, 1)`,
-        [name]
+        ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        [
+            name,
+            'teste-7-dias',
+            'trial',
+            now.toISOString(),
+            trialEndsAt.toISOString(),
+            40,
+            1
+        ]
     );
     return result.insertId;
 }
