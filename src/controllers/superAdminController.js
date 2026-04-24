@@ -250,6 +250,55 @@ async function updatePlano(req, res) {
     }
 }
 
+// ── Assinaturas / Faturas SaaS ─────────────────────────────────────────────
+
+async function listSaasAssinaturas(req, res) {
+    try {
+        const [rows] = await pool.query(
+            `SELECT p.id, p.igreja_id, p.descricao, p.valor, p.status, p.provider,
+                    p.payment_method, p.url, p.reference_code, p.created_at, p.paid_at,
+                    i.nome AS igreja_nome, i.plano, i.status_assinatura
+             FROM payment_links p
+             LEFT JOIN igrejas i ON i.id = p.igreja_id
+             ORDER BY p.created_at DESC
+             LIMIT 500`
+        );
+        res.json(rows || []);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}
+
+async function markSaasAssinaturaPaga(req, res) {
+    const id = Number(req.params.id);
+    if (!id) return res.status(400).json({ error: 'ID inválido.' });
+
+    try {
+        await pool.query(
+            `UPDATE payment_links
+             SET status = 'pago', paid_at = CURRENT_TIMESTAMP
+             WHERE id = ?`,
+            [id]
+        );
+
+        const [rows] = await pool.query(
+            `SELECT id, status, paid_at
+             FROM payment_links
+             WHERE id = ?
+             LIMIT 1`,
+            [id]
+        );
+
+        if (!rows.length) {
+            return res.status(404).json({ error: 'Fatura não encontrada.' });
+        }
+
+        res.json(rows[0]);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}
+
 module.exports = {
     getSuperAdminOverview,
     getSaasFaturamento,
@@ -259,5 +308,7 @@ module.exports = {
     updateSaasIgrejaContrato,
     listPlanos,
     getPlano,
-    updatePlano
+    updatePlano,
+    listSaasAssinaturas,
+    markSaasAssinaturaPaga
 };

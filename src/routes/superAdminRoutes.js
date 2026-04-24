@@ -9,7 +9,9 @@ const {
     updateSaasIgrejaContrato,
     listPlanos,
     getPlano,
-    updatePlano
+    updatePlano,
+    listSaasAssinaturas,
+    markSaasAssinaturaPaga
 } = require('../controllers/superAdminController');
 
 const router = express.Router();
@@ -31,5 +33,9 @@ router.patch('/api/saas/igrejas/:id/contrato', ...isSuperAdmin, updateSaasIgreja
 router.get('/api/saas/planos', ...isSuperAdmin, listPlanos);
 router.get('/api/saas/planos/:slug', ...isSuperAdmin, getPlano);
 router.put('/api/saas/planos/:slug', ...isSuperAdmin, updatePlano);
+
+// Assinaturas & Faturas
+router.get('/api/saas/assinaturas', ...isSuperAdmin, listSaasAssinaturas);
+router.put('/api/saas/assinaturas/:id/pago', ...isSuperAdmin, markSaasAssinaturaPaga);
 
 module.exports = router;
