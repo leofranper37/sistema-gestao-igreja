@@ -156,7 +156,7 @@ async function createMemberFromAutocadastro(payload) {
 async function findUserByEmailAndChurch(email, igrejaId) {
     const [rows] = await pool.query(
         `SELECT id, email
-         FROM users
+         FROM usuarios
          WHERE email = ? AND igreja_id = ?
          LIMIT 1`,
         [email, igrejaId]
@@ -167,7 +167,7 @@ async function findUserByEmailAndChurch(email, igrejaId) {
 
 async function createMemberUser(payload) {
     const [result] = await pool.query(
-        `INSERT INTO users (igreja, igreja_id, nome, email, password_hash, role)
+        `INSERT INTO usuarios (igreja, igreja_id, nome, email, password_hash, role)
          VALUES (?, ?, ?, ?, ?, 'membro')`,
         [payload.igrejaNome, payload.igrejaId, payload.nome, payload.email, payload.passwordHash]
     );

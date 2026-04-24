@@ -23,7 +23,7 @@ async function createChurch(name) {
 
 async function createUser(payload) {
     const [result] = await pool.query(
-        'INSERT INTO users (igreja, igreja_id, nome, email, password_hash, role) VALUES (?, ?, ?, ?, ?, ?)',
+        'INSERT INTO usuarios (igreja, igreja_id, nome, email, password_hash, role) VALUES (?, ?, ?, ?, ?, ?)',
         [payload.igreja, payload.igrejaId, payload.nome, payload.email, payload.passwordHash, payload.role]
     );
 
@@ -34,7 +34,7 @@ async function findUserByEmail(email) {
     const [rows] = await pool.query(
         `SELECT u.id, u.igreja, u.igreja_id, u.role, u.nome, u.email, u.password_hash,
                 i.plano, i.status_assinatura, i.trial_starts_at, i.trial_ends_at, i.max_cadastros, i.max_congregacoes
-         FROM users u
+         FROM usuarios u
          LEFT JOIN igrejas i ON i.id = u.igreja_id
          WHERE u.email = ?
          LIMIT 1`,
