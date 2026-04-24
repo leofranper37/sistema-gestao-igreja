@@ -1,5 +1,12 @@
 ﻿const path = require('path');
-const sqlite3 = require('sqlite3').verbose();
+let sqlite3;
+
+try {
+    sqlite3 = require('sqlite3').verbose();
+} catch (error) {
+    sqlite3 = null;
+    console.error('❌ sqlite3 indisponível neste ambiente:', error?.message || error);
+}
 
 // SQLite database path:
 // - Local/dev: project root file
@@ -9,13 +16,15 @@ const dbPath = process.env.SQLITE_DB_PATH
         ? '/tmp/ldfp_db.sqlite'
         : path.resolve(__dirname, '../../ldfp_db.sqlite'));
 
-const db = new sqlite3.Database(dbPath, (err) => {
+const db = sqlite3 ? new sqlite3.Database(dbPath, (err) => {
     if (err) {
         console.error('❌ Erro ao conectar no SQLite:', err.message);
     } else {
         console.log('✅ Banco de dados SQLite conectado com sucesso e pronto a usar!');
     }
-});
+}) : null;
+
+const sqliteUnavailableError = () => new Error('SQLite indisponível no runtime atual.');
 
 function normalizeSql(sql) {
     // Accept legacy Postgres-style placeholders ($1, $2...) and convert to SQLite style (?).
@@ -23,6 +32,10 @@ function normalizeSql(sql) {
 }
 
 function allAsync(sql, params = []) {
+    if (!db) {
+        return Promise.reject(sqliteUnavailableError());
+    }
+
     return new Promise((resolve, reject) => {
         db.all(normalizeSql(sql), params, (error, rows) => {
             if (error) {
@@ -36,6 +49,10 @@ function allAsync(sql, params = []) {
 }
 
 function runAsync(sql, params = []) {
+    if (!db) {
+        return Promise.reject(sqliteUnavailableError());
+    }
+
     return new Promise((resolve, reject) => {
         db.run(normalizeSql(sql), params, function onRun(error) {
             if (error) {
@@ -75,6 +92,10 @@ const pool = {
     },
 
     async end() {
+        if (!db) {
+            return Promise.resolve();
+        }
+
         return new Promise((resolve, reject) => {
             db.close((error) => {
                 if (error) {
@@ -89,6 +110,10 @@ const pool = {
 };
 
 async function initializeDatabase() {
+    if (!db) {
+        return;
+    }
+
     return new Promise((resolve, reject) => {
         db.serialize(() => {
             const safeAlter = (sql) => {
