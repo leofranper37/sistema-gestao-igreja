@@ -69,23 +69,79 @@ const parseDbUrl = () => {
 };
 
 const dbUrl = parseDbUrl();
+let mysqlPool = null;
+let mysqlPoolInitError = null;
 
-const mysqlConfig = {
-    host: readEnv('DB_HOST', 'MYSQL_HOST', 'MYSQLHOST', 'HOST_DO_BANCO_DE_DADOS') || dbUrl?.host,
-    user: readEnv('DB_USER', 'MYSQL_USER', 'MYSQLUSER', 'USUARIO_DO_BANCO_DE_DADOS', 'USUÁRIO_DO_BANCO_DE_DADOS') || dbUrl?.user,
-    password: readEnv('DB_PASSWORD', 'DB_PASS', 'MYSQL_PASSWORD', 'MYSQLPASSWORD', 'SENHA_DO_BANCO_DE_DADOS') || dbUrl?.password,
-    database: readEnv('DB_NAME', 'MYSQL_DATABASE', 'MYSQLDATABASE', 'NOME_DO_BANCO_DE_DADOS') || dbUrl?.database,
-    port: Number.parseInt(readEnv('DB_PORT', 'MYSQL_PORT', 'MYSQLPORT', 'PORTA_DO_BANCO_DE_DADOS') || dbUrl?.port || '3306', 10),
-    waitForConnections: true,
-    connectionLimit: Number.parseInt(process.env.DB_CONNECTION_LIMIT || '10', 10),
-    queueLimit: 0
-};
+function buildMysqlConfig() {
+    const hostRaw = readEnv('DB_HOST', 'MYSQL_HOST', 'MYSQLHOST', 'HOST_DO_BANCO_DE_DADOS');
+    const hostLooksLikeUrl = typeof hostRaw === 'string' && hostRaw.includes('://');
 
-const shouldUseMysqlFallback = !db && !!(mysqlConfig.host && mysqlConfig.user && mysqlConfig.database);
-const mysqlPool = shouldUseMysqlFallback ? mysql.createPool(mysqlConfig) : null;
+    let parsedFromHostUrl = null;
+    if (hostLooksLikeUrl) {
+        try {
+            const parsed = new URL(hostRaw);
+            parsedFromHostUrl = {
+                host: parsed.hostname || undefined,
+                user: parsed.username ? decodeURIComponent(parsed.username) : undefined,
+                password: parsed.password ? decodeURIComponent(parsed.password) : undefined,
+                database: parsed.pathname ? decodeURIComponent(parsed.pathname.replace(/^\//, '')) : undefined,
+                port: parsed.port ? Number.parseInt(parsed.port, 10) : undefined
+            };
+        } catch (_) {
+            parsedFromHostUrl = null;
+        }
+    }
 
-if (mysqlPool) {
-    console.log('✅ Fallback MySQL ativado para runtime sem sqlite3.');
+    const host = (!hostLooksLikeUrl ? hostRaw : undefined) || parsedFromHostUrl?.host || dbUrl?.host;
+    const user = readEnv('DB_USER', 'MYSQL_USER', 'MYSQLUSER', 'USUARIO_DO_BANCO_DE_DADOS', 'USUÁRIO_DO_BANCO_DE_DADOS') || parsedFromHostUrl?.user || dbUrl?.user;
+    const password = readEnv('DB_PASSWORD', 'DB_PASS', 'MYSQL_PASSWORD', 'MYSQLPASSWORD', 'SENHA_DO_BANCO_DE_DADOS') || parsedFromHostUrl?.password || dbUrl?.password;
+    const database = readEnv('DB_NAME', 'MYSQL_DATABASE', 'MYSQLDATABASE', 'NOME_DO_BANCO_DE_DADOS') || parsedFromHostUrl?.database || dbUrl?.database;
+    const portRaw = readEnv('DB_PORT', 'MYSQL_PORT', 'MYSQLPORT', 'PORTA_DO_BANCO_DE_DADOS') || parsedFromHostUrl?.port || dbUrl?.port || '3306';
+    const port = Number.parseInt(String(portRaw), 10);
+
+    if (!host || !user || !database || Number.isNaN(port)) {
+        return null;
+    }
+
+    return {
+        host,
+        user,
+        password: password || '',
+        database,
+        port,
+        waitForConnections: true,
+        connectionLimit: Number.parseInt(process.env.DB_CONNECTION_LIMIT || '10', 10),
+        queueLimit: 0
+    };
+}
+
+function getMysqlPool() {
+    if (db) {
+        return null;
+    }
+
+    if (mysqlPool) {
+        return mysqlPool;
+    }
+
+    if (mysqlPoolInitError) {
+        return null;
+    }
+
+    const config = buildMysqlConfig();
+    if (!config) {
+        return null;
+    }
+
+    try {
+        mysqlPool = mysql.createPool(config);
+        console.log('✅ Fallback MySQL ativado para runtime sem sqlite3.');
+        return mysqlPool;
+    } catch (error) {
+        mysqlPoolInitError = error;
+        console.error('❌ Falha ao iniciar fallback MySQL:', error?.message || error);
+        return null;
+    }
 }
 
 function normalizeSql(sql) {
@@ -141,8 +197,10 @@ function runAsync(sql, params = []) {
 
 const pool = {
     async query(sql, params = []) {
-        if (mysqlPool) {
-            const [rows] = await mysqlPool.query(adaptSqlForMysql(sql), params);
+        const activeMysqlPool = getMysqlPool();
+
+        if (activeMysqlPool) {
+            const [rows] = await activeMysqlPool.query(adaptSqlForMysql(sql), params);
             return [rows];
         }
 
@@ -158,8 +216,10 @@ const pool = {
     },
 
     async getConnection() {
-        if (mysqlPool) {
-            const connection = await mysqlPool.getConnection();
+        const activeMysqlPool = getMysqlPool();
+
+        if (activeMysqlPool) {
+            const connection = await activeMysqlPool.getConnection();
             return {
                 query: async (sql, params = []) => {
                     const [rows] = await connection.query(adaptSqlForMysql(sql), params);
@@ -182,6 +242,7 @@ const pool = {
     async end() {
         if (mysqlPool) {
             await mysqlPool.end();
+            mysqlPool = null;
             return;
         }
 
@@ -203,8 +264,10 @@ const pool = {
 };
 
 async function initializeDatabase() {
-    if (mysqlPool) {
-        await mysqlPool.query(`CREATE TABLE IF NOT EXISTS igrejas (
+    const activeMysqlPool = getMysqlPool();
+
+    if (activeMysqlPool) {
+        await activeMysqlPool.query(`CREATE TABLE IF NOT EXISTS igrejas (
             id INT AUTO_INCREMENT PRIMARY KEY,
             nome VARCHAR(255) NOT NULL UNIQUE,
             plano VARCHAR(100) NOT NULL DEFAULT 'teste-7-dias',
@@ -223,9 +286,9 @@ async function initializeDatabase() {
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )`);
 
-        await mysqlPool.query(`INSERT IGNORE INTO igrejas (id, nome) VALUES (1, 'Igreja Padrão')`);
+        await activeMysqlPool.query(`INSERT IGNORE INTO igrejas (id, nome) VALUES (1, 'Igreja Padrão')`);
 
-        await mysqlPool.query(`CREATE TABLE IF NOT EXISTS membros (
+        await activeMysqlPool.query(`CREATE TABLE IF NOT EXISTS membros (
             id INT AUTO_INCREMENT PRIMARY KEY,
             igreja_id INT NOT NULL DEFAULT 1,
             nome VARCHAR(255) NOT NULL,
@@ -253,7 +316,7 @@ async function initializeDatabase() {
             INDEX idx_membros_igreja (igreja_id)
         )`);
 
-        await mysqlPool.query(`CREATE TABLE IF NOT EXISTS usuarios (
+        await activeMysqlPool.query(`CREATE TABLE IF NOT EXISTS usuarios (
             id INT AUTO_INCREMENT PRIMARY KEY,
             igreja VARCHAR(255) NOT NULL,
             igreja_id INT NOT NULL,
@@ -264,7 +327,7 @@ async function initializeDatabase() {
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )`);
 
-        await mysqlPool.query(`CREATE TABLE IF NOT EXISTS payment_links (
+        await activeMysqlPool.query(`CREATE TABLE IF NOT EXISTS payment_links (
             id INT AUTO_INCREMENT PRIMARY KEY,
             igreja_id INT NOT NULL,
             descricao VARCHAR(255) NOT NULL,
@@ -288,7 +351,7 @@ async function initializeDatabase() {
             INDEX idx_payment_links_reference (reference_code)
         )`);
 
-        await mysqlPool.query(`CREATE TABLE IF NOT EXISTS pedidos_oracao (
+        await activeMysqlPool.query(`CREATE TABLE IF NOT EXISTS pedidos_oracao (
             id INT AUTO_INCREMENT PRIMARY KEY,
             igreja_id INT NOT NULL DEFAULT 1,
             solicitante VARCHAR(255) NOT NULL,
@@ -306,7 +369,7 @@ async function initializeDatabase() {
             INDEX idx_pedidos_oracao_status (status)
         )`);
 
-        await mysqlPool.query(`CREATE TABLE IF NOT EXISTS oracao_intercessores (
+        await activeMysqlPool.query(`CREATE TABLE IF NOT EXISTS oracao_intercessores (
             id INT AUTO_INCREMENT PRIMARY KEY,
             pedido_id INT NOT NULL,
             usuario_id INT NULL,
@@ -320,6 +383,10 @@ async function initializeDatabase() {
     }
 
     if (!db) {
+        if (mysqlPoolInitError) {
+            throw mysqlPoolInitError;
+        }
+
         throw sqliteUnavailableError();
     }
 
