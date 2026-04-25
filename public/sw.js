@@ -3,7 +3,7 @@
  * Handles caching, offline support, and background sync
  */
 
-const CACHE_NAME = 'ldfp-v3';
+const CACHE_NAME = 'ldfp-v4';
 const STATIC_ASSETS = [
     '/',
     '/index.html',
@@ -56,7 +56,7 @@ self.addEventListener('activate', (event) => {
     self.clients.claim();
 });
 
-// Fetch event - serve from cache, fallback to network
+// Fetch event - strategy by request type
 self.addEventListener('fetch', (event) => {
     const { request } = event;
     const url = new URL(request.url);
@@ -66,7 +66,29 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
-    // Skip api calls for dynamic data, but cache them for offline
+    // Navegação HTML: network-first para evitar precisar de Ctrl+F5 após deploy.
+    if (request.mode === 'navigate' || request.destination === 'document') {
+        event.respondWith(
+            fetch(request)
+                .then((response) => {
+                    if (response && response.status === 200) {
+                        const responseClone = response.clone();
+                        caches.open(CACHE_NAME).then((cache) => {
+                            cache.put(request, responseClone);
+                        });
+                    }
+                    return response;
+                })
+                .catch(() => {
+                    return caches.match(request).then((cached) => {
+                        return cached || caches.match('/index.html');
+                    });
+                })
+        );
+        return;
+    }
+
+    // API calls: network-first com fallback em cache quando offline
     if (url.pathname.startsWith('/api/') || url.pathname.includes('.json')) {
         event.respondWith(
             fetch(request)
@@ -93,13 +115,10 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
-    // For HTML and static assets, try cache first, then network
+    // Assets estáticos: cache-first com revalidação em background
     event.respondWith(
         caches.match(request).then((cached) => {
-            if (cached) {
-                return cached;
-            }
-            return fetch(request)
+            const networkFetch = fetch(request)
                 .then((response) => {
                     if (!response || response.status !== 200 || response.type === 'error') {
                         return response;
@@ -110,12 +129,9 @@ self.addEventListener('fetch', (event) => {
                     });
                     return response;
                 })
-                .catch(() => {
-                    // Offline fallback
-                    if (request.destination === 'document') {
-                        return caches.match('/index.html');
-                    }
-                });
+                .catch(() => cached);
+
+            return cached || networkFetch;
         })
     );
 });
