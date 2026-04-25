@@ -248,7 +248,7 @@
                     }
                 }
             } catch (error) {
-                setMsg(error.message || 'Falha ao carregar pagamento.', 'err');
+                setMsg((error.message || 'Falha ao carregar pagamento.') + ' Confira se o link foi copiado completo.', 'err');
             }
         }
 

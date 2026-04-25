@@ -253,13 +253,23 @@ async function markPaymentAsPaid(id, igrejaId) {
 }
 
 async function getPaymentLinkByReference(referenceCode) {
+    const safeRef = String(referenceCode || '').trim();
+    const decodedRef = (() => {
+        try {
+            return decodeURIComponent(safeRef);
+        } catch (_error) {
+            return safeRef;
+        }
+    })();
+
     const [rows] = await pool.query(
         `SELECT id, igreja_id, descricao, valor, provider, payment_method, status,
                 reference_code, url, status_detail, paid_at, created_at
          FROM payment_links
-         WHERE reference_code = ?
+         WHERE reference_code = ? OR reference_code = ? OR reference_code LIKE ?
+         ORDER BY created_at DESC
          LIMIT 1`,
-        [referenceCode]
+        [safeRef, decodedRef, `${decodedRef}%`]
     );
 
     return rows[0] || null;

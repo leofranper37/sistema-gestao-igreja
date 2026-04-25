@@ -56,6 +56,38 @@ function formatDateToYmd(date = new Date()) {
     return `${year}-${month}-${day}`;
 }
 
+function extractPaymentReference(input) {
+    const raw = normalizeText(input);
+    if (!raw) {
+        return '';
+    }
+
+    // Se vier URL completa, tenta extrair ?ref=
+    try {
+        const parsed = new URL(raw);
+        const fromQuery = normalizeText(parsed.searchParams.get('ref'));
+        if (fromQuery) {
+            return fromQuery;
+        }
+    } catch (_error) {}
+
+    // Se vier texto com ref=...
+    const match = raw.match(/[?&]ref=([^&]+)/i);
+    if (match && match[1]) {
+        try {
+            return decodeURIComponent(match[1]);
+        } catch (_error) {
+            return match[1];
+        }
+    }
+
+    try {
+        return decodeURIComponent(raw);
+    } catch (_error) {
+        return raw;
+    }
+}
+
 async function ensureDefaultTemplates(igrejaId) {
     const current = await engagementModel.listWhatsAppTemplates(igrejaId);
     if (current.length) {
@@ -266,7 +298,8 @@ async function markPaymentAsPaid(igrejaId, id) {
 }
 
 async function getPaymentLinkPublic(referenceCode) {
-    const item = await engagementModel.getPaymentLinkByReference(normalizeText(referenceCode));
+    const safeRef = extractPaymentReference(referenceCode);
+    const item = await engagementModel.getPaymentLinkByReference(safeRef);
     if (!item) {
         return null;
     }
@@ -296,7 +329,8 @@ async function getPaymentLinkPublic(referenceCode) {
 }
 
 async function reportPaymentAsPaidByClient(referenceCode, payload) {
-    const item = await engagementModel.getPaymentLinkByReference(normalizeText(referenceCode));
+    const safeRef = extractPaymentReference(referenceCode);
+    const item = await engagementModel.getPaymentLinkByReference(safeRef);
     if (!item) {
         return null;
     }
