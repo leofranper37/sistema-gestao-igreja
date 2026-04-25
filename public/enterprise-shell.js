@@ -325,7 +325,7 @@
                         ['dashboard.html', 'fa-regular fa-eye', 'Visão Geral', 'dashboard'],
                         ['app_membro.html', 'fa-solid fa-mobile-screen-button', 'App do Membro'],
                         ['novidades.html', 'fa-solid fa-star', 'Novidades'],
-                        ['planos.html', 'fa-solid fa-credit-card', 'Meu Plano'],
+                        ['meu_plano.html', 'fa-solid fa-credit-card', 'Meu Plano'],
                         ['configuracoes.html', 'fa-solid fa-gear', 'Configurações', 'configuracoes'],
                         ['index.html', 'fa-solid fa-right-from-bracket', 'Sair']
                     ], activePath, true, user)}

@@ -1,554 +1,1365 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Planos - LDFP</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LDFP - Meu Plano</title>
+    <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f3f4f6; color: #222; }
-        
-        /* HEADER SIMPLES */
-        header { padding: 20px 50px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1e293b; }
-        .logo img { height: 50px; background: rgba(255,255,255,0.9); padding: 5px 10px; border-radius: 5px; }
-        .btn-voltar { color: #94a3b8; text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 8px; }
-        .btn-voltar:hover { color: white; }
-
-        /* CONTEUDO */
-        .container { max-width: 1100px; margin: 0 auto; padding: 50px 20px; text-align: center; }
-        
-        h1 { font-size: 36px; margin-bottom: 10px; color: #fff; }
-        h1 span { color: #f59e0b; }
-        p.subtitle { color: #94a3b8; font-size: 18px; margin-bottom: 50px; }
-
-        /* GRID DE PRECOS */
-        .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-        
-        .price-card {
-            background: #1e293b; border-radius: 15px; padding: 30px; text-align: left;
-            border: 1px solid #334155; transition: 0.3s; position: relative; overflow: hidden;
-            display: flex; flex-direction: column;
-        }
-        .price-card:hover { transform: translateY(-10px); border-color: #f59e0b; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
-
-        /* DESTAQUE DO MEIO */
-        .price-card.featured { background: linear-gradient(145deg, #1e293b, #0f172a); border: 2px solid #f59e0b; transform: scale(1.05); z-index: 2; }
-        .badge {
-            position: absolute; top: 0; right: 0; background: #f59e0b; color: #000;
-            font-size: 11px; font-weight: bold; padding: 5px 10px; border-bottom-left-radius: 10px;
+        :root {
+            --mp-bg: radial-gradient(circle at 5% 0%, #1f3559 0%, #0d1728 38%, #090f1a 100%);
+            --mp-panel: #111b2b;
+            --mp-panel-soft: #18253b;
+            --mp-border: rgba(148, 163, 184, 0.24);
+            --mp-text: #e2e8f0;
+            --mp-muted: #94a3b8;
+            --mp-accent: #22d3ee;
+            --mp-accent-2: #10b981;
+            --mp-warning: #f59e0b;
+            --mp-danger: #ef4444;
         }
 
-        .plan-name { font-size: 20px; font-weight: 700; color: #fff; margin-bottom: 5px; }
-        .plan-price { font-size: 32px; font-weight: 800; color: #f59e0b; margin-bottom: 20px; }
-        .plan-price span { font-size: 14px; color: #94a3b8; font-weight: normal; }
-
-        .features { list-style: none; padding: 0; margin-bottom: 30px; flex: 1; }
-        .features li { margin-bottom: 12px; color: #cbd5e1; font-size: 14px; display: flex; align-items: center; gap: 10px; }
-        .features li i { color: #f59e0b; }
-        .features li i.off { color: #475569; }
-
-        /* BOTAO */
-        .btn-select {
-            background: transparent; border: 1px solid #f59e0b; color: #f59e0b;
-            width: 100%; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer;
-            transition: 0.2s; text-align: center; text-decoration: none; display: block;
+        body {
+            font-family: 'Sora', sans-serif;
+            background: #0a1220;
+            color: var(--mp-text);
         }
-        .btn-select:hover { background: #f59e0b; color: #000; }
-        
-        .btn-select.filled { background: #f59e0b; color: #000; }
-        .btn-select.filled:hover { background: #d97706; color: #fff; }
 
-        /* Modal de planos no mesmo padrao visual da tela publica */
-        .mpm-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.82);
-            z-index: 2000;
+        .mp-page {
+            min-height: calc(100vh - 72px);
+            padding: 24px;
+            background: linear-gradient(180deg, #0d1728 0%, #0a1220 40%, #09101d 100%);
+        }
+
+        .mp-grid {
+            display: grid;
+            grid-template-columns: 2.1fr 1fr;
+            gap: 20px;
+        }
+
+        .mp-hero {
+            background: var(--mp-bg);
+            border: 1px solid var(--mp-border);
+            border-radius: 18px;
+            padding: 26px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mp-hero::after {
+            content: '';
+            position: absolute;
+            width: 280px;
+            height: 280px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(34, 211, 238, 0.16) 0%, rgba(34, 211, 238, 0) 70%);
+            right: -80px;
+            top: -110px;
+            pointer-events: none;
+        }
+
+        .mp-kicker {
+            display: inline-flex;
             align-items: center;
-            justify-content: center;
-            padding: 22px;
+            gap: 8px;
+            color: #082f49;
+            background: linear-gradient(135deg, #67e8f9, #22d3ee);
+            border-radius: 999px;
+            padding: 6px 12px;
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
-        .mpm-dialog {
-            width: min(1260px, 98vw);
-            max-height: 92vh;
-            overflow: auto;
+
+        .mp-title {
+            margin: 16px 0 6px;
+            font-size: clamp(24px, 3vw, 34px);
+            font-weight: 800;
+            color: #f8fafc;
+        }
+
+        .mp-desc {
+            margin: 0;
+            color: #cbd5e1;
+            font-size: 14px;
+            line-height: 1.6;
+            max-width: 660px;
+        }
+
+        .mp-plan-strip {
+            margin-top: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 14px;
+            border-radius: 14px;
+            border: 1px solid rgba(34, 211, 238, 0.28);
+            background: rgba(14, 30, 56, 0.7);
+        }
+
+        .mp-plan-name {
+            font-size: 20px;
+            font-weight: 800;
+            color: #f8fafc;
+        }
+
+        .mp-plan-sub {
+            font-size: 12px;
+            color: #9fb3cb;
+            margin-top: 3px;
+        }
+
+        .mp-price {
+            font-size: 28px;
+            font-weight: 800;
+            color: #facc15;
+        }
+
+        .mp-price small {
+            font-size: 13px;
+            font-weight: 600;
+            color: #94a3b8;
+        }
+
+        .mp-actions {
+            margin-top: 16px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .btn-primary,
+        .btn-outline,
+        .btn-danger {
+            border: none;
+            border-radius: 10px;
+            padding: 11px 16px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform .15s ease, filter .2s ease;
+        }
+
+        .btn-primary:hover,
+        .btn-outline:hover,
+        .btn-danger:hover { transform: translateY(-1px); }
+
+        .btn-primary {
+            color: #072227;
+            background: linear-gradient(135deg, #67e8f9, #22d3ee);
+        }
+
+        .btn-outline {
+            color: #67e8f9;
+            background: rgba(103, 232, 249, 0.08);
+            border: 1px solid rgba(103, 232, 249, 0.3);
+        }
+
+        .btn-danger {
+            color: #fee2e2;
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.35);
+        }
+
+        .mp-panel {
+            background: var(--mp-panel);
+            border: 1px solid var(--mp-border);
             border-radius: 16px;
-            border: 1px solid rgba(255,255,255,0.08);
-            background: #07090f;
-            color: #f1f5f9;
-            padding: 20px;
-            box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55);
-            font-family: 'Inter', 'Segoe UI', sans-serif;
+            padding: 18px;
         }
-        .mpm-top {
+
+        .mp-panel h3 {
+            margin: 0 0 14px;
+            font-size: 14px;
+            color: #cbd5e1;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+        }
+
+        .mp-info-list {
+            display: grid;
+            gap: 10px;
+        }
+
+        .mp-info-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 18px;
+            font-size: 13px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            background: var(--mp-panel-soft);
+            border: 1px solid rgba(148, 163, 184, 0.18);
         }
-        .mpm-title {
+
+        .mp-info-item strong { color: #f8fafc; }
+
+        .mp-cards {
+            margin-top: 20px;
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 14px;
+        }
+
+        .mp-stat {
+            background: var(--mp-panel);
+            border: 1px solid var(--mp-border);
+            border-radius: 14px;
+            padding: 14px;
+            min-height: 115px;
+        }
+
+        .mp-stat i {
+            color: #22d3ee;
+            font-size: 18px;
+        }
+
+        .mp-stat .value {
+            margin-top: 12px;
+            font-size: 25px;
+            font-weight: 800;
+            color: #f8fafc;
+        }
+
+        .mp-stat .label {
+            margin-top: 4px;
+            color: var(--mp-muted);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: .45px;
+        }
+
+        .mp-features {
+            margin-top: 20px;
+            background: var(--mp-panel);
+            border: 1px solid var(--mp-border);
+            border-radius: 14px;
+            padding: 16px;
+        }
+
+        .mp-features h4 {
+            margin: 0 0 12px;
+            font-size: 14px;
+            color: #cbd5e1;
+        }
+
+        .mp-feature-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 8px;
+        }
+
+        .mp-feature-list li {
+            padding: 10px 12px;
+            border-radius: 10px;
+            background: var(--mp-panel-soft);
+            border: 1px solid rgba(148, 163, 184, 0.16);
+            font-size: 13px;
+            color: #dbe7f5;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .mp-feature-list i { color: var(--mp-accent-2); }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 11px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .4px;
+        }
+
+        .status-pill.ativa {
+            color: #065f46;
+            background: rgba(16, 185, 129, 0.2);
+            border: 1px solid rgba(16, 185, 129, 0.45);
+        }
+
+        .status-pill.inativa {
+            color: #ffedd5;
+            background: rgba(245, 158, 11, 0.2);
+            border: 1px solid rgba(245, 158, 11, 0.45);
+        }
+
+        .status-pill.bloqueada {
+            color: #fee2e2;
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.45);
+        }
+
+        .mp-modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 1200;
+            background: rgba(2, 6, 23, 0.78);
+            backdrop-filter: blur(4px);
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+        }
+
+        .mp-modal-overlay.open { display: flex; }
+
+        .mp-modal {
+            width: min(1180px, 100%);
+            max-height: 92vh;
+            overflow: auto;
+            border-radius: 18px;
+            border: 1px solid rgba(148, 163, 184, 0.28);
+            background: linear-gradient(145deg, #0f172a, #0b1222);
+            box-shadow: 0 30px 80px rgba(2, 6, 23, 0.65);
+            padding: 20px;
+        }
+
+        .mp-modal.compact { width: min(760px, 100%); }
+
+        .mp-modal-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .mp-modal-title {
             margin: 0;
             font-size: 24px;
             font-weight: 800;
-            letter-spacing: -0.4px;
+            color: #f8fafc;
         }
-        .mpm-close {
-            background: transparent;
-            border: 1px solid rgba(255,255,255,0.18);
-            color: #cbd5e1;
+
+        .mp-close {
             width: 36px;
             height: 36px;
             border-radius: 10px;
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            background: rgba(15, 23, 42, 0.7);
+            color: #cbd5e1;
             cursor: pointer;
-            font-size: 18px;
+            font-size: 16px;
         }
-        .mpm-toggle {
+
+        .billing-toggle {
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            background: #111827;
-            border: 1px solid rgba(255,255,255,0.08);
+            background: #0d1a32;
+            border: 1px solid rgba(148, 163, 184, 0.25);
             border-radius: 999px;
-            padding: 6px;
+            padding: 5px;
             position: relative;
-            margin-bottom: 18px;
+            margin-bottom: 16px;
         }
-        .mpm-toggle button {
-            background: transparent;
-            border: none;
-            color: #94a3b8;
-            font-weight: 700;
-            font-size: 13px;
-            padding: 8px 18px;
-            border-radius: 999px;
+
+        .billing-toggle button {
             position: relative;
-            z-index: 1;
+            z-index: 2;
+            border: none;
+            background: transparent;
+            color: #94a3b8;
+            font-size: 12px;
+            font-weight: 700;
+            border-radius: 999px;
+            padding: 8px 16px;
             cursor: pointer;
         }
-        .mpm-toggle button.active { color: #111827; }
-        .mpm-slider {
+
+        .billing-toggle button.active {
+            color: #082f49;
+        }
+
+        .billing-slider {
             position: absolute;
-            top: 6px;
-            left: 6px;
-            height: calc(100% - 12px);
+            top: 5px;
+            left: 5px;
+            height: calc(100% - 10px);
             border-radius: 999px;
-            background: linear-gradient(135deg, #fbbf24, #d97706);
-            box-shadow: 0 2px 10px rgba(245, 158, 11, 0.45);
-            transition: left .25s ease, width .25s ease;
+            background: linear-gradient(135deg, #67e8f9, #22d3ee);
+            transition: left .22s ease, width .22s ease;
+            z-index: 1;
         }
-        .mpm-discount {
-            background: rgba(34,197,94,0.2);
-            border: 1px solid rgba(34,197,94,0.35);
-            color: #22c55e;
-            font-size: 10px;
-            font-weight: 800;
-            border-radius: 999px;
-            padding: 2px 8px;
-            margin-left: 6px;
-        }
-        .mpm-grid {
+
+        .plans-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 16px;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 14px;
         }
-        .mpm-card {
-            background: #111827;
-            border: 1px solid rgba(255,255,255,0.07);
-            border-radius: 16px;
-            padding: 20px 16px;
+
+        .plan-card {
+            border-radius: 14px;
+            border: 1px solid rgba(148, 163, 184, 0.22);
+            background: linear-gradient(180deg, #142039 0%, #101a2d 100%);
+            padding: 16px;
             display: flex;
             flex-direction: column;
-            position: relative;
-            min-height: 550px;
+            min-height: 450px;
         }
-        .mpm-card.featured {
-            border: 2px solid #fbbf24;
-            background: linear-gradient(160deg, #1a2235 0%, #111827 100%);
+
+        .plan-card.featured {
+            border-color: rgba(34, 211, 238, 0.45);
+            box-shadow: inset 0 0 0 1px rgba(34, 211, 238, 0.28);
         }
-        .mpm-badge {
-            position: absolute;
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            background: linear-gradient(90deg, #fbbf24, #d97706);
-            color: #111;
-            font-size: 10px;
+
+        .plan-name {
+            font-size: 24px;
             font-weight: 800;
-            letter-spacing: .7px;
-            padding: 4px 12px;
-            border-bottom-left-radius: 10px;
-            border-bottom-right-radius: 10px;
+            margin: 8px 0 4px;
+            color: #f8fafc;
         }
-        .mpm-icon { font-size: 24px; margin: 8px 0 10px; }
-        .mpm-name-tag {
-            display: inline-block;
-            align-self: flex-start;
-            font-size: 10px;
+
+        .plan-sub {
+            color: #94a3b8;
+            font-size: 12px;
+            margin-bottom: 12px;
+        }
+
+        .plan-price {
+            border-top: 1px solid rgba(148, 163, 184, 0.16);
+            border-bottom: 1px solid rgba(148, 163, 184, 0.16);
+            padding: 10px 0;
+            margin-bottom: 12px;
+        }
+
+        .plan-price .amount {
+            font-size: 36px;
             font-weight: 800;
-            letter-spacing: .9px;
-            text-transform: uppercase;
-            color: #fbbf24;
-            background: rgba(245,158,11,.12);
-            border: 1px solid rgba(245,158,11,.24);
-            border-radius: 999px;
-            padding: 3px 8px;
-            margin-bottom: 8px;
+            color: #facc15;
+            line-height: 1;
         }
-        .mpm-name { font-size: 26px; font-weight: 800; margin: 0 0 4px; }
-        .mpm-subtitle { color: #94a3b8; font-size: 12px; margin-bottom: 12px; }
-        .mpm-verse {
-            border-left: 2px solid rgba(245,158,11,0.35);
-            color: rgba(245,158,11,.78);
-            font-style: italic;
-            font-size: 11px;
-            line-height: 1.45;
-            padding-left: 9px;
-            margin-bottom: 14px;
-        }
-        .mpm-price {
-            margin-bottom: 14px;
-            border-bottom: 1px solid rgba(255,255,255,0.08);
-            padding-bottom: 10px;
-        }
-        .mpm-currency { color: #fbbf24; font-weight: 800; font-size: 16px; vertical-align: top; }
-        .mpm-amount { font-size: 42px; font-weight: 900; line-height: 1; letter-spacing: -1.2px; }
-        .mpm-period { display: block; font-size: 12px; color: #94a3b8; margin-top: 3px; }
-        .mpm-annual-note { display: none; font-size: 11px; color: #22c55e; margin-top: 3px; font-weight: 700; }
-        .mpm-features {
+
+        .plan-price small { color: #94a3b8; }
+
+        .plan-feats {
             list-style: none;
             margin: 0 0 14px;
             padding: 0;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
+            display: grid;
+            gap: 7px;
             flex: 1;
         }
-        .mpm-features li {
+
+        .plan-feats li {
             display: flex;
             align-items: center;
             gap: 8px;
-            font-size: 13px;
-            color: #e2e8f0;
+            font-size: 12px;
+            color: #dbe6f5;
         }
-        .mpm-features li.disabled {
-            color: #64748b;
+
+        .plan-feats li.off {
+            color: #7890ad;
             text-decoration: line-through;
-            opacity: .7;
+            opacity: .8;
         }
-        .mpm-yes, .mpm-no {
+
+        .plan-feats .yes,
+        .plan-feats .no {
             width: 18px;
             height: 18px;
-            border-radius: 50%;
+            border-radius: 999px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            font-size: 9px;
+            font-size: 8px;
             flex-shrink: 0;
         }
-        .mpm-yes { background: rgba(34,197,94,.15); color: #22c55e; }
-        .mpm-no { background: rgba(239,68,68,.12); color: #ef4444; }
-        .mpm-btn {
+
+        .plan-feats .yes {
+            color: #065f46;
+            background: rgba(16, 185, 129, 0.3);
+        }
+
+        .plan-feats .no {
+            color: #7f1d1d;
+            background: rgba(239, 68, 68, 0.25);
+        }
+
+        .btn-plan {
             width: 100%;
             border: none;
             border-radius: 10px;
-            padding: 12px 14px;
-            font-size: 14px;
+            padding: 11px;
+            font-size: 13px;
             font-weight: 800;
+            color: #072227;
+            background: linear-gradient(135deg, #67e8f9, #22d3ee);
             cursor: pointer;
-            background: linear-gradient(135deg, #fbbf24, #d97706);
-            color: #111;
         }
-        .mpm-btn-outline {
-            background: rgba(245,158,11,0.08);
-            border: 1px solid rgba(245,158,11,0.3);
-            color: #fbbf24;
-        }
-        .mpm-note {
-            margin-top: 8px;
-            text-align: center;
-            font-size: 10px;
-            color: #94a3b8;
-        }
-        @media (max-width: 1180px) { .mpm-grid { grid-template-columns: repeat(2, 1fr); } }
-        @media (max-width: 700px) { .mpm-grid { grid-template-columns: 1fr; } .mpm-dialog { padding: 16px; } }
 
+        .btn-plan.ghost {
+            color: #67e8f9;
+            background: rgba(103, 232, 249, 0.1);
+            border: 1px solid rgba(103, 232, 249, 0.3);
+        }
+
+        .summary-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 16px;
+        }
+
+        .summary-table th,
+        .summary-table td {
+            border: 1px solid rgba(148, 163, 184, 0.22);
+            padding: 10px;
+            font-size: 13px;
+            text-align: left;
+        }
+
+        .summary-table th {
+            background: #122034;
+            color: #e2e8f0;
+        }
+
+        .summary-table td.current {
+            color: #94a3b8;
+            background: rgba(15, 23, 42, 0.45);
+        }
+
+        .summary-table td.next {
+            color: #67e8f9;
+            font-weight: 700;
+            background: rgba(8, 47, 73, 0.25);
+        }
+
+        .field {
+            margin-bottom: 12px;
+        }
+
+        .field label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 12px;
+            color: #cbd5e1;
+        }
+
+        .field input,
+        .field select {
+            width: 100%;
+            border-radius: 10px;
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            background: #0b1527;
+            color: #e2e8f0;
+            padding: 10px 12px;
+            font-size: 13px;
+        }
+
+        .payment-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+
+        .payment-tab {
+            flex: 1;
+            border: 1px solid rgba(148, 163, 184, 0.32);
+            background: #111d31;
+            color: #cbd5e1;
+            border-radius: 10px;
+            padding: 11px;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .payment-tab.active {
+            border-color: rgba(103, 232, 249, 0.5);
+            color: #67e8f9;
+            background: rgba(8, 47, 73, 0.35);
+        }
+
+        .payment-pane { display: none; }
+        .payment-pane.active { display: block; }
+
+        .pix-box {
+            background: #101a2d;
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            border-radius: 12px;
+            padding: 14px;
+        }
+
+        .pix-qr-wrap {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 220px;
+            border-radius: 12px;
+            background: rgba(2, 6, 23, 0.5);
+            border: 1px dashed rgba(148, 163, 184, 0.35);
+            margin-bottom: 12px;
+        }
+
+        .pix-qr-wrap img {
+            width: 200px;
+            height: 200px;
+            border-radius: 12px;
+            border: 3px solid #22d3ee;
+        }
+
+        .pix-code-wrap {
+            display: none;
+            gap: 8px;
+            align-items: center;
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            border-radius: 10px;
+            padding: 10px;
+            background: #0b1527;
+            margin-bottom: 12px;
+        }
+
+        .pix-code {
+            flex: 1;
+            font-size: 11px;
+            word-break: break-all;
+            color: #cbd5e1;
+            font-family: monospace;
+        }
+
+        .btn-copy {
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            color: #082f49;
+            background: linear-gradient(135deg, #67e8f9, #22d3ee);
+        }
+
+        .pix-status {
+            font-size: 13px;
+            color: #94a3b8;
+            text-align: center;
+            margin-top: 8px;
+        }
+
+        .pix-status.paid {
+            color: #10b981;
+            font-weight: 700;
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .card-grid .field.full { grid-column: 1 / -1; }
+
+        .alert-box {
+            margin-top: 10px;
+            border: 1px solid rgba(245, 158, 11, 0.45);
+            background: rgba(245, 158, 11, 0.14);
+            color: #fde68a;
+            border-radius: 10px;
+            padding: 11px;
+            font-size: 12px;
+        }
+
+        .error-box {
+            margin-top: 12px;
+            border: 1px solid rgba(239, 68, 68, 0.45);
+            background: rgba(127, 29, 29, 0.35);
+            color: #fecaca;
+            border-radius: 10px;
+            padding: 10px;
+            font-size: 12px;
+            display: none;
+        }
+
+        .error-box.visible { display: block; }
+
+        .loading-text {
+            color: #94a3b8;
+            font-size: 13px;
+            text-align: center;
+            padding: 20px 0;
+        }
+
+        @media (max-width: 1180px) {
+            .mp-grid { grid-template-columns: 1fr; }
+            .plans-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .mp-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+
+        @media (max-width: 760px) {
+            .mp-page { padding: 16px; }
+            .plans-grid { grid-template-columns: 1fr; }
+            .mp-feature-list { grid-template-columns: 1fr; }
+            .mp-cards { grid-template-columns: 1fr; }
+            .card-grid { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
-<body class="theme-petroleo">
+<body data-shell-title="Meu Plano" data-shell-breadcrumb="LDFP / Área do Cliente" data-shell-chip="Assinaturas" data-shell-active="meu_plano.html">
+    <main class="enterprise-main">
+        <section class="mp-page">
+            <div class="mp-grid">
+                <div>
+                    <div class="mp-hero">
+                        <span class="mp-kicker"><i class="fa-solid fa-sparkles"></i> Área de assinatura</span>
+                        <h2 class="mp-title">Escolha o melhor plano para sua igreja</h2>
+                        <p class="mp-desc" id="heroDesc">Carregando status da assinatura...</p>
 
-
-    <aside style="position:fixed;left:0;top:0;height:100vh;width:260px;background:#1e293b;padding:30px 0 0 0;z-index:10;display:flex;flex-direction:column;align-items:center;gap:20px;box-shadow:2px 0 16px #0002;">
-        <div class="logo" style="margin-bottom:30px;">
-            <img src="logo.png" alt="LDFP" style="height:50px;background:rgba(255,255,255,0.9);padding:5px 10px;border-radius:5px;">
-        </div>
-        <nav style="width:100%;">
-            <a href="dashboard.html" style="display:block;padding:12px 30px;color:#fff;text-decoration:none;font-weight:600;">Visão Geral</a>
-            <a href="novidades.html" style="display:block;padding:12px 30px;color:#fff;text-decoration:none;font-weight:600;">Novidades</a>
-            <a href="meu_plano.html" style="display:block;padding:12px 30px;color:#f59e0b;text-decoration:none;font-weight:700;background:#0f172a;">Meu Plano</a>
-            <a href="configuracoes.html" style="display:block;padding:12px 30px;color:#fff;text-decoration:none;font-weight:600;">Configurações</a>
-            <a href="index.html" style="display:block;padding:12px 30px;color:#fff;text-decoration:none;font-weight:600;">Sair</a>
-        </nav>
-        <!-- Banner compacto de upgrade de plano -->
-        <div style="background:#fbbf24;color:#111;padding:10px 8px 8px 8px;border-radius:8px;margin:18px 8px 0 8px;box-shadow:0 2px 8px #0001;width:90%;font-size:12px;line-height:1.3;display:flex;flex-direction:column;align-items:flex-start;gap:4px;">
-            <div style="font-size:13px;font-weight:700;margin-bottom:2px;">Plano limitado</div>
-            <div style="font-size:12px;">Atualize e desbloqueie todos os recursos.</div>
-            <a href="planos.html" style="background:#0f172a;color:#fff;padding:5px 12px;border-radius:6px;font-weight:600;text-decoration:none;font-size:12px;margin-top:4px;align-self:center;">Ver Planos</a>
-        </div>
-    </aside>
-
-    <div style="margin-left:260px;">
-        <header>
-            <div class="logo">
-                <img src="logo.png" alt="LDFP">
-            </div>
-            <a href="index.html" class="btn-voltar"><i class="fa-solid fa-arrow-left"></i> Voltar</a>
-        </header>
-
-    <div class="container">
-        <div style="max-width:800px;margin:0 auto;">
-            <div style="background:linear-gradient(90deg,#fbbf24 0%,#f59e0b 100%);color:#222;padding:32px 24px 24px 24px;border-radius:18px 18px 0 0;box-shadow:0 4px 24px #0001;display:flex;align-items:center;justify-content:space-between;">
-                <div style="font-size:26px;font-weight:700;">Gratuito com Anúncios</div>
-                <div style="font-size:28px;font-weight:900;">R$ 0,00 <span style='font-size:16px;font-weight:400;'>/mês</span></div>
-                <button id="btnAlterarPlano" style="background:#fff;color:#f59e0b;font-weight:700;padding:10px 22px;border-radius:8px;border:1px solid #fbbf24;box-shadow:0 2px 8px #0002;cursor:pointer;">Alterar Plano</button>
-            </div>
-            <div style="background:#fff;padding:32px 24px 40px 24px;border-radius:0 0 18px 18px;box-shadow:0 4px 24px #0001;">
-                <div style="font-size:18px;font-weight:600;color:#222;margin-bottom:24px;text-align:left;">&bull; Detalhes do seu plano</div>
-                <div style="display:flex;gap:24px;justify-content:center;flex-wrap:wrap;">
-                    <div style="background:#fff;border-radius:12px;padding:24px 18px;min-width:170px;text-align:center;box-shadow:0 2px 8px #0001;">
-                        <div style="font-size:36px;margin-bottom:8px;"><i class='fa-solid fa-database'></i></div>
-                        <div style="font-size:28px;font-weight:700;color:#222;">40</div>
-                        <div style="font-size:14px;color:#666;">TOTAL DE CADASTROS</div>
-                    </div>
-                    <div style="background:#fff;border-radius:12px;padding:24px 18px;min-width:170px;text-align:center;box-shadow:0 2px 8px #0001;">
-                        <div style="font-size:36px;margin-bottom:8px;"><i class='fa-solid fa-house'></i></div>
-                        <div style="font-size:28px;font-weight:700;color:#222;">1</div>
-                        <div style="font-size:14px;color:#666;">CONGREGAÇÕES</div>
-                    </div>
-                    <div style="background:#fff;border-radius:12px;padding:24px 18px;min-width:170px;text-align:center;box-shadow:0 2px 8px #0001;">
-                        <div style="font-size:36px;margin-bottom:8px;"><i class='fa-solid fa-mobile-screen-button'></i></div>
-                        <div style="font-size:28px;font-weight:700;color:#e11d48;"><i class='fa-solid fa-xmark'></i></div>
-                        <div style="font-size:14px;color:#666;">APP DO MEMBRO</div>
-                    </div>
-                    <div style="background:#fff;border-radius:12px;padding:24px 18px;min-width:170px;text-align:center;box-shadow:0 2px 8px #0001;">
-                        <div style="font-size:36px;margin-bottom:8px;"><i class='fa-solid fa-life-ring'></i></div>
-                        <div style="font-size:20px;color:#e11d48;margin-bottom:4px;">
-                            <span style='display:block;'><i class='fa-solid fa-xmark'></i> E-mail</span>
-                            <span style='display:block;'><i class='fa-solid fa-xmark'></i> WhatsApp</span>
-                            <span style='display:block;'><i class='fa-solid fa-xmark'></i> Telefone</span>
-                        </div>
-                        <div style="font-size:14px;color:#666;">CANAIS DE SUPORTE</div>
-                    </div>
-                </div>
-                <div style="margin-top:32px;text-align:center;">
-                            <div id="modalAlterarPlano" class="mpm-overlay">
-                                <div class="mpm-dialog">
-                                    <div class="mpm-top">
-                                        <h2 class="mpm-title">Escolha seu plano</h2>
-                                        <button class="mpm-close" id="btnFecharModal" aria-label="Fechar">&times;</button>
-                                    </div>
-
-                                    <div class="mpm-toggle" id="billingToggleModal">
-                                        <div class="mpm-slider" id="toggleSliderModal"></div>
-                                        <button class="active" id="btnMensalModal">Mensal</button>
-                                        <button id="btnAnualModal">Anual <span class="mpm-discount">-17%</span></button>
-                                    </div>
-
-                                    <div id="planosGrid" class="mpm-grid"></div>
-                                </div>
+                        <div class="mp-plan-strip">
+                            <div>
+                                <div class="mp-plan-name" id="currentPlanName">Plano Gratuito</div>
+                                <div class="mp-plan-sub" id="currentPlanSub">Sem assinatura ativa</div>
                             </div>
-                            <script>
-                                const planosCatalogo = {
-                                    mensal: [
-                                        {
-                                            nome: 'Hebrom',
-                                            tag: 'Basico',
-                                            icon: '⛰️',
-                                            subtitle: 'Igrejas em formacao',
-                                            verse: '"Ali Abraao construiu um altar ao Senhor..." — Gn 13:18',
-                                            preco: 50,
-                                            period: 'por mes · cobrado mensalmente',
-                                            anualNote: 'equivale a R$ 42/mes · cobrado R$ 500/ano',
-                                            featured: false,
-                                            cta: 'Assinar Hebrom',
-                                            ctaType: 'outline',
-                                            trial: '✦ 7 dias de teste gratuito',
-                                            features: [
-                                                { text: 'App Web Instalavel (PWA)', yes: true },
-                                                { text: 'App do Membro', yes: false },
-                                                { text: 'Ate 150 cadastros', yes: true },
-                                                { text: '1 congregacao', yes: true },
-                                                { text: 'EBD Dominical', yes: true },
-                                                { text: 'Credencial de Membro', yes: true },
-                                                { text: 'Grupos / Celulas', yes: true },
-                                                { text: 'Financeiro completo', yes: true },
-                                                { text: 'Relatorios completos', yes: true },
-                                                { text: 'Suporte via e-mail', yes: true }
-                                            ]
-                                        },
-                                        {
-                                            nome: 'Betel',
-                                            tag: 'Recomendado',
-                                            icon: '🏛️',
-                                            subtitle: 'Igrejas em crescimento',
-                                            verse: '"Esta e a casa de Deus e a porta do ceu." — Gn 28:17',
-                                            preco: 80,
-                                            period: 'por mes · cobrado mensalmente',
-                                            anualNote: 'equivale a R$ 67/mes · cobrado R$ 800/ano',
-                                            featured: true,
-                                            cta: 'Assinar Betel',
-                                            ctaType: 'primary',
-                                            trial: '✦ 7 dias de teste gratuito',
-                                            features: [
-                                                { text: 'App Web Instalavel (PWA)', yes: true },
-                                                { text: 'App do Membro', yes: true },
-                                                { text: 'Ate 300 cadastros', yes: true },
-                                                { text: 'Ate 5 congregacoes', yes: true },
-                                                { text: 'EBD Dominical', yes: true },
-                                                { text: 'Credencial de Membro', yes: true },
-                                                { text: 'Grupos / Celulas', yes: true },
-                                                { text: 'Financeiro completo', yes: true },
-                                                { text: 'Relatorios completos', yes: true },
-                                                { text: 'Suporte via WhatsApp', yes: true }
-                                            ]
-                                        },
-                                        {
-                                            nome: 'Siao',
-                                            tag: 'Premium',
-                                            icon: '👑',
-                                            subtitle: 'Igrejas consolidadas',
-                                            verse: '"O Senhor reina em Siao para sempre." — Sl 146:10',
-                                            preco: 100,
-                                            period: 'por mes · cobrado mensalmente',
-                                            anualNote: 'equivale a R$ 83/mes · cobrado R$ 1.000/ano',
-                                            featured: false,
-                                            cta: 'Assinar Siao',
-                                            ctaType: 'outline',
-                                            trial: '✦ 7 dias de teste gratuito',
-                                            features: [
-                                                { text: 'App Web Instalavel (PWA)', yes: true },
-                                                { text: 'App do Membro', yes: true },
-                                                { text: 'Ate 500 cadastros', yes: true },
-                                                { text: 'Ate 10 congregacoes', yes: true },
-                                                { text: 'EBD Dominical', yes: true },
-                                                { text: 'Credencial de Membro', yes: true },
-                                                { text: 'Grupos / Celulas', yes: true },
-                                                { text: 'Financeiro completo', yes: true },
-                                                { text: 'Relatorios completos', yes: true },
-                                                { text: 'Suporte via Telefone', yes: true },
-                                                { text: 'Consultoria Contabil', yes: true }
-                                            ]
-                                        }
-                                    ]
-                                };
+                            <div class="mp-price" id="currentPlanPrice">R$ 0,00 <small>/mês</small></div>
+                        </div>
 
-                                planosCatalogo.anual = planosCatalogo.mensal.map(function(plano) {
-                                    const clone = JSON.parse(JSON.stringify(plano));
-                                    if (clone.nome === 'Hebrom') clone.preco = 42;
-                                    if (clone.nome === 'Betel') clone.preco = 67;
-                                    if (clone.nome === 'Siao') clone.preco = 83;
-                                    clone.period = 'valor mensal equivalente (cobranca anual)';
-                                    return clone;
-                                });
+                        <div class="mp-actions">
+                            <button class="btn-primary" id="btnOpenPlans"><i class="fa-solid fa-arrow-up-right-dots"></i> Alterar Plano</button>
+                            <button class="btn-outline" id="btnOpenPublic"><i class="fa-solid fa-grid-2"></i> Ver Planos Públicos</button>
+                        </div>
+                    </div>
 
-                                let billingModal = 'mensal';
+                    <div class="mp-cards">
+                        <article class="mp-stat">
+                            <i class="fa-solid fa-users"></i>
+                            <div class="value" id="statCadastros">-</div>
+                            <div class="label">Limite de Cadastros</div>
+                        </article>
+                        <article class="mp-stat">
+                            <i class="fa-solid fa-church"></i>
+                            <div class="value" id="statCongregacoes">-</div>
+                            <div class="label">Limite de Congregações</div>
+                        </article>
+                        <article class="mp-stat">
+                            <i class="fa-solid fa-mobile-screen-button"></i>
+                            <div class="value" id="statAppMembro">-</div>
+                            <div class="label">App do Membro</div>
+                        </article>
+                        <article class="mp-stat">
+                            <i class="fa-solid fa-shield-heart"></i>
+                            <div class="value" id="statStatus">-</div>
+                            <div class="label">Status da Assinatura</div>
+                        </article>
+                    </div>
 
-                                function money(v) {
-                                    return Number(v).toLocaleString('pt-BR');
-                                }
-
-                                function renderPlanosModal(tipo) {
-                                    const grid = document.getElementById('planosGrid');
-                                    const cards = planosCatalogo[tipo].map(function(plano) {
-                                        const amountClass = 'mpm-amount';
-                                        const badge = plano.featured ? '<div class="mpm-badge">✦ Mais Popular</div>' : '';
-                                        const ctaClass = plano.ctaType === 'primary' ? 'mpm-btn' : 'mpm-btn mpm-btn-outline';
-                                        const annualNote = tipo === 'anual' && plano.anualNote
-                                            ? '<span class="mpm-annual-note" style="display:block;">' + plano.anualNote + '</span>'
-                                            : '';
-                                        const featureList = plano.features.map(function(item) {
-                                            const stateClass = item.yes ? 'mpm-yes' : 'mpm-no';
-                                            const icon = item.yes ? 'fa-check' : 'fa-xmark';
-                                            const lineClass = item.yes ? '' : ' class="disabled"';
-                                            return '<li' + lineClass + '><span class="' + stateClass + '"><i class="fa-solid ' + icon + '"></i></span>' + item.text + '</li>';
-                                        }).join('');
-                                        const trialNote = plano.trial ? '<div class="mpm-note">' + plano.trial + '</div>' : '';
-                                        return (
-                                            '<div class="mpm-card ' + (plano.featured ? 'featured' : '') + '">' +
-                                                badge +
-                                                '<div class="mpm-icon">' + plano.icon + '</div>' +
-                                                '<div class="mpm-name-tag">' + plano.tag + '</div>' +
-                                                '<h3 class="mpm-name">' + plano.nome + '</h3>' +
-                                                '<div class="mpm-subtitle">' + plano.subtitle + '</div>' +
-                                                '<div class="mpm-verse">' + plano.verse + '</div>' +
-                                                '<div class="mpm-price">' +
-                                                    '<span class="mpm-currency">R$</span> <span class="' + amountClass + '">' + money(plano.preco) + '</span>' +
-                                                    '<span class="mpm-period">' + plano.period + '</span>' +
-                                                    annualNote +
-                                                '</div>' +
-                                                '<ul class="mpm-features">' + featureList + '</ul>' +
-                                                '<button class="' + ctaClass + '" onclick="alert(\'Plano ' + plano.nome + ' selecionado\')">' + plano.cta + '</button>' +
-                                                trialNote +
-                                            '</div>'
-                                        );
-                                    }).join('');
-                                    grid.innerHTML = cards;
-                                }
-
-                                function setBillingModal(mode) {
-                                    billingModal = mode;
-                                    const btnMensal = document.getElementById('btnMensalModal');
-                                    const btnAnual = document.getElementById('btnAnualModal');
-                                    const slider = document.getElementById('toggleSliderModal');
-
-                                    if (mode === 'mensal') {
-                                        btnMensal.classList.add('active');
-                                        btnAnual.classList.remove('active');
-                                        slider.style.left = '6px';
-                                        slider.style.width = btnMensal.offsetWidth + 'px';
-                                    } else {
-                                        btnAnual.classList.add('active');
-                                        btnMensal.classList.remove('active');
-                                        slider.style.left = (btnMensal.offsetWidth + 6) + 'px';
-                                        slider.style.width = btnAnual.offsetWidth + 'px';
-                                    }
-                                    renderPlanosModal(mode);
-                                }
-
-                                function abrirModalPlanos() {
-                                    window.location.href = 'planos.html';
-                                }
-
-                                function fecharModalPlanos() {
-                                    document.getElementById('modalAlterarPlano').style.display = 'none';
-                                }
-
-                                document.getElementById('btnAlterarPlano').addEventListener('click', abrirModalPlanos);
-                                document.getElementById('btnFecharModal').addEventListener('click', fecharModalPlanos);
-                                document.getElementById('btnMensalModal').addEventListener('click', function() { setBillingModal('mensal'); });
-                                document.getElementById('btnAnualModal').addEventListener('click', function() { setBillingModal('anual'); });
-
-                                document.getElementById('modalAlterarPlano').addEventListener('click', function(ev) {
-                                    if (ev.target.id === 'modalAlterarPlano') fecharModalPlanos();
-                                });
-                            </script>
-                    <span style="background:#22d3ee;color:#222;padding:10px 28px;border-radius:8px;font-weight:700;font-size:18px;">Teste grátis de 1 mês</span>
+                    <div class="mp-features">
+                        <h4>Recursos do plano atual</h4>
+                        <ul class="mp-feature-list" id="currentFeatureList">
+                            <li><i class="fa-solid fa-spinner fa-spin"></i> Carregando recursos...</li>
+                        </ul>
+                    </div>
                 </div>
 
-                <div style="margin-top:26px;background:#0f172a;color:#e2e8f0;border-radius:12px;padding:18px 16px;text-align:left;display:flex;flex-wrap:wrap;gap:14px;justify-content:space-between;align-items:center;">
-                    <div style="font-size:14px;font-weight:700;color:#fbbf24;">Contato do responsável</div>
-                    <a href="mailto:leopereita31@gmail.com" style="color:#e2e8f0;text-decoration:none;font-size:14px;display:flex;align-items:center;gap:8px;">
-                        <i class="fa-solid fa-envelope" style="color:#fbbf24;"></i>
-                        leopereita31@gmail.com
-                    </a>
-                    <a href="https://instagram.com/leofranper" target="_blank" rel="noopener noreferrer" style="color:#e2e8f0;text-decoration:none;font-size:14px;display:flex;align-items:center;gap:8px;">
-                        <i class="fa-brands fa-instagram" style="color:#fbbf24;"></i>
-                        @leofranper
-                    </a>
-                </div>
+                <aside class="mp-panel">
+                    <h3>Situação da assinatura</h3>
+                    <div class="mp-info-list">
+                        <div class="mp-info-item"><span>Status</span><strong><span class="status-pill inativa" id="statusPill">Carregando</span></strong></div>
+                        <div class="mp-info-item"><span>Plano atual</span><strong id="sidePlano">Gratuito</strong></div>
+                        <div class="mp-info-item"><span>Próximo vencimento</span><strong id="sideVencimento">-</strong></div>
+                        <div class="mp-info-item"><span>Último pagamento</span><strong id="sideUltimo">-</strong></div>
+                        <div class="mp-info-item"><span>Periodicidade</span><strong id="sidePeriodicidade">Mensal</strong></div>
+                    </div>
+                    <div class="alert-box" id="upgradeNotice">
+                        Esta tela é para clientes sem assinatura ativa ou que desejam mudar para um plano com mais benefícios.
+                    </div>
+                </aside>
+            </div>
+        </section>
+    </main>
+
+    <div class="mp-modal-overlay" id="modalPlanos">
+        <div class="mp-modal">
+            <div class="mp-modal-head">
+                <h3 class="mp-modal-title">Escolha seu plano</h3>
+                <button class="mp-close" data-close="modalPlanos">✕</button>
+            </div>
+
+            <div class="billing-toggle" id="billingToggle">
+                <div class="billing-slider" id="billingSlider"></div>
+                <button class="active" id="btnMensal">Mensal</button>
+                <button id="btnAnual">Anual</button>
+            </div>
+
+            <div class="plans-grid" id="planGrid">
+                <div class="loading-text"><i class="fa-solid fa-spinner fa-spin"></i> Carregando planos...</div>
             </div>
         </div>
     </div>
 
+    <div class="mp-modal-overlay" id="modalResumo">
+        <div class="mp-modal compact">
+            <div class="mp-modal-head">
+                <h3 class="mp-modal-title">Resumo das Alterações</h3>
+                <button class="mp-close" data-close="modalResumo">✕</button>
+            </div>
+
+            <table class="summary-table">
+                <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th>Atual</th>
+                        <th>Novo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>Plano</td><td class="current" id="sumPlanoAtual">-</td><td class="next" id="sumPlanoNovo">-</td></tr>
+                    <tr><td>Cadastros</td><td class="current" id="sumCadAtual">-</td><td class="next" id="sumCadNovo">-</td></tr>
+                    <tr><td>Congregações</td><td class="current" id="sumCongAtual">-</td><td class="next" id="sumCongNovo">-</td></tr>
+                    <tr><td>Suporte</td><td class="current" id="sumSupAtual">-</td><td class="next" id="sumSupNovo">-</td></tr>
+                    <tr><td>Periodicidade</td><td class="current" id="sumCicloAtual">Mensal</td><td class="next" id="sumCicloNovo">Mensal</td></tr>
+                    <tr><td>Valor</td><td class="current" id="sumValorAtual">R$ 0,00/mês</td><td class="next" id="sumValorNovo">-</td></tr>
+                </tbody>
+            </table>
+
+            <div class="field">
+                <label for="metodoPagamento">Forma de pagamento</label>
+                <select id="metodoPagamento">
+                    <option value="pix">PIX</option>
+                    <option value="cartao">Cartão de Crédito</option>
+                </select>
+            </div>
+
+            <div class="alert-box">
+                Atenção: após confirmar esta alteração de plano, o pagamento será iniciado pela sua conta Mercado Pago.
+            </div>
+
+            <div class="mp-actions" style="justify-content:flex-end;margin-top:14px;">
+                <button class="btn-outline" id="btnVoltarPlanos"><i class="fa-solid fa-arrow-left"></i> Voltar</button>
+                <button class="btn-primary" id="btnConfirmarResumo"><i class="fa-solid fa-check"></i> Confirmar Alteração</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="mp-modal-overlay" id="modalPagamento">
+        <div class="mp-modal compact">
+            <div class="mp-modal-head">
+                <h3 class="mp-modal-title">Pagamento da Assinatura</h3>
+                <button class="mp-close" data-close="modalPagamento">✕</button>
+            </div>
+
+            <div class="mp-info-item" style="margin-bottom:14px;">
+                <span id="payPlano">Plano selecionado</span>
+                <strong id="payValor">-</strong>
+            </div>
+
+            <div class="payment-tabs">
+                <button class="payment-tab active" id="tabPix"><i class="fa-brands fa-pix"></i> PIX</button>
+                <button class="payment-tab" id="tabCartao"><i class="fa-solid fa-credit-card"></i> Cartão</button>
+            </div>
+
+            <div class="payment-pane active" id="panePix">
+                <div class="pix-box">
+                    <div class="pix-qr-wrap" id="pixQrWrap">
+                        <span id="pixPlaceholder">Clique em gerar PIX para criar o QR Code.</span>
+                        <img id="pixQrImg" alt="QR Code PIX" style="display:none;">
+                    </div>
+                    <div class="pix-code-wrap" id="pixCodeWrap">
+                        <div class="pix-code" id="pixCode"></div>
+                        <button class="btn-copy" id="btnCopyPix"><i class="fa-solid fa-copy"></i> Copiar</button>
+                    </div>
+                    <div class="pix-status" id="pixStatus">Aguardando geração do código PIX.</div>
+                </div>
+
+                <div class="mp-actions" style="margin-top:12px;">
+                    <button class="btn-primary" id="btnGerarPix"><i class="fa-brands fa-pix"></i> Gerar PIX</button>
+                </div>
+                <div class="error-box" id="pixError"></div>
+            </div>
+
+            <div class="payment-pane" id="paneCartao">
+                <div class="card-grid">
+                    <div class="field full">
+                        <label for="ccNome">Nome no cartão</label>
+                        <input id="ccNome" type="text" placeholder="Nome como está no cartão">
+                    </div>
+                    <div class="field full">
+                        <label for="ccNumero">Número do cartão</label>
+                        <input id="ccNumero" type="text" placeholder="0000 0000 0000 0000">
+                    </div>
+                    <div class="field">
+                        <label for="ccValidade">Validade</label>
+                        <input id="ccValidade" type="text" placeholder="MM/AA">
+                    </div>
+                    <div class="field">
+                        <label for="ccCvv">CVV</label>
+                        <input id="ccCvv" type="text" placeholder="000">
+                    </div>
+                    <div class="field">
+                        <label for="ccCpf">CPF do titular</label>
+                        <input id="ccCpf" type="text" placeholder="000.000.000-00">
+                    </div>
+                    <div class="field">
+                        <label for="ccEmail">E-mail do titular</label>
+                        <input id="ccEmail" type="email" placeholder="email@exemplo.com">
+                    </div>
+                </div>
+
+                <div class="alert-box">
+                    Os dados do cartão são exibidos nesta prévia para o cliente. O pagamento real será finalizado no ambiente seguro do Mercado Pago.
+                </div>
+
+                <div class="mp-actions" style="margin-top:12px;">
+                    <button class="btn-primary" id="btnIrMP"><i class="fa-solid fa-lock"></i> Pagar com Mercado Pago</button>
+                </div>
+                <div class="error-box" id="cardError"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="session.js"></script>
+    <script src="enterprise-shell.js"></script>
+    <script>
+    (function() {
+        requireAuthSession();
+
+        const auth = window.getStoredAuth?.() || {};
+        const token = auth.token || '';
+
+        const FREE_PLAN = {
+            slug: 'gratis',
+            nome: 'Gratuito com Anúncios',
+            subtitulo: 'Para iniciar sem assinatura',
+            preco_mensal: 0,
+            preco_anual: 0,
+            max_cadastros: 40,
+            max_congregacoes: 1,
+            modulo_app_membro: 0,
+            features_json: JSON.stringify([
+                'Até 40 cadastros',
+                '1 congregação',
+                'App do membro indisponível',
+                'Sem canais de suporte premium'
+            ])
+        };
+
+        let billingCycle = 'mensal';
+        let planos = [];
+        let status = null;
+        let currentPlan = FREE_PLAN;
+        let selectedPlan = null;
+        let pixPollInterval = null;
+
+        function byId(id) { return document.getElementById(id); }
+
+        function openModal(id) { byId(id).classList.add('open'); }
+        function closeModal(id) { byId(id).classList.remove('open'); }
+
+        function closeAllModals() {
+            closeModal('modalPlanos');
+            closeModal('modalResumo');
+            closeModal('modalPagamento');
+        }
+
+        function toCurrency(value) {
+            return Number(value || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        }
+
+        function parseFeatures(planObj) {
+            if (!planObj || !planObj.features_json) return [];
+            try {
+                const parsed = JSON.parse(planObj.features_json);
+                return Array.isArray(parsed) ? parsed : [];
+            } catch (_) {
+                return [];
+            }
+        }
+
+        function planPrice(planObj, cycle) {
+            return cycle === 'anual' ? Number(planObj.preco_anual || 0) : Number(planObj.preco_mensal || 0);
+        }
+
+        function statusText(raw) {
+            if (raw === 'ativa') return 'Ativa';
+            if (raw === 'trial') return 'Trial';
+            if (raw === 'expirado') return 'Expirado';
+            if (raw === 'cancelado') return 'Cancelado';
+            if (raw === 'suspensa') return 'Suspensa';
+            return 'Sem assinatura';
+        }
+
+        function supportFromFeatures(planObj) {
+            const feats = parseFeatures(planObj).map((f) => String(f).toLowerCase());
+            const channels = [];
+            if (feats.some((f) => f.includes('e-mail') || f.includes('email'))) channels.push('E-mail');
+            if (feats.some((f) => f.includes('whatsapp'))) channels.push('WhatsApp');
+            if (feats.some((f) => f.includes('telefone'))) channels.push('Telefone');
+            return channels.length ? channels.join(' + ') : 'Não';
+        }
+
+        function findPlanBySlug(slug) {
+            const found = planos.find((p) => String(p.slug).toLowerCase() === String(slug || '').toLowerCase());
+            return found || null;
+        }
+
+        function paintCurrentPlan() {
+            const currentPrice = planPrice(currentPlan, 'mensal');
+            byId('currentPlanName').textContent = currentPlan.nome || 'Plano Gratuito';
+            byId('currentPlanSub').textContent = currentPlan.subtitulo || 'Sem assinatura ativa';
+            byId('currentPlanPrice').innerHTML = `${toCurrency(currentPrice)} <small>/mês</small>`;
+
+            byId('statCadastros').textContent = String(currentPlan.max_cadastros || '-');
+            byId('statCongregacoes').textContent = String(currentPlan.max_congregacoes || '-');
+            byId('statAppMembro').textContent = Number(currentPlan.modulo_app_membro) ? 'Sim' : 'Não';
+            byId('statStatus').textContent = statusText(status?.status);
+
+            const featUl = byId('currentFeatureList');
+            const feats = parseFeatures(currentPlan);
+            if (!feats.length) {
+                featUl.innerHTML = '<li><i class="fa-solid fa-circle-info"></i> Sem recursos detalhados para este plano.</li>';
+            } else {
+                featUl.innerHTML = feats.map((f) => `<li><i class="fa-solid fa-check"></i>${escapeHtml(f)}</li>`).join('');
+            }
+
+            byId('sidePlano').textContent = currentPlan.nome || 'Gratuito';
+            byId('sideVencimento').textContent = formatDate(status?.proximoVencimento) || '-';
+            byId('sideUltimo').textContent = formatDate(status?.ultimoPagamento) || '-';
+
+            byId('heroDesc').textContent = (status?.status && status.status === 'ativa')
+                ? 'Sua assinatura está ativa. Você pode migrar para outro plano a qualquer momento para adicionar mais recursos.'
+                : 'Você ainda não tem assinatura ativa. Escolha um plano para desbloquear recursos adicionais e continuar usando o sistema sem limitações.';
+
+            const pill = byId('statusPill');
+            const statusRaw = status?.status || 'inativa';
+            const cls = statusRaw === 'ativa' ? 'ativa' : (['cancelado', 'suspensa', 'expirado'].includes(statusRaw) ? 'bloqueada' : 'inativa');
+            pill.className = `status-pill ${cls}`;
+            pill.textContent = statusText(statusRaw);
+        }
+
+        function formatDate(value) {
+            if (!value) return '';
+            const d = new Date(value);
+            if (Number.isNaN(d.getTime())) return '';
+            return d.toLocaleDateString('pt-BR');
+        }
+
+        function escapeHtml(text) {
+            return String(text || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        function billingLabel() {
+            return billingCycle === 'anual' ? 'Anual' : 'Mensal';
+        }
+
+        function renderPlanGrid() {
+            const grid = byId('planGrid');
+            if (!planos.length) {
+                grid.innerHTML = '<div class="loading-text">Nenhum plano disponível no momento.</div>';
+                return;
+            }
+
+            grid.innerHTML = planos.map((plano, index) => {
+                const price = planPrice(plano, billingCycle);
+                const features = parseFeatures(plano);
+                const highlighted = index === 1;
+                const cardClass = highlighted ? 'plan-card featured' : 'plan-card';
+                const supports = supportFromFeatures(plano);
+                const compactFeatures = features.map((f) => ({ text: f, yes: true }));
+
+                if (!features.some((f) => String(f).toLowerCase().includes('suporte'))) {
+                    compactFeatures.push({ text: 'Suporte via e-mail', yes: supports.toLowerCase().includes('e-mail') });
+                    compactFeatures.push({ text: 'Suporte via WhatsApp', yes: supports.toLowerCase().includes('whatsapp') });
+                }
+
+                const featHtml = compactFeatures.slice(0, 10).map((f) => {
+                    const rowClass = f.yes ? '' : 'off';
+                    const iconClass = f.yes ? 'yes' : 'no';
+                    const icon = f.yes ? 'fa-check' : 'fa-xmark';
+                    return `<li class="${rowClass}"><span class="${iconClass}"><i class="fa-solid ${icon}"></i></span>${escapeHtml(f.text)}</li>`;
+                }).join('');
+
+                return `
+                    <article class="${cardClass}">
+                        <div class="plan-name">${escapeHtml(plano.nome)}</div>
+                        <div class="plan-sub">${escapeHtml(plano.subtitulo || '')}</div>
+                        <div class="plan-price">
+                            <div class="amount">${toCurrency(price)}</div>
+                            <small>${billingCycle === 'anual' ? 'cobrado por ano' : 'cobrado por mês'}</small>
+                        </div>
+                        <ul class="plan-feats">${featHtml}</ul>
+                        <button class="${highlighted ? 'btn-plan' : 'btn-plan ghost'}" data-plan-slug="${escapeHtml(plano.slug)}">Selecionar ${escapeHtml(plano.nome)}</button>
+                    </article>
+                `;
+            }).join('');
+
+            grid.querySelectorAll('button[data-plan-slug]').forEach((btn) => {
+                btn.addEventListener('click', function() {
+                    const slug = this.getAttribute('data-plan-slug');
+                    selectedPlan = findPlanBySlug(slug);
+                    if (!selectedPlan) return;
+                    fillSummary();
+                    closeModal('modalPlanos');
+                    openModal('modalResumo');
+                });
+            });
+        }
+
+        function updateBillingToggle() {
+            const btnMensal = byId('btnMensal');
+            const btnAnual = byId('btnAnual');
+            const slider = byId('billingSlider');
+            btnMensal.classList.toggle('active', billingCycle === 'mensal');
+            btnAnual.classList.toggle('active', billingCycle === 'anual');
+
+            const activeBtn = billingCycle === 'mensal' ? btnMensal : btnAnual;
+            slider.style.width = activeBtn.offsetWidth + 'px';
+            slider.style.left = activeBtn.offsetLeft + 'px';
+        }
+
+        function fillSummary() {
+            if (!selectedPlan) return;
+            byId('sumPlanoAtual').textContent = currentPlan.nome || 'Gratuito';
+            byId('sumPlanoNovo').textContent = selectedPlan.nome;
+
+            byId('sumCadAtual').textContent = String(currentPlan.max_cadastros || '-');
+            byId('sumCadNovo').textContent = String(selectedPlan.max_cadastros || '-');
+
+            byId('sumCongAtual').textContent = String(currentPlan.max_congregacoes || '-');
+            byId('sumCongNovo').textContent = String(selectedPlan.max_congregacoes || '-');
+
+            byId('sumSupAtual').textContent = supportFromFeatures(currentPlan);
+            byId('sumSupNovo').textContent = supportFromFeatures(selectedPlan);
+
+            byId('sumCicloNovo').textContent = billingLabel();
+            byId('sumValorNovo').textContent = `${toCurrency(planPrice(selectedPlan, billingCycle))}/${billingCycle === 'anual' ? 'ano' : 'mês'}`;
+        }
+
+        function setPaymentTab(tab) {
+            byId('tabPix').classList.toggle('active', tab === 'pix');
+            byId('tabCartao').classList.toggle('active', tab === 'cartao');
+            byId('panePix').classList.toggle('active', tab === 'pix');
+            byId('paneCartao').classList.toggle('active', tab === 'cartao');
+        }
+
+        function resetPaymentState() {
+            clearInterval(pixPollInterval);
+            byId('pixQrImg').style.display = 'none';
+            byId('pixPlaceholder').style.display = 'inline';
+            byId('pixCodeWrap').style.display = 'none';
+            byId('pixCode').textContent = '';
+            byId('pixStatus').textContent = 'Aguardando geração do código PIX.';
+            byId('pixStatus').classList.remove('paid');
+
+            byId('pixError').classList.remove('visible');
+            byId('pixError').textContent = '';
+            byId('cardError').classList.remove('visible');
+            byId('cardError').textContent = '';
+
+            byId('btnGerarPix').disabled = false;
+            byId('btnGerarPix').innerHTML = '<i class="fa-brands fa-pix"></i> Gerar PIX';
+            byId('btnIrMP').disabled = false;
+            byId('btnIrMP').innerHTML = '<i class="fa-solid fa-lock"></i> Pagar com Mercado Pago';
+        }
+
+        async function apiJson(url, opts) {
+            const response = await fetch(url, opts || {});
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok) {
+                throw new Error(data.error || data.message || 'Erro na requisição.');
+            }
+            return data;
+        }
+
+        async function loadData() {
+            const plansReq = apiJson('/api/pagamentos/planos').catch(() => []);
+            const statusReq = token ? apiJson('/api/pagamentos/status') : Promise.resolve({ status: 'inativa', plano: 'gratis' });
+
+            const result = await Promise.all([plansReq, statusReq]);
+            planos = Array.isArray(result[0]) ? result[0] : [];
+            status = result[1] || { status: 'inativa', plano: 'gratis' };
+
+            const backendPlan = findPlanBySlug(status.plano);
+            currentPlan = backendPlan || FREE_PLAN;
+            paintCurrentPlan();
+            renderPlanGrid();
+            setTimeout(updateBillingToggle, 20);
+        }
+
+        async function gerarPix() {
+            if (!selectedPlan) return;
+            const btn = byId('btnGerarPix');
+            const err = byId('pixError');
+            err.classList.remove('visible');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Gerando...';
+
+            try {
+                const data = await apiJson('/api/pagamentos/pix', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ planoSlug: selectedPlan.slug, ciclo: billingCycle })
+                });
+
+                if (data.qrCodeBase64) {
+                    byId('pixQrImg').src = 'data:image/png;base64,' + data.qrCodeBase64;
+                    byId('pixQrImg').style.display = 'inline-block';
+                    byId('pixPlaceholder').style.display = 'none';
+                }
+
+                byId('pixCode').textContent = data.qrCode || '';
+                byId('pixCodeWrap').style.display = 'flex';
+                byId('pixStatus').textContent = 'Aguardando pagamento PIX...';
+
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-brands fa-pix"></i> Gerar novo PIX';
+
+                clearInterval(pixPollInterval);
+                pixPollInterval = setInterval(async function() {
+                    try {
+                        const statusData = await apiJson('/api/pagamentos/status', {
+                            headers: { 'Authorization': `Bearer ${token}` }
+                        });
+                        if (statusData.status === 'ativa') {
+                            clearInterval(pixPollInterval);
+                            byId('pixStatus').textContent = 'Pagamento confirmado! Redirecionando...';
+                            byId('pixStatus').classList.add('paid');
+                            setTimeout(function() {
+                                window.location.href = 'dashboard.html';
+                            }, 1600);
+                        }
+                    } catch (_) {
+                        // Mantém polling silencioso.
+                    }
+                }, 5000);
+            } catch (error) {
+                err.textContent = error.message;
+                err.classList.add('visible');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-brands fa-pix"></i> Tentar novamente';
+            }
+        }
+
+        async function irMercadoPago() {
+            if (!selectedPlan) return;
+
+            const btn = byId('btnIrMP');
+            const err = byId('cardError');
+            err.classList.remove('visible');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Gerando checkout...';
+
+            try {
+                const data = await apiJson('/api/pagamentos/cartao', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ planoSlug: selectedPlan.slug, ciclo: billingCycle })
+                });
+
+                const nextUrl = data.checkoutUrl || data.sandboxUrl;
+                if (!nextUrl) {
+                    throw new Error('URL de checkout não retornada.');
+                }
+                window.location.href = nextUrl;
+            } catch (error) {
+                err.textContent = error.message;
+                err.classList.add('visible');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-lock"></i> Pagar com Mercado Pago';
+            }
+        }
+
+        function copyPixCode() {
+            const code = byId('pixCode').textContent || '';
+            if (!code) return;
+            navigator.clipboard.writeText(code).then(function() {
+                byId('btnCopyPix').textContent = 'Copiado!';
+                setTimeout(function() {
+                    byId('btnCopyPix').innerHTML = '<i class="fa-solid fa-copy"></i> Copiar';
+                }, 1600);
+            }).catch(function() {
+                const ta = document.createElement('textarea');
+                ta.value = code;
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand('copy');
+                document.body.removeChild(ta);
+            });
+        }
+
+        function bootstrapActions() {
+            byId('btnOpenPublic').addEventListener('click', function() {
+                window.location.href = 'planos.html';
+            });
+
+            byId('btnOpenPlans').addEventListener('click', function() {
+                renderPlanGrid();
+                openModal('modalPlanos');
+            });
+
+            byId('btnMensal').addEventListener('click', function() {
+                billingCycle = 'mensal';
+                updateBillingToggle();
+                renderPlanGrid();
+            });
+
+            byId('btnAnual').addEventListener('click', function() {
+                billingCycle = 'anual';
+                updateBillingToggle();
+                renderPlanGrid();
+            });
+
+            byId('btnVoltarPlanos').addEventListener('click', function() {
+                closeModal('modalResumo');
+                openModal('modalPlanos');
+            });
+
+            byId('btnConfirmarResumo').addEventListener('click', function() {
+                if (!selectedPlan) return;
+                closeModal('modalResumo');
+                openModal('modalPagamento');
+                byId('payPlano').textContent = `${selectedPlan.nome} (${billingLabel()})`;
+                byId('payValor').textContent = toCurrency(planPrice(selectedPlan, billingCycle));
+
+                const method = byId('metodoPagamento').value;
+                setPaymentTab(method === 'cartao' ? 'cartao' : 'pix');
+                resetPaymentState();
+            });
+
+            byId('tabPix').addEventListener('click', function() { setPaymentTab('pix'); });
+            byId('tabCartao').addEventListener('click', function() { setPaymentTab('cartao'); });
+            byId('btnGerarPix').addEventListener('click', gerarPix);
+            byId('btnIrMP').addEventListener('click', irMercadoPago);
+            byId('btnCopyPix').addEventListener('click', copyPixCode);
+
+            document.querySelectorAll('[data-close]').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    closeModal(this.getAttribute('data-close'));
+                });
+            });
+
+            document.querySelectorAll('.mp-modal-overlay').forEach(function(overlay) {
+                overlay.addEventListener('click', function(e) {
+                    if (e.target === overlay) closeAllModals();
+                });
+            });
+        }
+
+        bootstrapActions();
+        loadData().catch(function() {
+            byId('heroDesc').textContent = 'Não foi possível carregar os dados da assinatura agora.';
+        });
+    })();
+    </script>
 </body>
 </html>
