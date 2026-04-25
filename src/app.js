@@ -22,7 +22,7 @@ const paymentRoutes = require('./routes/paymentRoutes');
 
 const app = express();
 
-const maintenanceModeEnabled = process.env.MAINTENANCE_MODE === 'true' || false;
+const maintenanceModeEnabled = String(process.env.MAINTENANCE_MODE || '').toLowerCase() === 'true';
 
 const allowedOrigins = config.cors.allowedOrigins;
 
