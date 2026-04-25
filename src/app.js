@@ -18,8 +18,11 @@ const outrasIgrejasRoutes = require('./routes/outrasIgrejasRoutes');
 const realtimeRoutes = require('./routes/realtimeRoutes');
 const systemRoutes = require('./routes/systemRoutes');
 const superAdminRoutes = require('./routes/superAdminRoutes');
+const paymentRoutes = require('./routes/paymentRoutes');
 
 const app = express();
+
+const maintenanceModeEnabled = process.env.NODE_ENV === 'production';
 
 const allowedOrigins = config.cors.allowedOrigins;
 
@@ -80,6 +83,25 @@ app.get(['/index.htm', '/INDEX.HTM'], (req, res) => {
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
 app.use((req, res, next) => {
+    if (!maintenanceModeEnabled) {
+        return next();
+    }
+
+    if (req.path === '/maintenance.html') {
+        return next();
+    }
+
+    if (req.path.startsWith('/api/')) {
+        return res.status(503).json({
+            erro: 'Sistema em manutenção. Voltaremos em breve.',
+            contato: 'contato@ldfp.com.br'
+        });
+    }
+
+    return res.status(503).sendFile(path.join(__dirname, '..', 'public', 'maintenance.html'));
+});
+
+app.use((req, res, next) => {
     const startedAt = Date.now();
 
     res.on('finish', () => {
@@ -109,6 +131,7 @@ app.use(outrasIgrejasRoutes);
 app.use(realtimeRoutes);
 app.use(systemRoutes);
 app.use(superAdminRoutes);
+app.use(paymentRoutes);
 
 /* ------------------------------------------------------------------ */
 /*  ROTA DE BOOTSTRAP — cria o primeiro super-admin se não existir     */
