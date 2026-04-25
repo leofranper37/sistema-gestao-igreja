@@ -51,6 +51,21 @@ const parseAllowedOrigins = () => {
         .filter(Boolean);
 };
 
+const parseJwtExpiresIn = () => {
+    const raw = pickFirstValue(process.env.JWT_EXPIRES_IN);
+
+    if (!raw) {
+        return '12h';
+    }
+
+    const numeric = Number(raw);
+    if (Number.isFinite(numeric)) {
+        return numeric > 0 ? String(numeric) : '12h';
+    }
+
+    return raw;
+};
+
 const databaseUrlConfig = parseDatabaseUrl();
 
 const config = {
@@ -71,7 +86,7 @@ const config = {
     security: {
         passwordSaltRounds: parseInteger(process.env.PASSWORD_SALT_ROUNDS, 10),
         jwtSecret: process.env.JWT_SECRET || 'ldfp-dev-secret',
-        jwtExpiresIn: process.env.JWT_EXPIRES_IN || '12h'
+        jwtExpiresIn: parseJwtExpiresIn()
     },
     app: {
         name: 'LDFP'
