@@ -404,6 +404,7 @@ async function initializeDatabase() {
         )`);
 
         await activePgPool.query(`INSERT INTO igrejas (id, nome) VALUES (1, 'Igreja Padrão') ON CONFLICT DO NOTHING`);
+        await activePgPool.query(`SELECT setval(pg_get_serial_sequence('igrejas','id'), GREATEST(1, (SELECT MAX(id) FROM igrejas)))`);
 
         await activePgPool.query(`CREATE TABLE IF NOT EXISTS membros (
             id SERIAL PRIMARY KEY,
