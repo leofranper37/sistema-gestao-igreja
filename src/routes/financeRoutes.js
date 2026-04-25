@@ -5,6 +5,9 @@ const {
     dizimoFiltroSchema,
     dizimoSchema,
     saldoInicialSchema,
+    tipoReceitaFiltroSchema,
+    tipoReceitaSchema,
+    tipoReceitaUpdateSchema,
     transacaoFiltroSchema,
     transacaoSchema,
     validateBody,
@@ -13,13 +16,17 @@ const {
 
 const {
     createDizimo,
+    createTipoReceita,
     createTransacao,
     deleteDizimo,
+    deleteTipoReceita,
     getSaldo,
     getSaldoInicial,
     getTotaisDizimos,
     listDizimos,
+    listTiposReceita,
     listTransacoes,
+    updateTipoReceita,
     upsertSaldoInicial
 } = require('../controllers/financeController');
 
@@ -35,5 +42,10 @@ router.get('/dizimos', requireAuth, authorize(['admin', 'financeiro', 'secretari
 router.get('/dizimos/totais', requireAuth, authorize(['admin', 'financeiro', 'secretaria', 'pastor']), getTotaisDizimos);
 router.post('/dizimos', requireAuth, authorize(['admin', 'financeiro', 'secretaria']), validateBody(dizimoSchema), createDizimo);
 router.delete('/dizimos/:id', requireAuth, authorize(['admin', 'financeiro', 'secretaria']), deleteDizimo);
+
+router.get('/tipos-receita', requireAuth, authorize(['admin', 'financeiro', 'secretaria', 'pastor']), validateQuery(tipoReceitaFiltroSchema), listTiposReceita);
+router.post('/tipos-receita', requireAuth, authorize(['admin', 'financeiro', 'secretaria']), validateBody(tipoReceitaSchema), createTipoReceita);
+router.put('/tipos-receita/:id', requireAuth, authorize(['admin', 'financeiro', 'secretaria']), validateBody(tipoReceitaUpdateSchema), updateTipoReceita);
+router.delete('/tipos-receita/:id', requireAuth, authorize(['admin', 'financeiro', 'secretaria']), deleteTipoReceita);
 
 module.exports = router;

@@ -78,6 +78,10 @@
         return true;
     }
 
+    function isPaymentRoute(resourceUrl) {
+        return /\/assinar\.html|\/conta_bloqueada\.html|\/pagamentos|\/api\/pagamentos/i.test(resourceUrl);
+    }
+
     window.fetch = async function (input, init = {}) {
         const requestUrl = typeof input === 'string' ? input : input?.url || '';
         const nextInit = { ...init };
@@ -95,6 +99,13 @@
         if (response.status === 401 && !isAuthRoute(requestUrl)) {
             clearAuthSession();
             redirectToLogin();
+        }
+
+        // 402 = assinatura expirada/cancelada
+        if (response.status === 402 && !isPaymentRoute(requestUrl) && !isPaymentRoute(window.location.pathname)) {
+            if (!/\/conta_bloqueada\.html|\/assinar\.html/i.test(window.location.pathname)) {
+                window.location.href = 'conta_bloqueada.html';
+            }
         }
 
         return response;

@@ -3,56 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LDFP - Dízimos e Ofertas</title>
+    <title>LDFP - Lançamentos de Dízimo</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        :root {
+            --azul-700: #1d4ed8;
+            --azul-600: #2563eb;
+            --azul-100: #dbeafe;
+            --verde-700: #15803d;
+            --verde-600: #16a34a;
+            --verde-100: #dcfce7;
+            --texto-700: #334155;
+            --borda: #dbe3ef;
+        }
+
         .wrap { max-width: 1200px; margin: 0 auto; padding: 18px 14px 32px; }
         .top-cards { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 18px; }
         .kpi { background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 18px 16px; box-shadow: 0 4px 14px rgba(15,23,42,.07); }
         .kpi small { display: block; font-size: 11px; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px; }
         .kpi strong { display: block; font-size: 1.6rem; font-weight: 800; color: #0f172a; }
-        .kpi.total strong { color: #0f766e; }
-        .kpi.dizimo strong { color: #0369a1; }
-        .kpi.oferta strong { color: #16a34a; }
-        .kpi.missoes strong { color: #2563eb; }
-        .kpi.outros strong { color: #0f766e; }
+        .kpi.total strong { color: var(--verde-700); }
+        .kpi.dizimo strong { color: var(--azul-700); }
+        .kpi.oferta strong { color: var(--verde-600); }
+        .kpi.missoes strong { color: var(--azul-600); }
+        .kpi.outros strong { color: var(--texto-700); }
+
         .main-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 14px; }
         .card { background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; box-shadow: 0 6px 20px rgba(15,23,42,.08); padding: 16px; }
         .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
-        .card-header h2 { margin: 0; font-size: 15px; color: #155e75; }
+        .card-header h2 { margin: 0; font-size: 15px; color: var(--azul-700); }
+
         .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
         .form-row .full { grid-column: 1 / -1; }
-        input, select, textarea { width: 100%; border: 1px solid #dbe3ef; border-radius: 8px; padding: 9px 12px; font-size: 13.5px; box-sizing: border-box; }
+
+        input, select, textarea {
+            width: 100%;
+            border: 1px solid var(--borda);
+            border-radius: 8px;
+            padding: 9px 12px;
+            font-size: 13.5px;
+            box-sizing: border-box;
+        }
         textarea { resize: vertical; min-height: 60px; }
+
         .btn { border: 0; border-radius: 8px; padding: 10px 14px; font-size: 13px; font-weight: 700; cursor: pointer; color: #fff; }
-        .btn-primary { background: #0f766e; width: 100%; margin-top: 4px; }
+        .btn-primary { background: var(--verde-700); width: 100%; margin-top: 4px; }
         .btn-del { background: #dc2626; padding: 5px 8px; font-size: 11px; }
+
         .filtros { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; align-items: flex-end; }
         .filtros input, .filtros select { max-width: 180px; margin: 0; }
+
         table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
         th, td { border-bottom: 1px solid #f1f5f9; padding: 9px 8px; text-align: left; vertical-align: top; }
         th { background: #f8fafc; color: #64748b; font-size: 11px; text-transform: uppercase; font-weight: 700; }
+
         .badge { display: inline-block; padding: 2px 8px; border-radius: 99px; font-size: 10.5px; font-weight: 700; }
-        .badge-dizimo { background: #dbeafe; color: #1d4ed8; }
-        .badge-oferta { background: #dcfce7; color: #15803d; }
+        .badge-dizimo { background: var(--azul-100); color: var(--azul-700); }
+        .badge-oferta { background: var(--verde-100); color: var(--verde-700); }
         .badge-missoes { background: #e0f2fe; color: #0369a1; }
         .badge-outros { background: #ecfeff; color: #0f766e; }
+
         .msg { font-size: 13px; margin-top: 8px; min-height: 18px; }
-        .msg.ok { color: #0f766e; } .msg.error { color: #b91c1c; }
+        .msg.ok { color: var(--verde-700); }
+        .msg.error { color: #b91c1c; }
+
         .pag { display: flex; gap: 8px; justify-content: flex-end; margin-top: 10px; align-items: center; }
         .pag button { border: 1px solid #e2e8f0; background: #fff; border-radius: 8px; padding: 6px 12px; font-size: 12px; cursor: pointer; }
         .pag button:disabled { opacity: .45; cursor: not-allowed; }
         .pag span { font-size: 12px; color: #64748b; }
-        @media (max-width: 1000px) { .top-cards { grid-template-columns: repeat(2, 1fr); } .main-grid { grid-template-columns: 1fr; } }
-        @media (max-width: 600px) { .top-cards { grid-template-columns: 1fr; } .filtros input, .filtros select { max-width: 100%; } }
+
+        @media (max-width: 1000px) {
+            .top-cards { grid-template-columns: repeat(2, 1fr); }
+            .main-grid { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 600px) {
+            .top-cards { grid-template-columns: 1fr; }
+            .filtros input, .filtros select { max-width: 100%; }
+        }
     </style>
 </head>
-<body class="theme-petroleo" data-shell-title="Dízimos e Ofertas" data-shell-breadcrumb="LDFP / Tesouraria / Dízimos" data-shell-active="dizimos.html" data-shell-chip="Tesouraria ativa" data-shell-role="Admin financeiro">
+<body class="theme-petroleo" data-shell-title="Lançamentos de Dízimo" data-shell-breadcrumb="LDFP / Tesouraria / Dízimos" data-shell-active="dizimos_lancamentos.html" data-shell-chip="Tesouraria ativa" data-shell-role="Admin financeiro">
 <main class="main-content enterprise-main">
 <div class="wrap">
 
-    <!-- KPIs -->
     <div class="top-cards">
         <div class="kpi total"><small>Total Geral</small><strong id="kpiTotal">R$ 0,00</strong></div>
         <div class="kpi dizimo"><small>Dízimos</small><strong id="kpiDizimo">R$ 0,00</strong></div>
@@ -62,11 +97,9 @@
     </div>
 
     <div class="main-grid">
-
-        <!-- Lista -->
         <section class="card">
             <div class="card-header">
-                <h2><i class="fa-solid fa-hand-holding-dollar"></i> Lançamentos</h2>
+                <h2><i class="fa-solid fa-hand-holding-dollar"></i> Lançamentos de Dízimo</h2>
                 <div class="filtros">
                     <input type="month" id="filtroComp" title="Filtrar competência">
                     <select id="filtroTipo" title="Filtrar tipo">
@@ -77,9 +110,10 @@
                         <option value="outros">Outros</option>
                     </select>
                     <input type="text" id="filtroNome" placeholder="Buscar por nome..." style="max-width:160px;">
-                    <button class="btn" style="background:#2563eb;" type="button" id="btnFiltrar">Filtrar</button>
+                    <button class="btn" style="background:var(--azul-600);" type="button" id="btnFiltrar">Filtrar</button>
                 </div>
             </div>
+
             <div style="overflow-x:auto;">
                 <table>
                     <thead>
@@ -95,6 +129,7 @@
                     <tbody id="tbDizimos"></tbody>
                 </table>
             </div>
+
             <div class="pag">
                 <button id="btnAnterior" type="button" disabled>&#8592; Anterior</button>
                 <span id="pagInfo">Pág 1</span>
@@ -103,7 +138,6 @@
             <p class="msg" id="msgLista"></p>
         </section>
 
-        <!-- Formulário -->
         <section class="card">
             <div class="card-header">
                 <h2><i class="fa-solid fa-plus"></i> Novo lançamento</h2>
@@ -125,7 +159,6 @@
             </form>
             <p class="msg" id="msgForm"></p>
         </section>
-
     </div>
 </div>
 </main>
@@ -165,12 +198,6 @@
         if (!val) return '';
         const [ano, mes] = val.split('-');
         return `${mes}/${ano}`;
-    }
-
-    function compToMonthInput(comp) {
-        if (!comp) return '';
-        const [mes, ano] = comp.split('/');
-        return `${ano}-${mes}`;
     }
 
     async function loadTotais(competencia) {
@@ -226,7 +253,7 @@
                 <td><strong>${item.membro_nome}</strong></td>
                 <td>${competenciaParaExibicao(item.competencia)}</td>
                 <td><span class="badge ${badgeMap[item.tipo] || 'badge-outros'}">${labelMap[item.tipo] || item.tipo}</span></td>
-                <td style="font-weight:700;color:#0f766e;">${fmtVal(item.valor)}</td>
+                <td style="font-weight:700;color:var(--verde-700);">${fmtVal(item.valor)}</td>
                 <td style="color:#64748b;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${item.observacao || ''}">${item.observacao || '-'}</td>
                 <td><button class="btn btn-del" onclick="excluir(${item.id})" title="Remover">×</button></td>
             </tr>
@@ -305,7 +332,6 @@
         refresh();
     });
 
-    // Competência padrão = mês atual
     const hoje = new Date();
     const mesAtual = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}`;
     document.getElementById('competencia').value = mesAtual;

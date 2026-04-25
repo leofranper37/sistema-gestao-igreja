@@ -4,6 +4,20 @@ const config = require('../config');
 const { pool } = require('../config/db');
 const { createHttpError } = require('../utils/httpError');
 
+// Rotas que nunca são bloqueadas por assinatura expirada
+const ROTAS_LIVRES_ASSINATURA = [
+    '/login',
+    '/criar-conta',
+    '/api/pagamentos',
+    '/api/setup',
+    '/super-admin',
+    '/realtime',
+];
+
+function isRotaLivreAssinatura(path) {
+    return ROTAS_LIVRES_ASSINATURA.some(p => path.startsWith(p));
+}
+
 async function requireAuth(req, res, next) {
     const authorization = req.headers.authorization || '';
     const queryToken = typeof req.query?.token === 'string' ? req.query.token.trim() : '';
@@ -49,6 +63,27 @@ async function requireAuth(req, res, next) {
             maxCadastros: user.max_cadastros || 40,
             maxCongregacoes: user.max_congregacoes || 1
         };
+
+        // ── Verificação de assinatura ──────────────────────────────────────
+        // Super-admin e rotas de pagamento/login nunca são bloqueados
+        if (req.auth.role !== 'super-admin' && !isRotaLivreAssinatura(req.path)) {
+            const status = req.auth.statusAssinatura;
+            const trialEndsAt = req.auth.trialEndsAt ? new Date(req.auth.trialEndsAt) : null;
+            const agora = new Date();
+
+            if (status === 'trial' && trialEndsAt && trialEndsAt < agora) {
+                // Atualiza status no banco para 'cancelado'
+                pool.query(
+                    `UPDATE igrejas SET status_assinatura = 'cancelado' WHERE id = ? AND status_assinatura = 'trial'`,
+                    [req.auth.igrejaId]
+                ).catch(() => {});
+                return next(createHttpError(402, 'Seu período de teste encerrou. Assine um plano para continuar em /assinar.html'));
+            }
+
+            if (['cancelado', 'suspensa', 'inativa'].includes(status)) {
+                return next(createHttpError(402, 'Assinatura inativa. Acesse /assinar.html para reativar.'));
+            }
+        }
 
         next();
     } catch (error) {

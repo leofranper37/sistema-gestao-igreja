@@ -22,10 +22,7 @@ async function getSuperAdminOverview(req, res) {
         const [igrejas] = await pool.query(
             `SELECT status_assinatura, mensalidade_valor FROM igrejas`
         );
-        const total = igrejas.length;
         const ativas = igrejas.filter(r => r.status_assinatura === 'ativa').length;
-        const trial = igrejas.filter(r => r.status_assinatura === 'trial').length;
-        const suspensas = igrejas.filter(r => r.status_assinatura === 'suspensa').length;
         const mrr = igrejas
             .filter(r => r.status_assinatura === 'ativa')
             .reduce((s, r) => s + fmt(r.mensalidade_valor), 0);
@@ -37,7 +34,27 @@ async function getSuperAdminOverview(req, res) {
         const pendingCount = fmt(pending[0]?.cnt);
         const pendingAmount = fmt(pending[0]?.total);
 
-        res.json({ total, ativas, trial, suspensas, mrr, pendingCount, pendingAmount });
+        const [customers] = await pool.query(
+            `SELECT i.id, i.nome, i.plano, i.status_assinatura,
+                    i.max_cadastros, i.trial_ends_at, i.created_at,
+                    u.nome AS responsavel_nome, u.email AS responsavel_email,
+                    COUNT(m.id) AS membros_ativos
+             FROM igrejas i
+             LEFT JOIN usuarios u ON u.igreja_id = i.id AND u.role IN ('admin','super-admin')
+             LEFT JOIN membros m ON m.igreja_id = i.id
+             GROUP BY i.id, u.nome, u.email
+             ORDER BY i.created_at DESC`
+        );
+
+        res.json({
+            kpis: {
+                mrr,
+                activeChurches: ativas,
+                pendingPayments: pendingCount,
+                pendingAmount
+            },
+            customers: customers || []
+        });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

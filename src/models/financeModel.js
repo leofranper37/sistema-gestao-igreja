@@ -1,5 +1,11 @@
 const { pool } = require('../config/db');
 
+const BASE_TIPOS_RECEITA = [
+    { slug: 'dizimos', descricao: 'Dízimos', planoConta: '4.01.01.01 - Dízimo de Membros' },
+    { slug: 'oferta-missionaria', descricao: 'Oferta Missionária', planoConta: '4.01.03.01 - Oferta Missionária de Membros' },
+    { slug: 'ofertas', descricao: 'Ofertas', planoConta: '4.01.01.02 - Oferta de Membros' }
+];
+
 async function getLatestSaldoInicial(igrejaId) {
     const [[row]] = await pool.query(
         'SELECT saldo_inicial, competencia FROM caixa_saldo_inicial WHERE igreja_id = ? ORDER BY competencia DESC LIMIT 1',
@@ -214,6 +220,115 @@ async function deleteDizimo(id, igrejaId) {
     await pool.query('DELETE FROM dizimos WHERE id = ? AND igreja_id = ?', [id, igrejaId]);
 }
 
+// ─── Tipos de Receita ──────────────────────────────────────────────────────
+
+async function ensureTiposReceitaTable() {
+    await pool.query(
+        `CREATE TABLE IF NOT EXISTS tipos_receita (
+            id VARCHAR(80) PRIMARY KEY,
+            igreja_id INTEGER NOT NULL,
+            descricao VARCHAR(255) NOT NULL,
+            plano_conta VARCHAR(255) NOT NULL,
+            origem VARCHAR(20) NOT NULL DEFAULT 'custom',
+            ativo INTEGER NOT NULL DEFAULT 1,
+            created_by INTEGER NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )`
+    );
+}
+
+async function ensureBaseTiposReceita(igrejaId) {
+    await ensureTiposReceitaTable();
+
+    for (const item of BASE_TIPOS_RECEITA) {
+        const [rows] = await pool.query(
+            `SELECT id
+             FROM tipos_receita
+             WHERE igreja_id = ? AND origem = 'base' AND descricao = ?
+             LIMIT 1`,
+            [igrejaId, item.descricao]
+        );
+
+        if (rows[0]) {
+            continue;
+        }
+
+        await pool.query(
+            `INSERT INTO tipos_receita (id, igreja_id, descricao, plano_conta, origem, ativo)
+             VALUES (?, ?, ?, ?, 'base', 1)`,
+            [`base-${igrejaId}-${item.slug}`, igrejaId, item.descricao, item.planoConta]
+        );
+    }
+}
+
+async function listTiposReceita(filters) {
+    await ensureBaseTiposReceita(filters.igrejaId);
+
+    const where = ['igreja_id = ?', 'ativo = 1'];
+    const values = [filters.igrejaId];
+
+    if (filters.search) {
+        where.push('(descricao LIKE ? OR plano_conta LIKE ?)');
+        values.push(`%${filters.search}%`, `%${filters.search}%`);
+    }
+
+    const [rows] = await pool.query(
+        `SELECT id, igreja_id, descricao, plano_conta, origem, ativo, created_by, created_at
+         FROM tipos_receita
+         WHERE ${where.join(' AND ')}
+         ORDER BY CASE WHEN origem = 'base' THEN 0 ELSE 1 END, descricao ASC`,
+        values
+    );
+
+    return rows;
+}
+
+async function findTipoReceitaById(id, igrejaId) {
+    await ensureTiposReceitaTable();
+    const [rows] = await pool.query(
+        `SELECT id, igreja_id, descricao, plano_conta, origem, ativo, created_by, created_at
+         FROM tipos_receita
+         WHERE id = ? AND igreja_id = ?
+         LIMIT 1`,
+        [id, igrejaId]
+    );
+
+    return rows[0] || null;
+}
+
+async function createTipoReceita(payload) {
+    await ensureTiposReceitaTable();
+    const id = `custom-${payload.igrejaId}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+
+    await pool.query(
+        `INSERT INTO tipos_receita (id, igreja_id, descricao, plano_conta, origem, ativo, created_by)
+         VALUES (?, ?, ?, ?, 'custom', 1, ?)`,
+        [id, payload.igrejaId, payload.descricao, payload.planoConta, payload.createdBy || null]
+    );
+
+    return id;
+}
+
+async function updateTipoReceita(id, igrejaId, payload) {
+    await ensureTiposReceitaTable();
+    await pool.query(
+        `UPDATE tipos_receita
+         SET descricao = ?, plano_conta = ?
+         WHERE id = ? AND igreja_id = ? AND origem = 'custom'`,
+        [payload.descricao, payload.planoConta, id, igrejaId]
+    );
+}
+
+async function deleteTipoReceita(id, igrejaId) {
+    await ensureTiposReceitaTable();
+    await pool.query(
+        `UPDATE tipos_receita
+         SET ativo = 0
+         WHERE id = ? AND igreja_id = ? AND origem = 'custom'`,
+        [id, igrejaId]
+    );
+}
+
 module.exports = {
     createSaldoInicial,
     createTransacao,
@@ -226,5 +341,10 @@ module.exports = {
     createDizimo,
     deleteDizimo,
     getTotaisDizimos,
-    listDizimos
+    listDizimos,
+    createTipoReceita,
+    deleteTipoReceita,
+    findTipoReceitaById,
+    listTiposReceita,
+    updateTipoReceita
 };

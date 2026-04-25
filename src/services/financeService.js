@@ -74,6 +74,55 @@ async function deleteDizimo(id, igrejaId) {
     await financeModel.deleteDizimo(id, igrejaId);
 }
 
+async function listTiposReceita(igrejaId, filters) {
+    const rows = await financeModel.listTiposReceita({ igrejaId, search: filters.search || null });
+    return rows.map(row => ({
+        id: row.id,
+        igrejaId: row.igreja_id,
+        descricao: row.descricao,
+        planoConta: row.plano_conta,
+        origem: row.origem,
+        ativo: Number(row.ativo) === 1,
+        createdBy: row.created_by,
+        createdAt: row.created_at
+    }));
+}
+
+async function createTipoReceita(igrejaId, payload, userId) {
+    return financeModel.createTipoReceita({
+        igrejaId,
+        descricao: payload.descricao,
+        planoConta: payload.planoConta,
+        createdBy: userId
+    });
+}
+
+async function updateTipoReceita(id, igrejaId, payload) {
+    return financeModel.updateTipoReceita(id, igrejaId, payload);
+}
+
+async function deleteTipoReceita(id, igrejaId) {
+    return financeModel.deleteTipoReceita(id, igrejaId);
+}
+
+async function getTipoReceitaById(id, igrejaId) {
+    const row = await financeModel.findTipoReceitaById(id, igrejaId);
+    if (!row) {
+        return null;
+    }
+
+    return {
+        id: row.id,
+        igrejaId: row.igreja_id,
+        descricao: row.descricao,
+        planoConta: row.plano_conta,
+        origem: row.origem,
+        ativo: Number(row.ativo) === 1,
+        createdBy: row.created_by,
+        createdAt: row.created_at
+    };
+}
+
 module.exports = {
     createTransacao,
     getSaldo,
@@ -84,5 +133,10 @@ module.exports = {
     createDizimo,
     deleteDizimo,
     getTotaisDizimos,
-    listDizimos
+    listDizimos,
+    createTipoReceita,
+    deleteTipoReceita,
+    getTipoReceitaById,
+    listTiposReceita,
+    updateTipoReceita
 };

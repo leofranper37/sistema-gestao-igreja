@@ -352,6 +352,20 @@ const dizimoFiltroSchema = Joi.object({
     ...paginationSchemaPart
 });
 
+const tipoReceitaSchema = Joi.object({
+    descricao: Joi.string().trim().min(2).max(255).required().label('Descrição'),
+    planoConta: Joi.string().trim().min(2).max(255).required().label('Plano de Conta')
+});
+
+const tipoReceitaUpdateSchema = Joi.object({
+    descricao: Joi.string().trim().min(2).max(255).required().label('Descrição'),
+    planoConta: Joi.string().trim().min(2).max(255).required().label('Plano de Conta')
+});
+
+const tipoReceitaFiltroSchema = Joi.object({
+    search: Joi.string().trim().max(255).allow('', null).optional().label('Busca')
+});
+
 const bancoContaSchema = Joi.object({
     nome: Joi.string().trim().min(2).max(255).required().label('Nome da conta'),
     banco: Joi.string().trim().max(120).allow('', null).optional().label('Banco'),
@@ -471,6 +485,9 @@ module.exports = {
     triggerEventoSchema,
     triggerOracaoSchema,
     triggerVisitanteSchema,
+    tipoReceitaFiltroSchema,
+    tipoReceitaSchema,
+    tipoReceitaUpdateSchema,
     membroFiltroSchema,
     membroSchema,
     outrasIgrejasQuerySchema,

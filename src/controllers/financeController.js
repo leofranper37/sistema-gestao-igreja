@@ -129,6 +129,54 @@ async function deleteDizimo(req, res) {
     res.json({ message: 'Lançamento removido.' });
 }
 
+async function listTiposReceita(req, res) {
+    const igrejaId = Number(req.auth.igrejaId || 1);
+    const query = req.validatedQuery || {};
+    const items = await financeService.listTiposReceita(igrejaId, { search: query.search || null });
+    res.json({ items });
+}
+
+async function createTipoReceita(req, res) {
+    const igrejaId = Number(req.auth.igrejaId || 1);
+    const id = await financeService.createTipoReceita(igrejaId, req.validatedBody, req.auth.id);
+    audit('finance.tipo-receita.create', req, { id, descricao: req.validatedBody.descricao });
+    res.status(201).json({ message: 'Tipo de receita criado com sucesso.', id });
+}
+
+async function updateTipoReceita(req, res) {
+    const igrejaId = Number(req.auth.igrejaId || 1);
+    const id = String(req.params.id || '').trim();
+
+    const current = await financeService.getTipoReceitaById(id, igrejaId);
+    if (!current) {
+        throw createHttpError(404, 'Tipo de receita não encontrado.');
+    }
+    if (current.origem === 'base') {
+        throw createHttpError(400, 'Tipos padrão do sistema não podem ser editados.');
+    }
+
+    await financeService.updateTipoReceita(id, igrejaId, req.validatedBody);
+    audit('finance.tipo-receita.update', req, { id, descricao: req.validatedBody.descricao });
+    res.json({ message: 'Tipo de receita atualizado com sucesso.' });
+}
+
+async function deleteTipoReceita(req, res) {
+    const igrejaId = Number(req.auth.igrejaId || 1);
+    const id = String(req.params.id || '').trim();
+
+    const current = await financeService.getTipoReceitaById(id, igrejaId);
+    if (!current) {
+        throw createHttpError(404, 'Tipo de receita não encontrado.');
+    }
+    if (current.origem === 'base') {
+        throw createHttpError(400, 'Tipos padrão do sistema não podem ser removidos.');
+    }
+
+    await financeService.deleteTipoReceita(id, igrejaId);
+    audit('finance.tipo-receita.delete', req, { id });
+    res.json({ message: 'Tipo de receita removido com sucesso.' });
+}
+
 module.exports = {
     createTransacao,
     getSaldo,
@@ -138,5 +186,9 @@ module.exports = {
     createDizimo,
     deleteDizimo,
     getTotaisDizimos,
-    listDizimos
+    listDizimos,
+    createTipoReceita,
+    deleteTipoReceita,
+    listTiposReceita,
+    updateTipoReceita
 };

@@ -26,8 +26,8 @@
         <div class="logo">
             <img src="logo.png" alt="LDFP">
         </div>
-        <h2 style="margin-bottom: 10px; font-size: 22px;">Comece Gratis</h2>
-        <p style="color: #666; font-size: 14px; margin-bottom: 20px;">Crie a conta da sua igreja em segundos.</p>
+        <h2 style="margin-bottom: 10px; font-size: 22px;">Cadastrar Nova Igreja</h2>
+        <p style="color: #666; font-size: 14px; margin-bottom: 20px;">Acesso restrito — apenas administradores autorizados.</p>
         <form>
             <div class="form-group"><label>Nome da Igreja</label><input id="igreja" type="text" placeholder="Ex: Assembleia de Deus..." required></div>
             <div class="form-group"><label>Seu Nome Completo</label><input id="nome" type="text" placeholder="Ex: Pr. Leonardo..." required></div>
@@ -36,10 +36,20 @@
             <button id="btnCriar" type="button" class="btn-register" onclick="criarConta()">Criar Conta</button>
             <div id="status" class="status"></div>
         </form>
-        <p style="margin-top: 20px; font-size: 13px;">Ja tem conta? <a href="login.html" style="color:#f59e0b; font-weight:bold; text-decoration:none;">Fazer Login</a></p>
+        <p style="margin-top: 20px; font-size: 13px;"><a href="javascript:history.back()" style="color:#555; font-size:12px; text-decoration:none;">← Voltar</a></p>
     </div>
     <script src="session.js"></script>
     <script>
+        // Bloqueia qualquer pessoa não autenticada ou sem role admin/super-admin
+        (function () {
+            const auth = window.getStoredAuth ? window.getStoredAuth() : null;
+            const role = auth?.user?.role || '';
+            const allowedRoles = ['super-admin', 'admin'];
+            if (!auth?.token || !allowedRoles.includes(role)) {
+                window.location.replace('login.html');
+            }
+        })();
+
         function extractErrorMessage(data, fallbackMessage) {
             if (!data) {
                 return fallbackMessage;
@@ -101,10 +111,13 @@
                     localStorage.setItem('ldfpUser', JSON.stringify(data.user));
                 }
 
-                status.textContent = 'Conta criada com sucesso!';
+                status.textContent = 'Igreja cadastrada com sucesso!';
                 status.className = 'status success';
                 setTimeout(() => {
-                    window.location.href = 'membros.html';
+                    const role = window.getStoredAuth?.()?.user?.role || '';
+                    window.location.href = ['super-admin', 'master', 'owner'].includes(role)
+                        ? 'super-admin.htm'
+                        : 'dashboard.html';
                 }, 900);
             } catch (err) {
                 status.textContent = err.message || 'Erro inesperado ao criar conta.';
