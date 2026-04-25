@@ -2,53 +2,291 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Criar Conta - LDFP</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Criar Conta — LDFP</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { margin: 0; font-family: 'Segoe UI', sans-serif; background-color: #e5e7eb; display: flex; justify-content: center; align-items: center; height: 100vh; }
-        .register-card { background: white; padding: 40px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 450px; text-align: center; }
-        
-        /* LOGO CENTRALIZADO */
-        .logo img { height: 70px; margin-bottom: 10px; }
+        :root {
+            --dark:   #0f172a;
+            --panel:  #1e293b;
+            --panel2: #0b1120;
+            --accent: #f59e0b;
+            --accent-dark: #d97706;
+            --green:  #22c55e;
+            --border: rgba(255,255,255,0.09);
+            --text:   #f1f5f9;
+            --muted:  #94a3b8;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--dark); color: var(--text); min-height: 100vh; }
 
-        .form-group { margin-bottom: 15px; text-align: left; }
-        .form-group label { display: block; font-size: 13px; font-weight: bold; color: #555; margin-bottom: 5px; }
-        .form-group input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
-        .btn-register { background-color: #111; color: white; width: 100%; padding: 12px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 16px; margin-top: 10px; }
-        .btn-register:hover { background-color: #333; }
-        .btn-register:disabled { opacity: 0.7; cursor: not-allowed; }
-        .status { margin-top: 12px; font-size: 13px; text-align: left; }
-        .status.error { color: #b91c1c; }
-        .status.success { color: #15803d; }
+        /* HEADER */
+        .co-header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 16px 40px; border-bottom: 1px solid var(--border);
+            background: var(--panel);
+        }
+        .co-header-logo {
+            background: rgba(255,255,255,.95); padding: 6px 14px;
+            border-radius: 7px;
+        }
+        .co-header-logo img { height: 40px; display: block; }
+        .co-header-link { font-size: 13px; color: var(--muted); }
+        .co-header-link a { color: var(--accent); font-weight: 700; text-decoration: none; }
+        .co-header-link a:hover { text-decoration: underline; }
+
+        /* BODY LAYOUT */
+        .co-body {
+            max-width: 1100px; margin: 0 auto;
+            padding: 48px 24px 60px;
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 36px;
+            align-items: start;
+        }
+        @media (max-width: 820px) {
+            .co-body { grid-template-columns: 1fr; padding: 28px 16px 48px; }
+            .co-plan-col { order: -1; }
+        }
+
+        /* FORM SIDE */
+        .co-form-col h1 { font-size: 26px; font-weight: 800; margin-bottom: 6px; }
+        .co-form-col h1 span { color: var(--accent); }
+        .co-form-col .co-subtitle { color: var(--muted); font-size: 14px; margin-bottom: 32px; }
+
+        .co-section-label {
+            font-size: 11px; font-weight: 800; letter-spacing: 1px;
+            text-transform: uppercase; color: var(--muted);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 8px; margin-bottom: 20px;
+        }
+
+        .co-field { margin-bottom: 18px; }
+        .co-field label { display: block; font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; }
+        .co-field input {
+            width: 100%; padding: 12px 14px;
+            background: var(--panel); border: 1px solid var(--border);
+            border-radius: 9px; color: var(--text); font-size: 14px;
+            outline: none; transition: border-color .2s;
+        }
+        .co-field input:focus { border-color: var(--accent); }
+        .co-field input::placeholder { color: #475569; }
+
+        .co-field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+        .co-btn {
+            width: 100%; padding: 15px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+            border: none; border-radius: 10px; color: #111;
+            font-size: 16px; font-weight: 800; cursor: pointer;
+            transition: filter .2s, transform .15s; margin-top: 8px;
+        }
+        .co-btn:hover { filter: brightness(1.08); transform: translateY(-1px); }
+        .co-btn:disabled { opacity: .6; cursor: not-allowed; filter: none; transform: none; }
+
+        .co-status { margin-top: 12px; font-size: 13px; border-radius: 7px; padding: 10px 14px; display: none; }
+        .co-status.error { background: rgba(239,68,68,.12); border: 1px solid rgba(239,68,68,.3); color: #f87171; display: block; }
+        .co-status.success { background: rgba(34,197,94,.1); border: 1px solid rgba(34,197,94,.3); color: var(--green); display: block; }
+
+        .co-terms { margin-top: 14px; font-size: 12px; color: var(--muted); text-align: center; line-height: 1.6; }
+        .co-terms a { color: var(--accent); text-decoration: none; }
+
+        /* PLAN SIDE */
+        .co-plan-card {
+            background: var(--panel2);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+            position: sticky; top: 24px;
+        }
+        .co-plan-header {
+            background: linear-gradient(135deg, #1a2235, #0f1e35);
+            padding: 24px 24px 20px;
+            border-bottom: 1px solid var(--border);
+        }
+        .co-plan-badge {
+            display: inline-block;
+            background: rgba(245,158,11,.15); border: 1px solid rgba(245,158,11,.35);
+            color: var(--accent); font-size: 10px; font-weight: 800;
+            letter-spacing: .8px; text-transform: uppercase;
+            border-radius: 999px; padding: 3px 10px; margin-bottom: 10px;
+        }
+        .co-plan-name { font-size: 22px; font-weight: 800; margin-bottom: 2px; }
+        .co-plan-sub { font-size: 13px; color: var(--muted); }
+        .co-plan-price { margin-top: 16px; display: flex; align-items: baseline; gap: 4px; }
+        .co-plan-price .cur { color: var(--accent); font-size: 16px; font-weight: 800; }
+        .co-plan-price .val { font-size: 40px; font-weight: 900; line-height: 1; letter-spacing: -1px; }
+        .co-plan-price .per { font-size: 13px; color: var(--muted); }
+        .co-plan-trial {
+            margin-top: 10px;
+            display: inline-flex; align-items: center; gap: 6px;
+            background: rgba(34,197,94,.12); border: 1px solid rgba(34,197,94,.3);
+            color: var(--green); font-size: 12px; font-weight: 700;
+            border-radius: 999px; padding: 4px 12px;
+        }
+
+        .co-plan-body { padding: 20px 24px 24px; }
+        .co-plan-section-label {
+            font-size: 10px; font-weight: 800; letter-spacing: 1px;
+            text-transform: uppercase; color: var(--muted); margin-bottom: 12px;
+        }
+        .co-plan-features { list-style: none; display: flex; flex-direction: column; gap: 9px; }
+        .co-plan-features li { display: flex; align-items: center; gap: 9px; font-size: 13px; }
+        .co-plan-features li .icon-yes {
+            width: 18px; height: 18px; border-radius: 50%;
+            background: rgba(34,197,94,.15); color: var(--green);
+            display: inline-flex; align-items: center; justify-content: center;
+            font-size: 9px; flex-shrink: 0;
+        }
+
+        .co-plan-total {
+            margin-top: 20px; padding-top: 16px;
+            border-top: 1px solid var(--border);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .co-plan-total .label { font-size: 13px; color: var(--muted); }
+        .co-plan-total .value { font-size: 18px; font-weight: 800; color: var(--accent); }
+
+        .co-secure {
+            margin-top: 16px; display: flex; align-items: center; justify-content: center;
+            gap: 6px; font-size: 12px; color: var(--muted);
+        }
+        .co-secure i { color: var(--green); }
+
+        .co-change-plan {
+            display: block; text-align: center; margin-top: 14px;
+            font-size: 12px; color: var(--muted); text-decoration: none;
+        }
+        .co-change-plan:hover { color: var(--accent); }
     </style>
 </head>
-<body class="theme-petroleo">
-    <div class="register-card">
-        <div class="logo">
+<body>
+    <header class="co-header">
+        <div class="co-header-logo">
             <img src="logo.png" alt="LDFP">
         </div>
-        <h2 style="margin-bottom: 10px; font-size: 22px;">Cadastrar Nova Igreja</h2>
-        <p style="color: #666; font-size: 14px; margin-bottom: 20px;">Acesso restrito — apenas administradores autorizados.</p>
-        <form>
-            <div class="form-group"><label>Nome da Igreja</label><input id="igreja" type="text" placeholder="Ex: Assembleia de Deus..." required></div>
-            <div class="form-group"><label>Seu Nome Completo</label><input id="nome" type="text" placeholder="Ex: Pr. Leonardo..." required></div>
-            <div class="form-group"><label>Email</label><input id="email" type="email" placeholder="seu@email.com" required></div>
-            <div class="form-group"><label>Crie uma Senha</label><input id="senha" type="password" placeholder="********" required></div>
-            <button id="btnCriar" type="button" class="btn-register" onclick="criarConta()">Criar Conta</button>
-            <div id="status" class="status"></div>
-        </form>
-        <p style="margin-top: 20px; font-size: 13px;"><a href="javascript:history.back()" style="color:#555; font-size:12px; text-decoration:none;">← Voltar</a></p>
+        <div class="co-header-link">
+            Já tem uma conta? <a href="login.html">Entrar</a>
+        </div>
+    </header>
+
+    <div class="co-body">
+        <!-- COLUNA FORMULÁRIO -->
+        <div class="co-form-col">
+            <h1>Crie sua conta <span>LDFP</span></h1>
+            <p class="co-subtitle">Preencha os dados abaixo para começar. Sem cartão de crédito obrigatório no plano gratuito.</p>
+
+            <div class="co-section-label">Dados da Igreja</div>
+
+            <div class="co-field">
+                <label>Nome da Igreja / Ministério</label>
+                <input id="igreja" type="text" placeholder="Ex: Igreja Batista Central..." required>
+            </div>
+
+            <div class="co-section-label" style="margin-top:28px;">Seu Acesso</div>
+
+            <div class="co-field">
+                <label>Seu Nome Completo</label>
+                <input id="nome" type="text" placeholder="Ex: Pr. Leonardo Pereira..." required>
+            </div>
+            <div class="co-field">
+                <label>E-mail</label>
+                <input id="email" type="email" placeholder="seu@email.com" required>
+            </div>
+            <div class="co-field">
+                <label>Crie uma Senha</label>
+                <input id="senha" type="password" placeholder="Mínimo 8 caracteres" required>
+            </div>
+
+            <button id="btnCriar" type="button" class="co-btn" onclick="criarConta()">
+                <i class="fa-solid fa-rocket"></i> &nbsp;Criar Conta e Começar
+            </button>
+            <div id="status" class="co-status"></div>
+
+            <p class="co-terms">
+                Ao criar sua conta você concorda com os <a href="#">Termos de Uso</a> e a <a href="#">Política de Privacidade</a>.
+            </p>
+        </div>
+
+        <!-- COLUNA PLANO -->
+        <div class="co-plan-col">
+            <div class="co-plan-card">
+                <div class="co-plan-header">
+                    <div class="co-plan-badge" id="planBadge">Plano Selecionado</div>
+                    <div class="co-plan-name" id="planNome">Ararate</div>
+                    <div class="co-plan-sub" id="planSub">Igrejas Pequenas</div>
+                    <div class="co-plan-price">
+                        <span class="cur" id="planCur">R$</span>
+                        <span class="val" id="planVal">50</span>
+                        <span class="per">/mês</span>
+                    </div>
+                    <div class="co-plan-trial" id="planTrial">
+                        <i class="fa-solid fa-gift"></i>
+                        <span id="planTrialTxt">7 dias grátis</span>
+                    </div>
+                </div>
+                <div class="co-plan-body">
+                    <div class="co-plan-section-label">O que está incluído</div>
+                    <ul class="co-plan-features" id="planFeatures"></ul>
+                    <div class="co-plan-total">
+                        <span class="label">Hoje você paga</span>
+                        <span class="value" id="planHoje">R$ 0,00</span>
+                    </div>
+                    <div class="co-secure">
+                        <i class="fa-solid fa-shield-halved"></i>
+                        <span>Ambiente seguro · Dados protegidos</span>
+                    </div>
+                    <a href="planos.html" class="co-change-plan">
+                        <i class="fa-solid fa-arrows-rotate"></i> Trocar de plano
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
+
     <script src="session.js"></script>
     <script>
-        // Bloqueia qualquer pessoa não autenticada ou sem role admin/super-admin
-        (function () {
-            const auth = window.getStoredAuth ? window.getStoredAuth() : null;
-            const role = auth?.user?.role || '';
-            const allowedRoles = ['super-admin', 'admin'];
-            if (!auth?.token || !allowedRoles.includes(role)) {
-                window.location.replace('login.html');
+        // — Dados dos planos —
+        const PLANOS = {
+            gratuito: { nome:'Gratuito', sub:'Com Anúncios', preco:0, trial:'1 mês grátis', hoje:'R$ 0,00',
+                features:['App Web instalável (PWA)','Até 40 cadastros','1 congregação','Escola Bíblica (EBD)','Grupos e Células','Financeiro com limites'] },
+            ararate: { nome:'Ararate', sub:'Igrejas Pequenas', preco:50, trial:'7 dias grátis', hoje:'R$ 0,00',
+                features:['App Web instalável (PWA)','Até 100 cadastros','1 congregação','Escola Bíblica (EBD)','Credencial de Membro','Grupos e Células','Suporte via e-mail'] },
+            hebrom: { nome:'Hebrom', sub:'Igrejas em Crescimento', preco:80, trial:'7 dias grátis', hoje:'R$ 0,00',
+                features:['App Web instalável (PWA)','Até 150 cadastros','1 congregação','Escola Bíblica (EBD)','Credencial de Membro','Grupos e Células','Suporte via e-mail'] },
+            betel: { nome:'Betel', sub:'Igrejas Ativas', preco:100, trial:'7 dias grátis', hoje:'R$ 0,00',
+                features:['App Web instalável (PWA)','App do Membro','Até 300 cadastros','Até 5 congregações','EBD','Credencial de Membro','Grupos e Células','Suporte via e-mail','Suporte via WhatsApp'] },
+            siao: { nome:'Sião', sub:'Igrejas Grandes', preco:150, trial:'7 dias grátis', hoje:'R$ 0,00',
+                features:['App Web instalável (PWA)','App do Membro','1.000+ cadastros','Congregações ilimitadas','EBD','Credencial de Membro','Grupos e Células','Suporte prioritário','Consultoria Contábil'] },
+            carmelo: { nome:'Carmelo', sub:'Igrejas em Crescimento', preco:100, trial:'7 dias grátis', hoje:'R$ 0,00',
+                features:['App Web instalável (PWA)','App do Membro','Até 500 cadastros','Até 10 congregações','EBD','Credencial de Membro','Grupos e Células','Suporte via e-mail','Suporte via WhatsApp','Suporte via Telefone'] }
+        };
+
+        function renderPlano() {
+            const params = new URLSearchParams(window.location.search);
+            const slug = (params.get('plano') || 'ararate').toLowerCase();
+            const p = PLANOS[slug] || PLANOS['ararate'];
+
+            document.getElementById('planNome').textContent = p.nome;
+            document.getElementById('planSub').textContent = p.sub;
+            document.getElementById('planVal').textContent = p.preco === 0 ? '0' : p.preco.toString().padStart(2,'0');
+            document.getElementById('planCur').textContent = 'R$';
+            document.getElementById('planTrialTxt').textContent = p.trial;
+            document.getElementById('planHoje').textContent = p.hoje;
+
+            if (p.preco === 0) {
+                document.getElementById('planBadge').textContent = 'Gratuito com Anúncios';
+            } else {
+                document.getElementById('planBadge').textContent = 'Plano ' + p.nome;
             }
-        })();
+
+            const ul = document.getElementById('planFeatures');
+            ul.innerHTML = p.features.map(f =>
+                `<li><span class="icon-yes"><i class="fa-solid fa-check"></i></span>${f}</li>`
+            ).join('');
+        }
+
+        renderPlano();
 
         function extractErrorMessage(data, fallbackMessage) {
             if (!data) {
@@ -67,28 +305,28 @@
             const senha = document.getElementById('senha').value;
 
             status.textContent = '';
-            status.className = 'status';
+            status.className = 'co-status';
 
             if (!igreja || !nome || !email || !senha) {
                 status.textContent = 'Preencha todos os campos antes de continuar.';
-                status.className = 'status error';
+                status.className = 'co-status error';
                 return;
             }
 
             if (!/^\S+@\S+\.\S+$/.test(email)) {
-                status.textContent = 'Digite um e-mail valido.';
-                status.className = 'status error';
+                status.textContent = 'Digite um e-mail válido.';
+                status.className = 'co-status error';
                 return;
             }
 
             if (senha.length < 8) {
                 status.textContent = 'A senha deve ter pelo menos 8 caracteres.';
-                status.className = 'status error';
+                status.className = 'co-status error';
                 return;
             }
 
             btn.disabled = true;
-            btn.textContent = 'Enviando...';
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> &nbsp;Criando conta...';
 
             try {
                 const resp = await fetch('/criar-conta', {
@@ -111,8 +349,8 @@
                     localStorage.setItem('ldfpUser', JSON.stringify(data.user));
                 }
 
-                status.textContent = 'Igreja cadastrada com sucesso!';
-                status.className = 'status success';
+                status.textContent = '✅ Igreja cadastrada com sucesso! Redirecionando...';
+                status.className = 'co-status success';
                 setTimeout(() => {
                     const role = window.getStoredAuth?.()?.user?.role || '';
                     window.location.href = ['super-admin', 'master', 'owner'].includes(role)
@@ -121,10 +359,10 @@
                 }, 900);
             } catch (err) {
                 status.textContent = err.message || 'Erro inesperado ao criar conta.';
-                status.className = 'status error';
+                status.className = 'co-status error';
             } finally {
                 btn.disabled = false;
-                btn.textContent = 'Criar Conta';
+                btn.innerHTML = '<i class="fa-solid fa-rocket"></i> &nbsp;Criar Conta e Começar';
             }
         }
 
