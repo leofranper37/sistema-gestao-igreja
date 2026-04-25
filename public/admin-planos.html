@@ -128,8 +128,9 @@ async function loadPlanos() {
 
 function renderPlanos(planos) {
   const grid = document.getElementById('plansGrid');
-  if (!planos.length) { grid.innerHTML = '<p>Nenhum plano encontrado.</p>'; return; }
-  grid.innerHTML = planos.map(p => planCard(p)).join('');
+  const planosVisiveis = (planos || []).filter(p => String(p.slug || '').toLowerCase() !== 'eden');
+  if (!planosVisiveis.length) { grid.innerHTML = '<p>Nenhum plano encontrado.</p>'; return; }
+  grid.innerHTML = planosVisiveis.map(p => planCard(p)).join('');
 }
 
 function planCard(p) {
