@@ -9,10 +9,21 @@
     <style>
         .bl-wrap { padding: 24px 28px 48px; }
 
+        .bl-hero {
+            background: linear-gradient(135deg, #0f172a 0%, #0b3340 50%, #115e59 100%);
+            border-radius: 16px;
+            color: #e2e8f0;
+            padding: 18px 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 16px 34px rgba(15, 23, 42, .2);
+        }
+        .bl-hero h2 { margin: 0 0 6px; font-size: 22px; }
+        .bl-hero p { margin: 0; color: #bfdbfe; font-size: 13px; }
+
         /* ── Escolha do banco ── */
         .bl-section-header {
-            background: #ffc107;
-            border-radius: 8px 8px 0 0;
+            background: linear-gradient(135deg, #0ea5e9, #0f766e);
+            border-radius: 12px 12px 0 0;
             padding: 14px 18px;
             display: flex;
             align-items: center;
@@ -23,7 +34,7 @@
             margin: 0;
             font-size: 15px;
             font-weight: 700;
-            color: #1a1a1a;
+            color: #ecfeff;
         }
         .bl-search-row {
             display: flex;
@@ -37,7 +48,7 @@
             font-size: 13.5px;
         }
         .bl-search-row button {
-            background: #333;
+            background: #0f172a;
             color: #fff;
             border: none;
             border-radius: 6px;
@@ -47,11 +58,12 @@
         }
         .bl-table-wrap {
             background: #fff;
-            border: 1px solid #e5e7eb;
+            border: 1px solid #dbe6f3;
             border-top: none;
-            border-radius: 0 0 8px 8px;
+            border-radius: 0 0 12px 12px;
             overflow-x: auto;
             margin-bottom: 32px;
+            box-shadow: 0 10px 24px rgba(15,23,42,.08);
         }
         .bl-table {
             width: 100%;
@@ -110,11 +122,11 @@
             margin-bottom: 20px;
         }
         .bl-card {
-            background: #fff;
-            border: 1px solid #e5e7eb;
+            background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+            border: 1px solid #dbe6f3;
             border-radius: 12px;
             padding: 18px;
-            box-shadow: 0 4px 14px rgba(15,23,42,.07);
+            box-shadow: 0 8px 20px rgba(15,23,42,.08);
         }
         .bl-card h4 { margin: 0 0 14px; font-size: 14px; color: #374151; }
         .bl-field { margin-bottom: 10px; }
@@ -152,6 +164,7 @@
         .bl-msg.error { color: #b91c1c; }
 
         .bl-historico { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 18px; box-shadow: 0 4px 14px rgba(15,23,42,.07); }
+        .bl-historico { border-color: #dbe6f3; box-shadow: 0 8px 20px rgba(15,23,42,.08); }
         .bl-historico-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; flex-wrap: wrap; gap: 8px; }
         .bl-historico-top h4 { margin: 0; font-size: 14px; }
         .bl-historico-top input { border: 1px solid #dbe3ef; border-radius: 8px; padding: 8px 12px; font-size: 13px; width: 220px; }
@@ -181,6 +194,11 @@
       data-shell-chip="Tesouraria">
 <main class="main-content enterprise-main">
 <div class="bl-wrap">
+
+    <section class="bl-hero">
+        <h2><i class="fa-solid fa-money-bill-transfer"></i> Lancamentos Bancarios</h2>
+        <p>Controle profissional de entradas e saidas com resumo em tempo real no padrao visual LDFP.</p>
+    </section>
 
     <!-- ── Escolha o Banco ──────────────────────────────────────────── -->
     <div id="tela-escolha">

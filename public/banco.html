@@ -7,13 +7,39 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        .wrap { max-width: 1100px; margin: 0 auto; padding: 18px 14px 40px; }
-        .main-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 14px; }
-        .card { background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; box-shadow: 0 6px 20px rgba(15,23,42,.08); padding: 16px; }
+        .wrap { max-width: 1180px; margin: 0 auto; padding: 24px 18px 44px; }
+        .hero {
+            background: linear-gradient(130deg, #0f172a 0%, #0b3340 55%, #115e59 100%);
+            border-radius: 16px;
+            padding: 18px 20px;
+            color: #e2e8f0;
+            margin-bottom: 16px;
+            box-shadow: 0 16px 36px rgba(15, 23, 42, .22);
+        }
+        .hero h2 { margin: 0 0 6px; font-size: 21px; }
+        .hero p { margin: 0; color: #bfdbfe; font-size: 13px; }
+        .main-grid { display: grid; grid-template-columns: 1.55fr 1fr; gap: 14px; }
+        .card {
+            background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+            border: 1px solid #d9e4f0;
+            border-radius: 14px;
+            box-shadow: 0 10px 24px rgba(15,23,42,.08);
+            padding: 16px;
+        }
         .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
-        .card-header h2 { margin: 0; font-size: 15px; color: #155e75; }
-        .btn { border: 0; border-radius: 8px; padding: 9px 14px; font-size: 13px; font-weight: 700; cursor: pointer; color: #fff; }
-        .btn-primary { background: #0f766e; }
+        .card-header h2 { margin: 0; font-size: 15px; color: #0f4c66; }
+        .btn {
+            border: 0;
+            border-radius: 8px;
+            padding: 9px 14px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            color: #fff;
+            transition: transform .12s ease, filter .12s ease;
+        }
+        .btn:hover { transform: translateY(-1px); filter: brightness(1.04); }
+        .btn-primary { background: linear-gradient(135deg, #0ea5e9, #0f766e); }
         .btn-del { background: #dc2626; padding: 5px 8px; font-size: 11px; }
         .btn-edit { background: #0284c7; padding: 5px 8px; font-size: 11px; }
         input, select, textarea { width: 100%; border: 1px solid #dbe3ef; border-radius: 8px; padding: 9px 12px; font-size: 13.5px; box-sizing: border-box; margin-bottom: 6px; }
@@ -22,7 +48,8 @@
         .form-row .full { grid-column: 1/-1; }
         table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
         th, td { border-bottom: 1px solid #f1f5f9; padding: 9px 8px; text-align: left; }
-        th { background: #f8fafc; color: #64748b; font-size: 11px; text-transform: uppercase; font-weight: 700; }
+        th { background: #eff6ff; color: #475569; font-size: 11px; text-transform: uppercase; font-weight: 700; }
+        tbody tr:hover { background: #f0f9ff; }
         .badge { display: inline-block; padding: 2px 8px; border-radius: 99px; font-size: 10.5px; font-weight: 700; }
         .badge-corrente { background: #dbeafe; color: #1d4ed8; }
         .badge-poupanca { background: #dcfce7; color: #15803d; }
@@ -39,6 +66,11 @@
 <body class="theme-petroleo" data-shell-title="Contas Bancárias" data-shell-breadcrumb="LDFP / Tesouraria / Banco" data-shell-active="banco.html" data-shell-chip="Tesouraria ativa">
 <main class="main-content enterprise-main">
 <div class="wrap">
+    <section class="hero">
+        <h2><i class="fa-solid fa-building-columns"></i> Contas Bancarias</h2>
+        <p>Gestao centralizada das contas da igreja com operacao rapida e visual profissional no padrao LDFP.</p>
+    </section>
+
     <div class="main-grid">
 
         <!-- Lista de contas -->

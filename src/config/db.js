@@ -471,6 +471,38 @@ async function initializeDatabase() {
         await activePgPool.query(`CREATE INDEX IF NOT EXISTS idx_payment_links_igreja ON payment_links (igreja_id)`);
         await activePgPool.query(`CREATE INDEX IF NOT EXISTS idx_payment_links_reference ON payment_links (reference_code)`);
 
+        await activePgPool.query(`CREATE TABLE IF NOT EXISTS banco_contas (
+            id SERIAL PRIMARY KEY,
+            igreja_id INTEGER NOT NULL,
+            nome VARCHAR(255) NOT NULL,
+            banco VARCHAR(255) NULL,
+            agencia VARCHAR(120) NULL,
+            conta VARCHAR(120) NULL,
+            tipo VARCHAR(50) NOT NULL DEFAULT 'corrente',
+            saldo_inicial DECIMAL(12,2) NOT NULL DEFAULT 0,
+            observacao TEXT NULL,
+            ativo SMALLINT NOT NULL DEFAULT 1,
+            created_by INTEGER NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )`);
+        await activePgPool.query(`CREATE INDEX IF NOT EXISTS idx_banco_contas_igreja ON banco_contas (igreja_id)`);
+
+        await activePgPool.query(`CREATE TABLE IF NOT EXISTS banco_lancamentos (
+            id SERIAL PRIMARY KEY,
+            conta_id INTEGER NOT NULL,
+            igreja_id INTEGER NOT NULL,
+            descricao VARCHAR(255) NOT NULL,
+            tipo VARCHAR(30) NOT NULL,
+            valor DECIMAL(12,2) NOT NULL,
+            data_lancamento DATE NOT NULL,
+            observacao TEXT NULL,
+            created_by INTEGER NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )`);
+        await activePgPool.query(`CREATE INDEX IF NOT EXISTS idx_banco_lancamentos_conta ON banco_lancamentos (conta_id)`);
+        await activePgPool.query(`CREATE INDEX IF NOT EXISTS idx_banco_lancamentos_igreja ON banco_lancamentos (igreja_id)`);
+
         await activePgPool.query(`CREATE TABLE IF NOT EXISTS pedidos_oracao (
             id SERIAL PRIMARY KEY,
             igreja_id INTEGER NOT NULL DEFAULT 1,
@@ -630,6 +662,38 @@ async function initializeDatabase() {
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             INDEX idx_payment_links_igreja (igreja_id),
             INDEX idx_payment_links_reference (reference_code)
+        )`);
+
+        await activeMysqlPool.query(`CREATE TABLE IF NOT EXISTS banco_contas (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            igreja_id INT NOT NULL,
+            nome VARCHAR(255) NOT NULL,
+            banco VARCHAR(255) NULL,
+            agencia VARCHAR(120) NULL,
+            conta VARCHAR(120) NULL,
+            tipo VARCHAR(50) NOT NULL DEFAULT 'corrente',
+            saldo_inicial DECIMAL(12,2) NOT NULL DEFAULT 0,
+            observacao TEXT NULL,
+            ativo TINYINT(1) NOT NULL DEFAULT 1,
+            created_by INT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            INDEX idx_banco_contas_igreja (igreja_id)
+        )`);
+
+        await activeMysqlPool.query(`CREATE TABLE IF NOT EXISTS banco_lancamentos (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            conta_id INT NOT NULL,
+            igreja_id INT NOT NULL,
+            descricao VARCHAR(255) NOT NULL,
+            tipo VARCHAR(30) NOT NULL,
+            valor DECIMAL(12,2) NOT NULL,
+            data_lancamento DATE NOT NULL,
+            observacao TEXT NULL,
+            created_by INT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            INDEX idx_banco_lancamentos_conta (conta_id),
+            INDEX idx_banco_lancamentos_igreja (igreja_id)
         )`);
 
         await activeMysqlPool.query(`CREATE TABLE IF NOT EXISTS pedidos_oracao (
@@ -837,6 +901,38 @@ async function initializeDatabase() {
 
             db.run(`CREATE INDEX IF NOT EXISTS idx_payment_links_igreja ON payment_links (igreja_id)`);
             db.run(`CREATE INDEX IF NOT EXISTS idx_payment_links_reference ON payment_links (reference_code)`);
+
+            db.run(`CREATE TABLE IF NOT EXISTS banco_contas (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                igreja_id INTEGER NOT NULL,
+                nome TEXT NOT NULL,
+                banco TEXT NULL,
+                agencia TEXT NULL,
+                conta TEXT NULL,
+                tipo TEXT NOT NULL DEFAULT 'corrente',
+                saldo_inicial REAL NOT NULL DEFAULT 0,
+                observacao TEXT NULL,
+                ativo INTEGER NOT NULL DEFAULT 1,
+                created_by INTEGER,
+                created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+                updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+            )`);
+            db.run(`CREATE INDEX IF NOT EXISTS idx_banco_contas_igreja ON banco_contas (igreja_id)`);
+
+            db.run(`CREATE TABLE IF NOT EXISTS banco_lancamentos (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                conta_id INTEGER NOT NULL,
+                igreja_id INTEGER NOT NULL,
+                descricao TEXT NOT NULL,
+                tipo TEXT NOT NULL,
+                valor REAL NOT NULL,
+                data_lancamento TEXT NOT NULL,
+                observacao TEXT,
+                created_by INTEGER,
+                created_at TEXT DEFAULT CURRENT_TIMESTAMP
+            )`);
+            db.run(`CREATE INDEX IF NOT EXISTS idx_banco_lancamentos_conta ON banco_lancamentos (conta_id)`);
+            db.run(`CREATE INDEX IF NOT EXISTS idx_banco_lancamentos_igreja ON banco_lancamentos (igreja_id)`);
 
             db.run(`CREATE TABLE IF NOT EXISTS pedidos_oracao (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
