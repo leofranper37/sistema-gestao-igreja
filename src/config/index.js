@@ -58,12 +58,20 @@ const parseJwtExpiresIn = () => {
         return '12h';
     }
 
-    const numeric = Number(raw);
+    const normalized = String(raw).trim().toLowerCase();
+
+    // Valores nulos/zerados com sufixo (ex.: 0, 0s, 0m, 0h) ou negativos geram token
+    // imediatamente expirado no jsonwebtoken, então usamos fallback seguro.
+    if (/^[-+]?0+(?:\.[0]+)?(?:ms|s|m|h|d)?$/.test(normalized) || /^-/.test(normalized)) {
+        return '12h';
+    }
+
+    const numeric = Number(normalized);
     if (Number.isFinite(numeric)) {
         return numeric > 0 ? String(numeric) : '12h';
     }
 
-    return raw;
+    return normalized;
 };
 
 const databaseUrlConfig = parseDatabaseUrl();
