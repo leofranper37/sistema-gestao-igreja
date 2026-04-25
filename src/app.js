@@ -80,8 +80,6 @@ app.get(['/index.htm', '/INDEX.HTM'], (req, res) => {
     res.redirect(301, '/index.html');
 });
 
-app.use(express.static(path.join(__dirname, '..', 'public')));
-
 app.use((req, res, next) => {
     if (!maintenanceModeEnabled) {
         return next();
@@ -100,6 +98,8 @@ app.use((req, res, next) => {
 
     return res.status(503).sendFile(path.join(__dirname, '..', 'public', 'maintenance.html'));
 });
+
+app.use(express.static(path.join(__dirname, '..', 'public')));
 
 app.use((req, res, next) => {
     const startedAt = Date.now();
