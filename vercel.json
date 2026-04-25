@@ -1,8 +1,13 @@
 {
-  "rewrites": [
+  "version": 2,
+  "routes": [
     {
-      "source": "/(.*)",
-      "destination": "/maintenance.html"
+      "src": "/maintenance.html",
+      "dest": "/maintenance.html"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/maintenance.html"
     }
   ]
 }
