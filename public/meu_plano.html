@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Planos - LDFP</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f3f4f6; color: #222; }
         
@@ -56,6 +57,221 @@
         
         .btn-select.filled { background: #f59e0b; color: #000; }
         .btn-select.filled:hover { background: #d97706; color: #fff; }
+
+        /* Modal de planos no mesmo padrao visual da tela publica */
+        .mpm-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.82);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 22px;
+        }
+        .mpm-dialog {
+            width: min(1260px, 98vw);
+            max-height: 92vh;
+            overflow: auto;
+            border-radius: 16px;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: #07090f;
+            color: #f1f5f9;
+            padding: 20px;
+            box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55);
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+        }
+        .mpm-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+        }
+        .mpm-title {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: -0.4px;
+        }
+        .mpm-close {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.18);
+            color: #cbd5e1;
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 18px;
+        }
+        .mpm-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #111827;
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 999px;
+            padding: 6px;
+            position: relative;
+            margin-bottom: 18px;
+        }
+        .mpm-toggle button {
+            background: transparent;
+            border: none;
+            color: #94a3b8;
+            font-weight: 700;
+            font-size: 13px;
+            padding: 8px 18px;
+            border-radius: 999px;
+            position: relative;
+            z-index: 1;
+            cursor: pointer;
+        }
+        .mpm-toggle button.active { color: #111827; }
+        .mpm-slider {
+            position: absolute;
+            top: 6px;
+            left: 6px;
+            height: calc(100% - 12px);
+            border-radius: 999px;
+            background: linear-gradient(135deg, #fbbf24, #d97706);
+            box-shadow: 0 2px 10px rgba(245, 158, 11, 0.45);
+            transition: left .25s ease, width .25s ease;
+        }
+        .mpm-discount {
+            background: rgba(34,197,94,0.2);
+            border: 1px solid rgba(34,197,94,0.35);
+            color: #22c55e;
+            font-size: 10px;
+            font-weight: 800;
+            border-radius: 999px;
+            padding: 2px 8px;
+            margin-left: 6px;
+        }
+        .mpm-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+        }
+        .mpm-card {
+            background: #111827;
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 16px;
+            padding: 20px 16px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            min-height: 550px;
+        }
+        .mpm-card.featured {
+            border: 2px solid #fbbf24;
+            background: linear-gradient(160deg, #1a2235 0%, #111827 100%);
+        }
+        .mpm-badge {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(90deg, #fbbf24, #d97706);
+            color: #111;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: .7px;
+            padding: 4px 12px;
+            border-bottom-left-radius: 10px;
+            border-bottom-right-radius: 10px;
+        }
+        .mpm-icon { font-size: 24px; margin: 8px 0 10px; }
+        .mpm-name-tag {
+            display: inline-block;
+            align-self: flex-start;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: .9px;
+            text-transform: uppercase;
+            color: #fbbf24;
+            background: rgba(245,158,11,.12);
+            border: 1px solid rgba(245,158,11,.24);
+            border-radius: 999px;
+            padding: 3px 8px;
+            margin-bottom: 8px;
+        }
+        .mpm-name { font-size: 26px; font-weight: 800; margin: 0 0 4px; }
+        .mpm-subtitle { color: #94a3b8; font-size: 12px; margin-bottom: 12px; }
+        .mpm-verse {
+            border-left: 2px solid rgba(245,158,11,0.35);
+            color: rgba(245,158,11,.78);
+            font-style: italic;
+            font-size: 11px;
+            line-height: 1.45;
+            padding-left: 9px;
+            margin-bottom: 14px;
+        }
+        .mpm-price {
+            margin-bottom: 14px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            padding-bottom: 10px;
+        }
+        .mpm-currency { color: #fbbf24; font-weight: 800; font-size: 16px; vertical-align: top; }
+        .mpm-amount { font-size: 42px; font-weight: 900; line-height: 1; letter-spacing: -1.2px; }
+        .mpm-period { display: block; font-size: 12px; color: #94a3b8; margin-top: 3px; }
+        .mpm-annual-note { display: none; font-size: 11px; color: #22c55e; margin-top: 3px; font-weight: 700; }
+        .mpm-features {
+            list-style: none;
+            margin: 0 0 14px;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex: 1;
+        }
+        .mpm-features li {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: #e2e8f0;
+        }
+        .mpm-features li.disabled {
+            color: #64748b;
+            text-decoration: line-through;
+            opacity: .7;
+        }
+        .mpm-yes, .mpm-no {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 9px;
+            flex-shrink: 0;
+        }
+        .mpm-yes { background: rgba(34,197,94,.15); color: #22c55e; }
+        .mpm-no { background: rgba(239,68,68,.12); color: #ef4444; }
+        .mpm-btn {
+            width: 100%;
+            border: none;
+            border-radius: 10px;
+            padding: 12px 14px;
+            font-size: 14px;
+            font-weight: 800;
+            cursor: pointer;
+            background: linear-gradient(135deg, #fbbf24, #d97706);
+            color: #111;
+        }
+        .mpm-btn-outline {
+            background: rgba(245,158,11,0.08);
+            border: 1px solid rgba(245,158,11,0.3);
+            color: #fbbf24;
+        }
+        .mpm-note {
+            margin-top: 8px;
+            text-align: center;
+            font-size: 10px;
+            color: #94a3b8;
+        }
+        @media (max-width: 1180px) { .mpm-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 700px) { .mpm-grid { grid-template-columns: 1fr; } .mpm-dialog { padding: 16px; } }
 
     </style>
 </head>
@@ -125,102 +341,229 @@
                     </div>
                 </div>
                 <div style="margin-top:32px;text-align:center;">
-                            <!-- Modal de alteraÃ§Ã£o de planos -->
-                            <div id="modalAlterarPlano" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.85);z-index:2000;align-items:center;justify-content:center;">
-                                <div style="background:#fff;padding:40px 20px 30px 20px;border-radius:16px;max-width:1100px;width:98vw;box-shadow:0 8px 40px #000;position:relative;">
-                                    <button onclick="document.getElementById('modalAlterarPlano').style.display='none'" style="position:absolute;top:18px;right:18px;background:none;border:none;color:#222;font-size:22px;cursor:pointer;">&times;</button>
-                                    <h2 style="color:#f59e0b;text-align:center;margin-bottom:10px;">Escolha seu Plano</h2>
-                                    <div style="display:flex;justify-content:center;align-items:center;margin-bottom:24px;gap:12px;">
-                                        <button id="btnMensal" style="background:#fbbf24;color:#222;font-weight:700;padding:8px 28px;border-radius:20px;border:none;font-size:16px;box-shadow:0 2px 8px #0001;cursor:pointer;">Mensal</button>
-                                        <button id="btnAnual" style="background:#eee;color:#222;font-weight:700;padding:8px 28px;border-radius:20px;border:none;font-size:16px;box-shadow:0 2px 8px #0001;cursor:pointer;">Anual <span style='background:#22c55e;color:#fff;padding:2px 10px;border-radius:10px;font-size:12px;margin-left:8px;'>Economize atÃ© 16%</span></button>
+                            <div id="modalAlterarPlano" class="mpm-overlay">
+                                <div class="mpm-dialog">
+                                    <div class="mpm-top">
+                                        <h2 class="mpm-title">Escolha seu plano</h2>
+                                        <button class="mpm-close" id="btnFecharModal" aria-label="Fechar">&times;</button>
                                     </div>
-                                    <div id="planosGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px;">
-                                        <!-- Os cards dos planos serÃ£o preenchidos via JS -->
+
+                                    <div class="mpm-toggle" id="billingToggleModal">
+                                        <div class="mpm-slider" id="toggleSliderModal"></div>
+                                        <button class="active" id="btnMensalModal">Mensal</button>
+                                        <button id="btnAnualModal">Anual <span class="mpm-discount">-17%</span></button>
                                     </div>
+
+                                    <div id="planosGrid" class="mpm-grid"></div>
                                 </div>
                             </div>
                             <script>
-                            // Dados dos planos
-                            // Adicionais para Carmelo
-                            let adicionais = { cadastros: 0, congregacoes: 0 };
-                            const planos = {
-                                mensal: [
-                                    { nome: 'Ararate', cadastros: 100, congregacoes: 1, preco: 50, recursos: ['App do Membro','Suporte via e-mail'], whatsapp: false, telefone: false, popular: false },
-                                    { nome: 'Sinai', cadastros: 300, congregacoes: 5, preco: 80, recursos: ['App do Membro','Suporte via e-mail','Suporte via WhatsApp'], whatsapp: true, telefone: false, popular: true },
-                                    { nome: 'Carmelo', cadastros: 500, congregacoes: 10, preco: 100, recursos: ['App do Membro','Suporte via e-mail','Suporte via WhatsApp','Suporte via Telefone'], whatsapp: true, telefone: true, popular: false }
-                                ],
-                                anual: [
-                                    { nome: 'Ararate', cadastros: 100, congregacoes: 1, preco: 500, recursos: ['App do Membro','Suporte via e-mail'], whatsapp: false, telefone: false, popular: false },
-                                    { nome: 'Sinai', cadastros: 300, congregacoes: 5, preco: 1000, recursos: ['App do Membro','Suporte via e-mail','Suporte via WhatsApp'], whatsapp: true, telefone: false, popular: true },
-                                    { nome: 'Carmelo', cadastros: 500, congregacoes: 10, preco: 1200, recursos: ['App do Membro','Suporte via e-mail','Suporte via WhatsApp','Suporte via Telefone'], whatsapp: true, telefone: true, popular: false }
-                                ]
-                            };
-                            function renderPlanos(tipo) {
-                                const grid = document.getElementById('planosGrid');
-                                grid.innerHTML = '';
-                                planos[tipo].forEach((plano, idx) => {
-                                    const popular = plano.popular ? `<div style='position:absolute;top:-18px;right:-18px;background:#fbbf24;color:#111;font-size:12px;font-weight:700;padding:4px 16px;border-radius:8px 8px 8px 0;box-shadow:0 2px 8px #0002;'>MAIS POPULAR</div>` : '';
-                                    let adicionaisHtml = '';
-                                    let precoFinal = plano.preco;
-                                    if (plano.nome === 'Carmelo') {
-                                        // PreÃ§o dos adicionais
-                                        const precoCadastro = tipo === 'mensal' ? 0.2 : 2; // R$0,20/mÃªs ou R$2,00/ano por cadastro
-                                        const precoCong = tipo === 'mensal' ? 3 : 20; // R$3,00/mÃªs ou R$20,00/ano por congregaÃ§Ã£o
-                                        precoFinal += adicionais.cadastros * precoCadastro + adicionais.congregacoes * precoCong;
-                                        adicionaisHtml = `
-                                            <div style='margin:18px 0 0 0;text-align:left;width:100%;'>
-                                                <div style='font-size:13px;color:#222;font-weight:600;margin-bottom:6px;'>Adicionais</div>
-                                                <label style='font-size:13px;'>Cadastros: <b>${adicionais.cadastros}</b> (+R$ ${(adicionais.cadastros*precoCadastro).toLocaleString('pt-BR',{minimumFractionDigits:2})}/${tipo==='mensal'?'mÃªs':'ano'})</label>
-                                                <input type='range' min='0' max='2000' value='${adicionais.cadastros}' id='sliderCadastros' style='width:100%;margin-bottom:10px;'>
-                                                <label style='font-size:13px;'>CongregaÃ§Ãµes: <b>${adicionais.congregacoes}</b> (+R$ ${(adicionais.congregacoes*precoCong).toLocaleString('pt-BR',{minimumFractionDigits:2})}/${tipo==='mensal'?'mÃªs':'ano'})</label>
-                                                <input type='range' min='0' max='200' value='${adicionais.congregacoes}' id='sliderCongregacoes' style='width:100%;'>
-                                            </div>
-                                        `;
-                                    }
-                                    grid.innerHTML += `
-                                    <div style="background:#fff;border-radius:12px;padding:32px 18px 24px 18px;text-align:center;display:flex;flex-direction:column;align-items:center;box-shadow:0 2px 8px #0001;position:relative;">
-                                        ${popular}
-                                        <div style='font-size:22px;font-weight:700;color:#222;margin-bottom:2px;'>${plano.nome}</div>
-                                        <div style='font-size:13px;color:#fbbf24;margin-bottom:10px;'>AtÃ© ${plano.cadastros + (plano.nome==='Carmelo'?adicionais.cadastros:0)} Cadastros<br>${plano.congregacoes + (plano.nome==='Carmelo'?adicionais.congregacoes:0)} congregaÃ§Ã£o${(plano.congregacoes + (plano.nome==='Carmelo'?adicionais.congregacoes:0))>1?'s':''}</div>
-                                        <div id='precoCarmelo${tipo}' style='font-size:38px;font-weight:900;color:#f59e0b;margin-bottom:2px;'>R$ ${precoFinal.toLocaleString('pt-BR',{minimumFractionDigits:2})} <span style='font-size:14px;color:#94a3b8;'>/${tipo==='mensal'?'mÃªs':'ano'}</span></div>
-                                        <ul style='list-style:none;padding:0;margin-bottom:18px;color:#222;font-size:15px;text-align:left;'>
-                                            <li><span style='color:#22c55e'>âœ”</span> App do Membro</li>
-                                            <li><span style='color:#22c55e'>âœ”</span> ${plano.cadastros + (plano.nome==='Carmelo'?adicionais.cadastros:0)} cadastros</li>
-                                            <li><span style='color:#22c55e'>âœ”</span> ${plano.congregacoes + (plano.nome==='Carmelo'?adicionais.congregacoes:0)} congregaÃ§Ã£o${(plano.congregacoes + (plano.nome==='Carmelo'?adicionais.congregacoes:0))>1?'s':''}</li>
-                                            <li><span style='color:#22c55e'>âœ”</span> Suporte via e-mail</li>
-                                            <li><span style='color:${plano.whatsapp?'#22c55e':'#aaa'}'>${plano.whatsapp?'âœ”':'âœ–'}</span> Suporte via WhatsApp</li>
-                                            <li><span style='color:${plano.telefone?'#22c55e':'#aaa'}'>${plano.telefone?'âœ”':'âœ–'}</span> Suporte via Telefone</li>
-                                        </ul>
-                                        ${adicionaisHtml}
-                                        <button style='background:#fbbf24;color:#222;font-weight:700;padding:12px 0;border-radius:8px;border:none;font-size:16px;width:100%;margin-top:18px;cursor:pointer;box-shadow:0 2px 8px #0001;'>SELECIONAR PLANO</button>
-                                    </div>`;
+                                const planosCatalogo = {
+                                    mensal: [
+                                        {
+                                            nome: 'Eden',
+                                            tag: 'Gratuito',
+                                            icon: '🌿',
+                                            subtitle: 'O comeco de tudo',
+                                            verse: '"No principio, Deus criou..." — Gn 1:1',
+                                            preco: 0,
+                                            period: 'para sempre · com anuncios',
+                                            anualNote: '',
+                                            featured: false,
+                                            cta: 'Plano atual',
+                                            ctaType: 'outline',
+                                            trial: '',
+                                            features: [
+                                                { text: 'App Web Instalavel (PWA)', yes: true },
+                                                { text: 'App do Membro', yes: false },
+                                                { text: 'Ate 30 cadastros', yes: true },
+                                                { text: '1 congregacao', yes: true },
+                                                { text: 'EBD Dominical', yes: true },
+                                                { text: 'Credencial de Membro', yes: false },
+                                                { text: 'Grupos / Celulas', yes: true },
+                                                { text: 'Financeiro (com limites)', yes: true },
+                                                { text: 'Relatorios (com limites)', yes: true },
+                                                { text: 'Suporte prioritario', yes: false }
+                                            ]
+                                        },
+                                        {
+                                            nome: 'Hebrom',
+                                            tag: 'Basico',
+                                            icon: '⛰️',
+                                            subtitle: 'Igrejas em formacao',
+                                            verse: '"Ali Abraao construiu um altar ao Senhor..." — Gn 13:18',
+                                            preco: 50,
+                                            period: 'por mes · cobrado mensalmente',
+                                            anualNote: 'equivale a R$ 42/mes · cobrado R$ 500/ano',
+                                            featured: false,
+                                            cta: 'Assinar Hebrom',
+                                            ctaType: 'outline',
+                                            trial: '✦ 7 dias de teste gratuito',
+                                            features: [
+                                                { text: 'App Web Instalavel (PWA)', yes: true },
+                                                { text: 'App do Membro', yes: false },
+                                                { text: 'Ate 150 cadastros', yes: true },
+                                                { text: '1 congregacao', yes: true },
+                                                { text: 'EBD Dominical', yes: true },
+                                                { text: 'Credencial de Membro', yes: true },
+                                                { text: 'Grupos / Celulas', yes: true },
+                                                { text: 'Financeiro completo', yes: true },
+                                                { text: 'Relatorios completos', yes: true },
+                                                { text: 'Suporte via e-mail', yes: true }
+                                            ]
+                                        },
+                                        {
+                                            nome: 'Betel',
+                                            tag: 'Recomendado',
+                                            icon: '🏛️',
+                                            subtitle: 'Igrejas em crescimento',
+                                            verse: '"Esta e a casa de Deus e a porta do ceu." — Gn 28:17',
+                                            preco: 80,
+                                            period: 'por mes · cobrado mensalmente',
+                                            anualNote: 'equivale a R$ 67/mes · cobrado R$ 800/ano',
+                                            featured: true,
+                                            cta: 'Assinar Betel',
+                                            ctaType: 'primary',
+                                            trial: '✦ 7 dias de teste gratuito',
+                                            features: [
+                                                { text: 'App Web Instalavel (PWA)', yes: true },
+                                                { text: 'App do Membro', yes: true },
+                                                { text: 'Ate 300 cadastros', yes: true },
+                                                { text: 'Ate 5 congregacoes', yes: true },
+                                                { text: 'EBD Dominical', yes: true },
+                                                { text: 'Credencial de Membro', yes: true },
+                                                { text: 'Grupos / Celulas', yes: true },
+                                                { text: 'Financeiro completo', yes: true },
+                                                { text: 'Relatorios completos', yes: true },
+                                                { text: 'Suporte via WhatsApp', yes: true }
+                                            ]
+                                        },
+                                        {
+                                            nome: 'Siao',
+                                            tag: 'Premium',
+                                            icon: '👑',
+                                            subtitle: 'Igrejas consolidadas',
+                                            verse: '"O Senhor reina em Siao para sempre." — Sl 146:10',
+                                            preco: 100,
+                                            period: 'por mes · cobrado mensalmente',
+                                            anualNote: 'equivale a R$ 83/mes · cobrado R$ 1.000/ano',
+                                            featured: false,
+                                            cta: 'Assinar Siao',
+                                            ctaType: 'outline',
+                                            trial: '✦ 7 dias de teste gratuito',
+                                            features: [
+                                                { text: 'App Web Instalavel (PWA)', yes: true },
+                                                { text: 'App do Membro', yes: true },
+                                                { text: 'Ate 500 cadastros', yes: true },
+                                                { text: 'Ate 10 congregacoes', yes: true },
+                                                { text: 'EBD Dominical', yes: true },
+                                                { text: 'Credencial de Membro', yes: true },
+                                                { text: 'Grupos / Celulas', yes: true },
+                                                { text: 'Financeiro completo', yes: true },
+                                                { text: 'Relatorios completos', yes: true },
+                                                { text: 'Suporte via Telefone', yes: true },
+                                                { text: 'Consultoria Contabil', yes: true }
+                                            ]
+                                        }
+                                    ]
+                                };
+
+                                planosCatalogo.anual = planosCatalogo.mensal.map(function(plano) {
+                                    const clone = JSON.parse(JSON.stringify(plano));
+                                    if (clone.nome === 'Hebrom') clone.preco = 42;
+                                    if (clone.nome === 'Betel') clone.preco = 67;
+                                    if (clone.nome === 'Siao') clone.preco = 83;
+                                    if (clone.nome === 'Eden') clone.preco = 0;
+                                    clone.period = clone.nome === 'Eden'
+                                        ? 'para sempre · com anuncios'
+                                        : 'valor mensal equivalente (cobranca anual)';
+                                    return clone;
                                 });
-                                // Eventos dos sliders de adicionais
-                                setTimeout(()=>{
-                                    const sliderCad = document.getElementById('sliderCadastros');
-                                    const sliderCong = document.getElementById('sliderCongregacoes');
-                                    if(sliderCad && sliderCong){
-                                        sliderCad.oninput = function(){ adicionais.cadastros = parseInt(this.value); renderPlanos(tipo); };
-                                        sliderCong.oninput = function(){ adicionais.congregacoes = parseInt(this.value); renderPlanos(tipo); };
+
+                                let billingModal = 'mensal';
+
+                                function money(v) {
+                                    return Number(v).toLocaleString('pt-BR');
+                                }
+
+                                function renderPlanosModal(tipo) {
+                                    const grid = document.getElementById('planosGrid');
+                                    const cards = planosCatalogo[tipo].map(function(plano) {
+                                        const amountClass = plano.nome === 'Eden' ? 'mpm-amount free' : 'mpm-amount';
+                                        const badge = plano.featured ? '<div class="mpm-badge">✦ Mais Popular</div>' : '';
+                                        const ctaClass = plano.ctaType === 'primary' ? 'mpm-btn' : 'mpm-btn mpm-btn-outline';
+                                        const annualNote = tipo === 'anual' && plano.anualNote
+                                            ? '<span class="mpm-annual-note" style="display:block;">' + plano.anualNote + '</span>'
+                                            : '';
+                                        const featureList = plano.features.map(function(item) {
+                                            const stateClass = item.yes ? 'mpm-yes' : 'mpm-no';
+                                            const icon = item.yes ? 'fa-check' : 'fa-xmark';
+                                            const lineClass = item.yes ? '' : ' class="disabled"';
+                                            return '<li' + lineClass + '><span class="' + stateClass + '"><i class="fa-solid ' + icon + '"></i></span>' + item.text + '</li>';
+                                        }).join('');
+                                        const trialNote = plano.trial ? '<div class="mpm-note">' + plano.trial + '</div>' : '';
+                                        return (
+                                            '<div class="mpm-card ' + (plano.featured ? 'featured' : '') + '">' +
+                                                badge +
+                                                '<div class="mpm-icon">' + plano.icon + '</div>' +
+                                                '<div class="mpm-name-tag">' + plano.tag + '</div>' +
+                                                '<h3 class="mpm-name">' + plano.nome + '</h3>' +
+                                                '<div class="mpm-subtitle">' + plano.subtitle + '</div>' +
+                                                '<div class="mpm-verse">' + plano.verse + '</div>' +
+                                                '<div class="mpm-price">' +
+                                                    '<span class="mpm-currency">R$</span> <span class="' + amountClass + '">' + money(plano.preco) + '</span>' +
+                                                    '<span class="mpm-period">' + plano.period + '</span>' +
+                                                    annualNote +
+                                                '</div>' +
+                                                '<ul class="mpm-features">' + featureList + '</ul>' +
+                                                '<button class="' + ctaClass + '" onclick="alert(\'Plano ' + plano.nome + ' selecionado\')">' + plano.cta + '</button>' +
+                                                trialNote +
+                                            '</div>'
+                                        );
+                                    }).join('');
+                                    grid.innerHTML = cards;
+                                }
+
+                                function setBillingModal(mode) {
+                                    billingModal = mode;
+                                    const btnMensal = document.getElementById('btnMensalModal');
+                                    const btnAnual = document.getElementById('btnAnualModal');
+                                    const slider = document.getElementById('toggleSliderModal');
+
+                                    if (mode === 'mensal') {
+                                        btnMensal.classList.add('active');
+                                        btnAnual.classList.remove('active');
+                                        slider.style.left = '6px';
+                                        slider.style.width = btnMensal.offsetWidth + 'px';
+                                    } else {
+                                        btnAnual.classList.add('active');
+                                        btnMensal.classList.remove('active');
+                                        slider.style.left = (btnMensal.offsetWidth + 6) + 'px';
+                                        slider.style.width = btnAnual.offsetWidth + 'px';
                                     }
-                                }, 100);
-                            }
-                            document.getElementById('btnAlterarPlano').onclick = function() {
-                                document.getElementById('modalAlterarPlano').style.display = 'flex';
-                                renderPlanos('mensal');
-                                document.getElementById('btnMensal').style.background = '#fbbf24';
-                                document.getElementById('btnAnual').style.background = '#eee';
-                            };
-                            document.getElementById('btnMensal').onclick = function() {
-                                renderPlanos('mensal');
-                                this.style.background = '#fbbf24';
-                                document.getElementById('btnAnual').style.background = '#eee';
-                            };
-                            document.getElementById('btnAnual').onclick = function() {
-                                renderPlanos('anual');
-                                this.style.background = '#fbbf24';
-                                document.getElementById('btnMensal').style.background = '#eee';
-                            };
+                                    renderPlanosModal(mode);
+                                }
+
+                                function abrirModalPlanos() {
+                                    const modal = document.getElementById('modalAlterarPlano');
+                                    modal.style.display = 'flex';
+                                    requestAnimationFrame(function() {
+                                        setBillingModal(billingModal);
+                                    });
+                                }
+
+                                function fecharModalPlanos() {
+                                    document.getElementById('modalAlterarPlano').style.display = 'none';
+                                }
+
+                                document.getElementById('btnAlterarPlano').addEventListener('click', abrirModalPlanos);
+                                document.getElementById('btnFecharModal').addEventListener('click', fecharModalPlanos);
+                                document.getElementById('btnMensalModal').addEventListener('click', function() { setBillingModal('mensal'); });
+                                document.getElementById('btnAnualModal').addEventListener('click', function() { setBillingModal('anual'); });
+
+                                document.getElementById('modalAlterarPlano').addEventListener('click', function(ev) {
+                                    if (ev.target.id === 'modalAlterarPlano') fecharModalPlanos();
+                                });
                             </script>
                     <span style="background:#22d3ee;color:#222;padding:10px 28px;border-radius:8px;font-weight:700;font-size:18px;">Teste grÃ¡tis de 1 mÃªs</span>
                 </div>
