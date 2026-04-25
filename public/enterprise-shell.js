@@ -434,6 +434,8 @@
                 container.classList.remove('is-open');
                 if (prevBtn) prevBtn.classList.remove('active');
             }
+            // Remove o inline style para que a classe CSS is-open controle a visibilidade
+            container.style.display = '';
         });
 
         menuToggle.addEventListener('click', function () {
