@@ -151,6 +151,28 @@ async function listPaymentLinks(req, res) {
     res.json(items);
 }
 
+async function getPaymentLinkPublic(req, res) {
+    const item = await engagementService.getPaymentLinkPublic(req.params.referenceCode);
+    if (!item) {
+        throw createHttpError(404, 'Link de pagamento não encontrado.');
+    }
+
+    res.json(item);
+}
+
+async function reportPaymentAsPaidByClient(req, res) {
+    const result = await engagementService.reportPaymentAsPaidByClient(req.params.referenceCode, req.body || {});
+    if (!result) {
+        throw createHttpError(404, 'Link de pagamento não encontrado.');
+    }
+
+    if (result.alreadyReported) {
+        return res.json({ message: 'Pagamento já sinalizado anteriormente.', status: result.status });
+    }
+
+    res.json({ message: 'Pagamento sinalizado. Aguarde confirmação da igreja.', status: result.status });
+}
+
 async function markPaymentAsPaid(req, res) {
     await engagementService.markPaymentAsPaid(req.auth.igrejaId, Number(req.params.id));
     audit('payment.link.markPaid', req, { id: Number(req.params.id) });
@@ -259,6 +281,7 @@ module.exports = {
     getMemberPermissions,
     getMemberAppContext,
     getQrSessionPublic,
+    getPaymentLinkPublic,
     listAutocadastros,
     listMidiaVisitors,
     listPaymentLinks,
@@ -267,6 +290,7 @@ module.exports = {
     listWhatsAppLogs,
     listWhatsAppTemplates,
     markPaymentAsPaid,
+    reportPaymentAsPaidByClient,
     rejectAutocadastro,
     createQrSession,
     submitPublicVisitorByToken,

@@ -211,15 +211,18 @@ async function listPortariaCheckins(igrejaId, dateRef) {
 async function createPaymentLink(payload) {
     const [result] = await pool.query(
         `INSERT INTO payment_links (
-            igreja_id, descricao, valor, provider, status, reference_code, url, created_by
-         ) VALUES (?, ?, ?, ?, 'pendente', ?, ?, ?)`,
+            igreja_id, descricao, valor, provider, payment_method, status,
+            reference_code, url, status_detail, created_by
+         ) VALUES (?, ?, ?, ?, ?, 'pendente', ?, ?, ?, ?)`,
         [
             payload.igrejaId,
             payload.descricao,
             payload.valor,
             payload.provider,
+            payload.paymentMethod || 'pix',
             payload.referenceCode,
             payload.url,
+            payload.statusDetail || null,
             payload.createdBy || null
         ]
     );
@@ -229,7 +232,8 @@ async function createPaymentLink(payload) {
 
 async function listPaymentLinks(igrejaId) {
     const [rows] = await pool.query(
-        `SELECT id, descricao, valor, provider, status, reference_code, url, paid_at, created_at
+        `SELECT id, descricao, valor, provider, payment_method, status, reference_code,
+                url, status_detail, paid_at, created_at
          FROM payment_links
          WHERE igreja_id = ?
          ORDER BY id DESC`,
@@ -245,6 +249,29 @@ async function markPaymentAsPaid(id, igrejaId) {
          SET status = 'pago', paid_at = CURRENT_TIMESTAMP
          WHERE id = ? AND igreja_id = ?`,
         [id, igrejaId]
+    );
+}
+
+async function getPaymentLinkByReference(referenceCode) {
+    const [rows] = await pool.query(
+        `SELECT id, igreja_id, descricao, valor, provider, payment_method, status,
+                reference_code, url, status_detail, paid_at, created_at
+         FROM payment_links
+         WHERE reference_code = ?
+         LIMIT 1`,
+        [referenceCode]
+    );
+
+    return rows[0] || null;
+}
+
+async function markPaymentAsClientReported(id, igrejaId, statusDetail) {
+    await pool.query(
+        `UPDATE payment_links
+         SET status = 'aguardando_confirmacao',
+             status_detail = ?
+         WHERE id = ? AND igreja_id = ? AND status = 'pendente'`,
+        [statusDetail || null, id, igrejaId]
     );
 }
 
@@ -358,10 +385,12 @@ module.exports = {
     listAutocadastros,
     listMidiaVisitors,
     listPaymentLinks,
+    getPaymentLinkByReference,
     listPortariaCheckins,
     listVisitorsForTelao,
     listWhatsAppLogs,
     listWhatsAppTemplates,
+    markPaymentAsClientReported,
     markPaymentAsPaid,
     createQrSession,
     createPublicVisitor,

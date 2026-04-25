@@ -32,6 +32,7 @@ const {
     getAuthMe,
     getMemberPermissions,
     getMemberAppContext,
+    getPaymentLinkPublic,
     getQrSessionPublic,
     listAutocadastros,
     listMidiaVisitors,
@@ -41,6 +42,7 @@ const {
     listWhatsAppLogs,
     listWhatsAppTemplates,
     markPaymentAsPaid,
+    reportPaymentAsPaidByClient,
     rejectAutocadastro,
     submitPublicVisitorByToken,
     triggerEventoLembrete,
@@ -80,6 +82,9 @@ router.post('/portaria/qr-sessoes/:token/visitantes', validateBody(visitanteQrPu
 router.get('/midia/visitantes', requireAuth, authorize(['admin', 'secretaria', 'midia', 'pastor']), validateQuery(midiaVisitanteQuerySchema), listMidiaVisitors);
 router.put('/midia/visitantes/:id/status', requireAuth, authorize(['admin', 'secretaria', 'midia']), validateBody(midiaVisitanteStatusSchema), updateMidiaVisitorStatus);
 router.get('/midia/telao/visitantes', requireAuth, authorize(['admin', 'secretaria', 'midia', 'pastor']), listTelaoVisitors);
+
+router.get('/pagamentos/publico/:referenceCode', getPaymentLinkPublic);
+router.put('/pagamentos/publico/:referenceCode/cliente-pago', reportPaymentAsPaidByClient);
 
 router.get('/pagamentos/links', requireAuth, authorize(['admin', 'secretaria', 'financeiro']), listPaymentLinks);
 router.post('/pagamentos/links', requireAuth, authorize(['admin', 'secretaria', 'financeiro']), validateBody(pagamentoLinkSchema), createPaymentLink);

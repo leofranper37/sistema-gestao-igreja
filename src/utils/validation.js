@@ -304,7 +304,9 @@ const portariaCheckinQuerySchema = Joi.object({
 const pagamentoLinkSchema = Joi.object({
     descricao: Joi.string().trim().min(2).max(255).required().label('Descrição'),
     valor: decimalInput.label('Valor'),
-    provider: Joi.string().trim().max(60).allow('', null).optional().label('Provedor')
+    provider: Joi.string().trim().max(60).allow('', null).optional().label('Provedor'),
+    pixKey: Joi.string().trim().max(255).allow('', null).optional().label('Chave PIX'),
+    cardCheckoutUrl: Joi.string().trim().uri().max(2000).allow('', null).optional().label('Link de cartão')
 });
 
 const qrSessionSchema = Joi.object({

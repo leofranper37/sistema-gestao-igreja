@@ -229,17 +229,28 @@ async function listPortariaCheckins(igrejaId, dateRef) {
 
 async function createPaymentLink(igrejaId, payload, userId) {
     const referenceCode = buildPaymentReference();
-    const provider = normalizeText(payload.provider) || 'mock_pix';
-    const baseUrl = process.env.PAYMENT_BASE_URL || 'https://pagamento.exemplo.local';
-    const url = `${baseUrl}/p/${referenceCode}`;
+    const providerRaw = normalizeText(payload.provider).toLowerCase();
+    const provider = providerRaw.includes('cart') ? 'cartao' : 'pix';
+    const paymentMethod = provider;
+    const appBaseUrl = process.env.APP_PUBLIC_BASE_URL || process.env.APP_BASE_URL || 'http://localhost:3001';
+    const url = `${appBaseUrl.replace(/\/$/, '')}/pagamento_link.html?ref=${encodeURIComponent(referenceCode)}`;
+
+    const statusDetail = JSON.stringify({
+        pixKey: normalizeText(payload.pixKey) || null,
+        cardCheckoutUrl: normalizeText(payload.cardCheckoutUrl) || null,
+        clientePagoAt: null,
+        clienteObservacao: null
+    });
 
     const id = await engagementModel.createPaymentLink({
         igrejaId,
         descricao: normalizeText(payload.descricao),
         valor: Number(payload.valor),
         provider,
+        paymentMethod,
         referenceCode,
         url,
+        statusDetail,
         createdBy: userId
     });
 
@@ -252,6 +263,67 @@ async function listPaymentLinks(igrejaId) {
 
 async function markPaymentAsPaid(igrejaId, id) {
     await engagementModel.markPaymentAsPaid(id, igrejaId);
+}
+
+async function getPaymentLinkPublic(referenceCode) {
+    const item = await engagementModel.getPaymentLinkByReference(normalizeText(referenceCode));
+    if (!item) {
+        return null;
+    }
+
+    let meta = {};
+    try {
+        meta = item.status_detail ? JSON.parse(item.status_detail) : {};
+    } catch (_error) {
+        meta = {};
+    }
+
+    return {
+        id: item.id,
+        referencia: item.reference_code,
+        descricao: item.descricao,
+        valor: item.valor,
+        provider: item.provider,
+        paymentMethod: item.payment_method,
+        status: item.status,
+        pixKey: meta.pixKey || null,
+        cardCheckoutUrl: meta.cardCheckoutUrl || null,
+        clientePagoAt: meta.clientePagoAt || null,
+        clienteObservacao: meta.clienteObservacao || null,
+        paidAt: item.paid_at,
+        createdAt: item.created_at
+    };
+}
+
+async function reportPaymentAsPaidByClient(referenceCode, payload) {
+    const item = await engagementModel.getPaymentLinkByReference(normalizeText(referenceCode));
+    if (!item) {
+        return null;
+    }
+
+    if (item.status === 'pago' || item.status === 'aguardando_confirmacao') {
+        return {
+            alreadyReported: true,
+            status: item.status
+        };
+    }
+
+    let meta = {};
+    try {
+        meta = item.status_detail ? JSON.parse(item.status_detail) : {};
+    } catch (_error) {
+        meta = {};
+    }
+
+    meta.clientePagoAt = new Date().toISOString();
+    meta.clienteObservacao = normalizeText(payload?.observacao) || null;
+
+    await engagementModel.markPaymentAsClientReported(item.id, item.igreja_id, JSON.stringify(meta));
+
+    return {
+        alreadyReported: false,
+        status: 'aguardando_confirmacao'
+    };
 }
 
 async function createQrSession(igrejaId, payload, userId) {
@@ -381,6 +453,7 @@ module.exports = {
     createTemplate,
     dispatchWhatsApp,
     getMemberPermissions,
+    getPaymentLinkPublic,
     getQrSessionPublic,
     getMemberAppContext,
     listAutocadastros,
@@ -391,6 +464,7 @@ module.exports = {
     listTemplates,
     listWhatsAppLogs,
     markPaymentAsPaid,
+    reportPaymentAsPaidByClient,
     rejectAutocadastro,
     submitPublicVisitorByToken,
     updateMidiaVisitorStatus,

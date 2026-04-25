@@ -24,7 +24,7 @@
 
         .grid {
             display: grid;
-            grid-template-columns: 2fr 1fr 1fr auto;
+            grid-template-columns: 2fr 1fr 1fr 2fr auto;
             gap: 8px;
         }
 
@@ -82,6 +82,27 @@
             color: #166534;
         }
 
+        .status.aguardando_confirmacao {
+            background: #dbeafe;
+            color: #1e3a8a;
+        }
+
+        .hint {
+            margin-top: 8px;
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .row-actions {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .btn.secondary {
+            background: #334155;
+        }
+
         .msg {
             font-size: 13px;
             color: #0f766e;
@@ -107,11 +128,14 @@
                     <input type="text" id="descricao" placeholder="Descrição" required>
                     <input type="number" id="valor" step="0.01" min="0" placeholder="Valor" required>
                     <select id="provider">
-                        <option value="mock_pix">PIX</option>
-                        <option value="mock_cartao">Cartão</option>
+                        <option value="pix">PIX</option>
+                        <option value="cartao">Cartão</option>
                     </select>
+                    <input type="text" id="pixKey" placeholder="Chave PIX (email, telefone, aleatória)">
                     <button class="btn" type="submit">Criar</button>
                 </form>
+                <div class="hint">Opcional para cartão: informe um link de checkout no campo abaixo.</div>
+                <input type="url" id="cardCheckoutUrl" placeholder="https://... (Link de pagamento por cartão)" style="margin-top:10px;width:100%;">
                 <p class="msg" id="statusMsg"></p>
             </section>
 
@@ -142,6 +166,15 @@
         const form = document.getElementById('formPagamento');
         const tbLinks = document.getElementById('tbLinks');
         const statusMsg = document.getElementById('statusMsg');
+        const providerEl = document.getElementById('provider');
+        const pixKeyEl = document.getElementById('pixKey');
+        const cardCheckoutEl = document.getElementById('cardCheckoutUrl');
+
+        // Mantem preferencia local para facilitar criacao de novos links
+        const prefPixKey = localStorage.getItem('ldfp_pref_pix_key') || '';
+        const prefCardUrl = localStorage.getItem('ldfp_pref_card_checkout_url') || '';
+        if (prefPixKey) pixKeyEl.value = prefPixKey;
+        if (prefCardUrl) cardCheckoutEl.value = prefCardUrl;
 
         function formatCurrency(value) {
             return Number(value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -150,6 +183,25 @@
         function setStatus(message, error) {
             statusMsg.className = error ? 'msg error' : 'msg';
             statusMsg.textContent = message || '';
+        }
+
+        function escapeHtml(text) {
+            return String(text || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function providerLabel(value) {
+            return value === 'cartao' ? 'cartao' : 'pix';
+        }
+
+        function toggleProviderFields() {
+            const provider = providerEl.value;
+            pixKeyEl.style.display = provider === 'pix' ? '' : 'none';
+            cardCheckoutEl.style.display = provider === 'cartao' ? '' : 'none';
         }
 
         async function loadLinks() {
@@ -161,12 +213,19 @@
 
             tbLinks.innerHTML = (data || []).map((item) => `
                 <tr>
-                    <td>${item.descricao}</td>
+                    <td>${escapeHtml(item.descricao)}</td>
                     <td>${formatCurrency(item.valor)}</td>
-                    <td>${item.provider}</td>
-                    <td><span class="status ${item.status}">${item.status}</span></td>
+                    <td>${providerLabel(item.payment_method || item.provider)}</td>
+                    <td><span class="status ${item.status}">${(item.status || '').replace('_', ' ')}</span></td>
                     <td><a href="${item.url}" target="_blank" rel="noreferrer">Abrir</a></td>
-                    <td>${item.status === 'pendente' ? `<button class="btn" onclick="marcarPago(${item.id})">Marcar pago</button>` : '-'}</td>
+                    <td>
+                        <div class="row-actions">
+                            <button class="btn secondary" onclick="copiarLink('${escapeHtml(item.url)}')">Copiar link</button>
+                            ${item.status === 'aguardando_confirmacao' ? `<button class="btn" onclick="marcarPago(${item.id})">Confirmar pago</button>` : ''}
+                            ${item.status === 'pendente' ? `<span style="font-size:12px;color:#64748b;">Aguardando cliente pagar</span>` : ''}
+                            ${item.status === 'pago' ? `<span style="font-size:12px;color:#166534;">Pagamento confirmado</span>` : ''}
+                        </div>
+                    </td>
                 </tr>
             `).join('');
         }
@@ -185,7 +244,20 @@
             }
         }
 
+        async function copiarLink(url) {
+            try {
+                await navigator.clipboard.writeText(url);
+                setStatus('Link copiado para a area de transferencia.');
+            } catch (_error) {
+                setStatus('Nao foi possivel copiar o link.', true);
+            }
+        }
+
         window.marcarPago = marcarPago;
+        window.copiarLink = copiarLink;
+
+        providerEl.addEventListener('change', toggleProviderFields);
+        toggleProviderFields();
 
         form.addEventListener('submit', async (event) => {
             event.preventDefault();
@@ -198,7 +270,9 @@
                     body: JSON.stringify({
                         descricao: document.getElementById('descricao').value.trim(),
                         valor: Number(document.getElementById('valor').value),
-                        provider: document.getElementById('provider').value
+                        provider: providerEl.value,
+                        pixKey: pixKeyEl.value.trim() || null,
+                        cardCheckoutUrl: cardCheckoutEl.value.trim() || null
                     })
                 });
 
@@ -207,8 +281,22 @@
                     throw new Error(data.error || 'Nao foi possivel criar link de pagamento.');
                 }
 
-                setStatus(`Link criado: ${data.url}`);
+                if (providerEl.value === 'pix' && pixKeyEl.value.trim()) {
+                    localStorage.setItem('ldfp_pref_pix_key', pixKeyEl.value.trim());
+                }
+                if (providerEl.value === 'cartao' && cardCheckoutEl.value.trim()) {
+                    localStorage.setItem('ldfp_pref_card_checkout_url', cardCheckoutEl.value.trim());
+                }
+
+                setStatus(`Link criado com sucesso. Compartilhe: ${data.url}`);
                 form.reset();
+                if (providerEl.value === 'pix') {
+                    pixKeyEl.value = localStorage.getItem('ldfp_pref_pix_key') || '';
+                }
+                if (providerEl.value === 'cartao') {
+                    cardCheckoutEl.value = localStorage.getItem('ldfp_pref_card_checkout_url') || '';
+                }
+                toggleProviderFields();
                 await loadLinks();
             } catch (error) {
                 setStatus(error.message, true);
