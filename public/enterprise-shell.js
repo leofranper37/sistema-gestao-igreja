@@ -459,6 +459,7 @@
                         const otherContainer = otherButton.nextElementSibling;
                         if (otherContainer && otherContainer.classList.contains('dropdown-container')) {
                             otherContainer.classList.remove('is-open');
+                            otherContainer.style.display = 'none';
                         }
                     }
                 });
@@ -470,6 +471,7 @@
 
                 this.classList.toggle('active', isOpening);
                 container.classList.toggle('is-open', isOpening);
+                container.style.display = isOpening ? 'block' : 'none';
             });
         });
 
