@@ -126,25 +126,39 @@
 
     function renderSecretariaGroup(activePath, user) {
         const pessoasLinks = [
-            ['lista_membros.html', 'fa-solid fa-user-check', 'Membros', 'membros'],
-            ['membros.html', 'fa-solid fa-id-card', 'Ficha Cadastral', 'membros'],
-            ['congregados.html', 'fa-solid fa-user-clock', 'Congregados', 'membros'],
-            ['visitantes.html', 'fa-solid fa-walking', 'Visitantes', 'visitantes'],
-            ['criancas.html', 'fa-solid fa-child-reaching', 'Crianças', 'criancas']
+            // Membros
+            ['lista_membros.html',    'fa-solid fa-users',            'Membros',             'membros'],
+            ['membros.html',          'fa-solid fa-id-card',          'Ficha Cadastral',     'membros'],
+            ['congregados.html',      'fa-solid fa-user-clock',       'Congregados',         'membros'],
+            ['visitantes.html',       'fa-solid fa-walking',          'Visitantes',          'visitantes'],
+            ['criancas.html',         'fa-solid fa-child-reaching',   'Crianças',            'criancas'],
+            // Registros / Config
+            ['cargos.html',           'fa-solid fa-medal',            'Cargos',              'membros'],
+            ['situacoes.html',        'fa-solid fa-circle-dot',       'Situações',           'membros'],
+            ['congregacoes.html',     'fa-solid fa-map-pin',          'Congregações',        'membros'],
+            ['tipos_admissao.html',   'fa-solid fa-door-open',        'Tipos de Admissão',   'membros'],
+            // Histórico
+            ['historico_pastoral.html', 'fa-solid fa-scroll',         'Histórico Pastoral',  'membros'],
+            ['tipos_historico.html',  'fa-solid fa-bookmark',         'Tipos de Histórico',  'membros']
         ];
 
         const organizacaoLinks = [
-            ['grupos.html', 'fa-solid fa-people-group', 'Grupos / Células', 'membros'],
-            ['escalas.html?tab=dashboard', 'fa-solid fa-clipboard-list', 'Escalas', 'agenda'],
-            ['batismos.html', 'fa-solid fa-water', 'Batismos', 'membros'],
-            ['agenda.html', 'fa-solid fa-calendar-days', 'Agenda', 'agenda']
+            ['grupos.html',               'fa-solid fa-people-group',   'Grupos / Células',    'membros'],
+            ['grupos_categorias.html',    'fa-solid fa-folder-tree',    'Categorias de Grupos','membros'],
+            ['grupos_reunioes.html',      'fa-solid fa-comments',       'Reuniões de Grupos',  'membros'],
+            ['escalas.html',              'fa-solid fa-clipboard-list', 'Escalas',             'agenda'],
+            ['batismos.html',             'fa-solid fa-water',          'Batismos',            'membros'],
+            ['batismos_inscricoes.html',  'fa-solid fa-pen-to-square',  'Inscrições de Batismo','membros'],
+            ['agenda.html',               'fa-solid fa-calendar-days',  'Agenda',              'agenda']
         ];
 
         const espiritualidadeLinks = [
-            ['ebd_alunos.html', 'fa-solid fa-book-bible', 'EBD', 'criancas'],
-            ['oracoes.html', 'fa-solid fa-hands-praying', 'Orações', 'oracoes'],
-            ['missionarios.html', 'fa-solid fa-globe', 'Missionários', 'missionarios'],
-            ['outras_igrejas.html', 'fa-solid fa-church', 'Outras Igrejas', 'igrejas']
+            ['ebd_turmas.html',  'fa-solid fa-chalkboard-user', 'EBD — Turmas',        'criancas'],
+            ['ebd_alunos.html',  'fa-solid fa-user-graduate',   'EBD — Alunos',        'criancas'],
+            ['ebd_grades.html',  'fa-solid fa-table-cells',     'EBD — Grades',        'criancas'],
+            ['oracoes.html',     'fa-solid fa-hands-praying',   'Orações',             'oracoes'],
+            ['missionarios.html','fa-solid fa-globe',           'Missionários',        'missionarios'],
+            ['outras_igrejas.html','fa-solid fa-church',        'Outras Igrejas',      'igrejas']
         ];
 
         const allowedPessoasLinks = filterLinksByRole(pessoasLinks, user);
