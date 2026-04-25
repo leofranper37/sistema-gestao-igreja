@@ -126,7 +126,8 @@
 
     function renderSecretariaGroup(activePath, user) {
         const pessoasLinks = [
-            ['membros.html', 'fa-solid fa-user-check', 'Membros', 'membros'],
+            ['lista_membros.html', 'fa-solid fa-user-check', 'Membros', 'membros'],
+            ['membros.html', 'fa-solid fa-id-card', 'Ficha Cadastral', 'membros'],
             ['congregados.html', 'fa-solid fa-user-clock', 'Congregados', 'membros'],
             ['visitantes.html', 'fa-solid fa-walking', 'Visitantes', 'visitantes'],
             ['criancas.html', 'fa-solid fa-child-reaching', 'Crianças', 'criancas']
