@@ -34,7 +34,9 @@ async function listarPlanos(req, res) {
         const [rows] = await pool.query(
             `SELECT slug, nome, subtitulo, preco_mensal, preco_anual,
                     max_cadastros, max_congregacoes, modulo_app_membro, features_json
-             FROM saas_planos WHERE ativo = 1 ORDER BY preco_mensal ASC`
+             FROM saas_planos
+             WHERE ativo = 1 AND LOWER(slug) <> 'eden'
+             ORDER BY preco_mensal ASC`
         );
         res.json(rows || []);
     } catch (_) {

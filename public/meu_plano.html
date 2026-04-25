@@ -293,7 +293,7 @@
         <div style="background:#fbbf24;color:#111;padding:10px 8px 8px 8px;border-radius:8px;margin:18px 8px 0 8px;box-shadow:0 2px 8px #0001;width:90%;font-size:12px;line-height:1.3;display:flex;flex-direction:column;align-items:flex-start;gap:4px;">
             <div style="font-size:13px;font-weight:700;margin-bottom:2px;">Plano limitado</div>
             <div style="font-size:12px;">Atualize e desbloqueie todos os recursos.</div>
-            <a href="#planos" style="background:#0f172a;color:#fff;padding:5px 12px;border-radius:6px;font-weight:600;text-decoration:none;font-size:12px;margin-top:4px;align-self:center;">Ver Planos</a>
+            <a href="planos.html" style="background:#0f172a;color:#fff;padding:5px 12px;border-radius:6px;font-weight:600;text-decoration:none;font-size:12px;margin-top:4px;align-self:center;">Ver Planos</a>
         </div>
     </aside>
 
@@ -516,11 +516,7 @@
                                 }
 
                                 function abrirModalPlanos() {
-                                    const modal = document.getElementById('modalAlterarPlano');
-                                    modal.style.display = 'flex';
-                                    requestAnimationFrame(function() {
-                                        setBillingModal(billingModal);
-                                    });
+                                    window.location.href = 'planos.html';
                                 }
 
                                 function fecharModalPlanos() {
