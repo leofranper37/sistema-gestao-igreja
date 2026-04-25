@@ -127,6 +127,7 @@
     function renderSecretariaGroup(activePath, user) {
         const membrosLinks = [
             ['membros.html', 'fa-regular fa-id-card', 'Ficha Cadastral', 'membros'],
+            ['cadastro.html', 'fa-solid fa-file-pen', 'Ficha de Cadastro', 'membros'],
             ['cargos.html', 'fa-solid fa-briefcase', 'Cargos', 'cargos'],
             ['situacoes.html', 'fa-solid fa-toggle-on', 'Situações', 'membros'],
             ['congregacoes.html', 'fa-solid fa-church', 'Congregações', 'membros']
