@@ -5,7 +5,27 @@
     function getStoredAuth() {
         try {
             const raw = localStorage.getItem(STORAGE_KEY);
-            return raw ? JSON.parse(raw) : null;
+            if (raw) {
+                return JSON.parse(raw);
+            }
+
+            const legacyToken = sessionStorage.getItem('token') || localStorage.getItem('token');
+            if (!legacyToken) {
+                return null;
+            }
+
+            let legacyUser = null;
+            try {
+                const rawUser = localStorage.getItem('ldfpUser');
+                legacyUser = rawUser ? JSON.parse(rawUser) : null;
+            } catch (_) {
+                legacyUser = null;
+            }
+
+            return {
+                token: legacyToken,
+                user: legacyUser || {}
+            };
         } catch (error) {
             localStorage.removeItem(STORAGE_KEY);
             return null;
@@ -17,6 +37,10 @@
             return;
         }
 
+        // Compatibilidade com páginas legadas que ainda leem "token" diretamente.
+        localStorage.setItem('token', payload.token);
+        sessionStorage.setItem('token', payload.token);
+
         localStorage.setItem(STORAGE_KEY, JSON.stringify({
             token: payload.token,
             user: payload.user
@@ -26,6 +50,8 @@
     function clearAuthSession() {
         localStorage.removeItem(STORAGE_KEY);
         localStorage.removeItem('ldfpUser');
+        localStorage.removeItem('token');
+        sessionStorage.removeItem('token');
     }
 
     function getAuthToken() {
