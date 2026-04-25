@@ -159,6 +159,46 @@
             color: #b91c1c;
         }
 
+        /* MODAL UPGRADE */
+        .upgrade-overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,.75); z-index: 9000;
+            align-items: center; justify-content: center; padding: 20px;
+        }
+        .upgrade-overlay.open { display: flex; }
+        .upgrade-modal {
+            background: #1e293b; border: 1px solid rgba(255,255,255,.1);
+            border-radius: 20px; padding: 36px 32px; max-width: 420px; width: 100%;
+            text-align: center; position: relative;
+        }
+        .upgrade-icon {
+            width: 64px; height: 64px; border-radius: 50%;
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 18px; font-size: 28px; color: #111;
+        }
+        .upgrade-modal h3 { color: #f1f5f9; font-size: 22px; margin: 0 0 10px; }
+        .upgrade-modal p  { color: #94a3b8; font-size: 14px; line-height: 1.6; margin: 0 0 24px; }
+        .upgrade-modal .badge-plano {
+            display: inline-block; background: rgba(245,158,11,.15);
+            border: 1px solid rgba(245,158,11,.35); color: #f59e0b;
+            border-radius: 999px; font-size: 12px; font-weight: 700;
+            padding: 4px 14px; margin-bottom: 20px;
+        }
+        .btn-upgrade {
+            display: block; width: 100%; padding: 13px;
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: #111; border: none; border-radius: 10px;
+            font-size: 15px; font-weight: 800; cursor: pointer; margin-bottom: 10px;
+        }
+        .btn-upgrade:hover { filter: brightness(1.08); }
+        .btn-fechar-upgrade {
+            background: transparent; border: 1px solid rgba(255,255,255,.12);
+            color: #94a3b8; border-radius: 10px; padding: 11px;
+            width: 100%; font-size: 14px; cursor: pointer;
+        }
+        .btn-fechar-upgrade:hover { background: rgba(255,255,255,.05); }
+
         @media (max-width: 900px) {
             .filters-grid,
             .form-grid {
@@ -236,16 +276,35 @@
 
     <script src="session.js"></script>
     <script src="enterprise-shell.js"></script>
+
+    <!-- MODAL UPGRADE -->
+    <div class="upgrade-overlay" id="upgradeOverlay">
+        <div class="upgrade-modal">
+            <div class="upgrade-icon"><i class="fa-solid fa-building-circle-arrow-right"></i></div>
+            <h3>Limite Atingido</h3>
+            <div class="badge-plano" id="upgradeBadgePlano">Plano atual: —</div>
+            <p id="upgradeMsg">Seu plano atual permite apenas <strong>1 congregação</strong>.<br>Faça upgrade para cadastrar mais unidades.</p>
+            <button class="btn-upgrade" onclick="window.location.href='assinar.html'">
+                <i class="fa-solid fa-arrow-up-right-from-square"></i> Ver Planos e Fazer Upgrade
+            </button>
+            <button class="btn-fechar-upgrade" onclick="document.getElementById('upgradeOverlay').classList.remove('open')">
+                Fechar
+            </button>
+        </div>
+    </div>
+
     <script>
         requireAuthSession();
 
-        const baseData = [
-            { id: 1, nome: 'Sede Central', cidade: 'São Paulo', pastor: 'Pr. Daniel Ramos' },
-            { id: 2, nome: 'Congregação Jardim Norte', cidade: 'São Paulo', pastor: 'Pr. Carlos Menezes' },
-            { id: 3, nome: 'Congregação Bela Vista', cidade: 'Guarulhos', pastor: 'Pr. Marcos Elias' },
-            { id: 4, nome: 'Congregação Nova Aliança', cidade: 'Osasco', pastor: 'Pr. Tiago Souza' }
-        ];
+        // Lê limite de congregações do auth (token JWT)
+        const auth = window.getStoredAuth ? window.getStoredAuth() : null;
+        const maxCongregacoes = auth?.user?.maxCongregacoes || 1;
+        const planoAtual = auth?.user?.plano || 'Eden';
 
+        // Mapeamento de limites conhecidos
+        const LIMITES_PLANO = { eden: 1, hebrom: 1, betel: 5, siao: 10 };
+
+        const baseData = [];
         let state = [...baseData];
         let filtered = [...baseData];
 
@@ -261,7 +320,7 @@
         function renderRows(list) {
             rowsBody.innerHTML = '';
             if (!list.length) {
-                rowsBody.innerHTML = '<tr><td colspan="4" style="color:#94a3b8;">Nenhuma congregação encontrada.</td></tr>';
+                rowsBody.innerHTML = '<tr><td colspan="4" style="color:#94a3b8;text-align:center;padding:24px;">Nenhuma congregação cadastrada.</td></tr>';
                 return;
             }
 
@@ -294,6 +353,20 @@
             formCard.classList.toggle('active', show);
         }
 
+        function mostrarUpgradeModal() {
+            const limite = maxCongregacoes;
+            const badge = document.getElementById('upgradeBadgePlano');
+            const msg   = document.getElementById('upgradeMsg');
+
+            badge.textContent = `Plano atual: ${planoAtual.charAt(0).toUpperCase() + planoAtual.slice(1)}`;
+
+            const proxLimite = limite === 1 ? 5 : (limite === 5 ? 10 : '∞');
+            msg.innerHTML = `Seu plano atual permite apenas <strong>${limite} congregação${limite > 1 ? 'ões' : ''}</strong>.<br>
+                Faça upgrade para o próximo plano e cadastre até <strong>${proxLimite} congregações</strong>.`;
+
+            document.getElementById('upgradeOverlay').classList.add('open');
+        }
+
         window.removerCongregacao = function(id) {
             if (!confirm('Deseja excluir esta congregação?')) return;
             state = state.filter((item) => item.id !== id);
@@ -301,7 +374,14 @@
             setStatus('Congregação removida com sucesso!');
         };
 
-        document.getElementById('toggleFormBtn').addEventListener('click', () => toggleForm(true));
+        document.getElementById('toggleFormBtn').addEventListener('click', () => {
+            if (state.length >= maxCongregacoes) {
+                mostrarUpgradeModal();
+                return;
+            }
+            toggleForm(true);
+        });
+
         document.getElementById('cancelFormBtn').addEventListener('click', () => toggleForm(false));
         document.getElementById('applyFiltersBtn').addEventListener('click', aplicarFiltros);
         document.getElementById('clearFiltersBtn').addEventListener('click', () => {
@@ -313,6 +393,12 @@
 
         formCard.addEventListener('submit', (event) => {
             event.preventDefault();
+
+            if (state.length >= maxCongregacoes) {
+                mostrarUpgradeModal();
+                return;
+            }
+
             const nome = document.getElementById('nomeCongregacao').value.trim();
             const cidade = document.getElementById('cidadeCongregacao').value.trim();
             const pastor = document.getElementById('pastorCongregacao').value.trim();
@@ -324,7 +410,7 @@
 
             state.push({ id: Date.now(), nome, cidade, pastor });
             aplicarFiltros();
-            setStatus('Congregação cadastrada com sucesso!');
+            setStatus(`Congregação cadastrada! (${state.length}/${maxCongregacoes} usadas)`);
             formCard.reset();
             toggleForm(false);
         });

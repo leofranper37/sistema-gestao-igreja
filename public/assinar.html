@@ -107,6 +107,36 @@
         /* PIX */
         .pix-section, .card-section { display: none; }
         .pix-section.active, .card-section.active { display: block; }
+
+        /* Bloco chave PIX estática */
+        .pix-chave-bloco {
+            background: linear-gradient(135deg, rgba(50,188,173,.1), rgba(50,188,173,.05));
+            border: 1px solid rgba(50,188,173,.35); border-radius: 12px;
+            padding: 18px 16px; margin-bottom: 18px; text-align: center;
+        }
+        .pix-chave-bloco .pix-logo { font-size: 32px; color: #32BCAD; margin-bottom: 8px; }
+        .pix-chave-bloco h4 { color: #f1f5f9; font-size: 14px; margin: 0 0 4px; }
+        .pix-chave-bloco .banco-label { color: #94a3b8; font-size: 11px; margin-bottom: 14px; }
+        .pix-chave-wrap {
+            background: rgba(0,0,0,.3); border-radius: 8px; padding: 10px 14px;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .pix-chave-txt { flex: 1; font-size: 14px; font-weight: 700; color: #32BCAD; font-family: monospace; word-break: break-all; }
+        .btn-copy-chave {
+            background: #32BCAD; color: #0f172a; border: none; border-radius: 7px;
+            padding: 7px 12px; font-weight: 800; cursor: pointer; font-size: 12px; white-space: nowrap;
+        }
+        .btn-copy-chave:hover { filter: brightness(1.1); }
+        .pix-aviso {
+            background: rgba(245,158,11,.08); border: 1px solid rgba(245,158,11,.25);
+            border-radius: 8px; padding: 10px 14px; margin: 14px 0;
+            font-size: 12px; color: #fcd34d; line-height: 1.5; text-align: left;
+        }
+        .pix-aviso i { color: #f59e0b; margin-right: 6px; }
+
+        .pix-divider { display: flex; align-items: center; gap: 10px; margin: 16px 0; color: #475569; font-size: 12px; }
+        .pix-divider::before, .pix-divider::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,.08); }
+
         .pix-qr { text-align: center; margin: 20px 0; }
         .pix-qr img { width: 200px; height: 200px; border-radius: 12px; border: 4px solid var(--accent); }
         .pix-qr-placeholder { width: 200px; height: 200px; background: var(--panel); border-radius: 12px;
@@ -209,6 +239,27 @@
 
             <!-- PIX -->
             <div class="pix-section active" id="pixSection">
+
+                <!-- CHAVE PIX ESTÁTICA -->
+                <div class="pix-chave-bloco">
+                    <div class="pix-logo"><i class="fa-brands fa-pix"></i></div>
+                    <h4>Pague via PIX para esta chave</h4>
+                    <div class="banco-label">Mercado Pago &nbsp;•&nbsp; Conta de pagamento</div>
+                    <div class="pix-chave-wrap">
+                        <span class="pix-chave-txt" id="chavePix">leopereita31@gmail.com</span>
+                        <button class="btn-copy-chave" onclick="copiarChavePix()">
+                            <i class="fa-solid fa-copy"></i> Copiar
+                        </button>
+                    </div>
+                </div>
+
+                <div class="pix-aviso">
+                    <i class="fa-solid fa-circle-info"></i>
+                    Após efetuar o pagamento, envie o comprovante via WhatsApp para que seu plano seja ativado manualmente. Geralmente ativado em até <strong>1 hora útil</strong>.
+                </div>
+
+                <div class="pix-divider">ou gere um QR Code dinâmico</div>
+
                 <div class="pix-qr" id="pixQrWrap">
                     <div class="pix-qr-placeholder" id="pixQrPlaceholder">
                         <span>Clique em "Gerar PIX"</span>
@@ -223,8 +274,8 @@
                     Expira em <span id="pixContador">30:00</span>
                 </div>
                 <div class="pix-status" id="pixStatus"></div>
-                <button class="btn-assinar primary" id="btnGerarPix" onclick="gerarPix()" style="margin-top:16px;">
-                    <i class="fa-brands fa-pix"></i> Gerar QR Code PIX
+                <button class="btn-assinar outline" id="btnGerarPix" onclick="gerarPix()" style="margin-top:16px;">
+                    <i class="fa-brands fa-pix"></i> Gerar QR Code Dinâmico
                 </button>
                 <div class="error-msg" id="pixErro"></div>
             </div>
@@ -499,6 +550,17 @@
                 } catch (_) {}
             }, 5000);
         }
+
+        window.copiarChavePix = function () {
+            const chave = 'leopereita31@gmail.com';
+            navigator.clipboard.writeText(chave).catch(() => {
+                const ta = document.createElement('textarea');
+                ta.value = chave; document.body.appendChild(ta); ta.select();
+                document.execCommand('copy'); document.body.removeChild(ta);
+            });
+            const btn = document.querySelector('.btn-copy-chave');
+            if (btn) { btn.textContent = 'Copiado!'; setTimeout(() => { btn.innerHTML = '<i class="fa-solid fa-copy"></i> Copiar'; }, 2000); }
+        };
 
         window.copiarPix = function () {
             const code = document.getElementById('pixCode').textContent;
