@@ -14,14 +14,14 @@
         .btn-voltar { color: #94a3b8; text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 8px; }
         .btn-voltar:hover { color: white; }
 
-        /* CONTEÃšDO */
+        /* CONTEUDO */
         .container { max-width: 1100px; margin: 0 auto; padding: 50px 20px; text-align: center; }
         
         h1 { font-size: 36px; margin-bottom: 10px; color: #fff; }
         h1 span { color: #f59e0b; }
         p.subtitle { color: #94a3b8; font-size: 18px; margin-bottom: 50px; }
 
-        /* GRID DE PREÃ‡OS */
+        /* GRID DE PRECOS */
         .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
         
         .price-card {
@@ -47,7 +47,7 @@
         .features li i { color: #f59e0b; }
         .features li i.off { color: #475569; }
 
-        /* BOTÃƒO */
+        /* BOTAO */
         .btn-select {
             background: transparent; border: 1px solid #f59e0b; color: #f59e0b;
             width: 100%; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer;
@@ -283,10 +283,10 @@
             <img src="logo.png" alt="LDFP" style="height:50px;background:rgba(255,255,255,0.9);padding:5px 10px;border-radius:5px;">
         </div>
         <nav style="width:100%;">
-            <a href="dashboard.html" style="display:block;padding:12px 30px;color:#fff;text-decoration:none;font-weight:600;">Visao Geral</a>
+            <a href="dashboard.html" style="display:block;padding:12px 30px;color:#fff;text-decoration:none;font-weight:600;">Visão Geral</a>
             <a href="novidades.html" style="display:block;padding:12px 30px;color:#fff;text-decoration:none;font-weight:600;">Novidades</a>
             <a href="meu_plano.html" style="display:block;padding:12px 30px;color:#f59e0b;text-decoration:none;font-weight:700;background:#0f172a;">Meu Plano</a>
-            <a href="configuracoes.html" style="display:block;padding:12px 30px;color:#fff;text-decoration:none;font-weight:600;">Configuracoes</a>
+            <a href="configuracoes.html" style="display:block;padding:12px 30px;color:#fff;text-decoration:none;font-weight:600;">Configurações</a>
             <a href="index.html" style="display:block;padding:12px 30px;color:#fff;text-decoration:none;font-weight:600;">Sair</a>
         </nav>
         <!-- Banner compacto de upgrade de plano -->
@@ -308,8 +308,8 @@
     <div class="container">
         <div style="max-width:800px;margin:0 auto;">
             <div style="background:linear-gradient(90deg,#fbbf24 0%,#f59e0b 100%);color:#222;padding:32px 24px 24px 24px;border-radius:18px 18px 0 0;box-shadow:0 4px 24px #0001;display:flex;align-items:center;justify-content:space-between;">
-                <div style="font-size:26px;font-weight:700;">Gratuito com AnÃºncios</div>
-                <div style="font-size:28px;font-weight:900;">R$ 0,00 <span style='font-size:16px;font-weight:400;'>/mÃªs</span></div>
+                <div style="font-size:26px;font-weight:700;">Gratuito com Anúncios</div>
+                <div style="font-size:28px;font-weight:900;">R$ 0,00 <span style='font-size:16px;font-weight:400;'>/mês</span></div>
                 <button id="btnAlterarPlano" style="background:#fff;color:#f59e0b;font-weight:700;padding:10px 22px;border-radius:8px;border:1px solid #fbbf24;box-shadow:0 2px 8px #0002;cursor:pointer;">Alterar Plano</button>
             </div>
             <div style="background:#fff;padding:32px 24px 40px 24px;border-radius:0 0 18px 18px;box-shadow:0 4px 24px #0001;">
@@ -323,7 +323,7 @@
                     <div style="background:#fff;border-radius:12px;padding:24px 18px;min-width:170px;text-align:center;box-shadow:0 2px 8px #0001;">
                         <div style="font-size:36px;margin-bottom:8px;"><i class='fa-solid fa-house'></i></div>
                         <div style="font-size:28px;font-weight:700;color:#222;">1</div>
-                        <div style="font-size:14px;color:#666;">CONGREGAÃ‡Ã•ES</div>
+                        <div style="font-size:14px;color:#666;">CONGREGAÇÕES</div>
                     </div>
                     <div style="background:#fff;border-radius:12px;padding:24px 18px;min-width:170px;text-align:center;box-shadow:0 2px 8px #0001;">
                         <div style="font-size:36px;margin-bottom:8px;"><i class='fa-solid fa-mobile-screen-button'></i></div>
@@ -360,32 +360,6 @@
                             <script>
                                 const planosCatalogo = {
                                     mensal: [
-                                        {
-                                            nome: 'Eden',
-                                            tag: 'Gratuito',
-                                            icon: '🌿',
-                                            subtitle: 'O comeco de tudo',
-                                            verse: '"No principio, Deus criou..." — Gn 1:1',
-                                            preco: 0,
-                                            period: 'para sempre · com anuncios',
-                                            anualNote: '',
-                                            featured: false,
-                                            cta: 'Plano atual',
-                                            ctaType: 'outline',
-                                            trial: '',
-                                            features: [
-                                                { text: 'App Web Instalavel (PWA)', yes: true },
-                                                { text: 'App do Membro', yes: false },
-                                                { text: 'Ate 30 cadastros', yes: true },
-                                                { text: '1 congregacao', yes: true },
-                                                { text: 'EBD Dominical', yes: true },
-                                                { text: 'Credencial de Membro', yes: false },
-                                                { text: 'Grupos / Celulas', yes: true },
-                                                { text: 'Financeiro (com limites)', yes: true },
-                                                { text: 'Relatorios (com limites)', yes: true },
-                                                { text: 'Suporte prioritario', yes: false }
-                                            ]
-                                        },
                                         {
                                             nome: 'Hebrom',
                                             tag: 'Basico',
@@ -473,10 +447,7 @@
                                     if (clone.nome === 'Hebrom') clone.preco = 42;
                                     if (clone.nome === 'Betel') clone.preco = 67;
                                     if (clone.nome === 'Siao') clone.preco = 83;
-                                    if (clone.nome === 'Eden') clone.preco = 0;
-                                    clone.period = clone.nome === 'Eden'
-                                        ? 'para sempre · com anuncios'
-                                        : 'valor mensal equivalente (cobranca anual)';
+                                    clone.period = 'valor mensal equivalente (cobranca anual)';
                                     return clone;
                                 });
 
@@ -489,7 +460,7 @@
                                 function renderPlanosModal(tipo) {
                                     const grid = document.getElementById('planosGrid');
                                     const cards = planosCatalogo[tipo].map(function(plano) {
-                                        const amountClass = plano.nome === 'Eden' ? 'mpm-amount free' : 'mpm-amount';
+                                        const amountClass = 'mpm-amount';
                                         const badge = plano.featured ? '<div class="mpm-badge">✦ Mais Popular</div>' : '';
                                         const ctaClass = plano.ctaType === 'primary' ? 'mpm-btn' : 'mpm-btn mpm-btn-outline';
                                         const annualNote = tipo === 'anual' && plano.anualNote
@@ -565,11 +536,11 @@
                                     if (ev.target.id === 'modalAlterarPlano') fecharModalPlanos();
                                 });
                             </script>
-                    <span style="background:#22d3ee;color:#222;padding:10px 28px;border-radius:8px;font-weight:700;font-size:18px;">Teste grÃ¡tis de 1 mÃªs</span>
+                    <span style="background:#22d3ee;color:#222;padding:10px 28px;border-radius:8px;font-weight:700;font-size:18px;">Teste grátis de 1 mês</span>
                 </div>
 
                 <div style="margin-top:26px;background:#0f172a;color:#e2e8f0;border-radius:12px;padding:18px 16px;text-align:left;display:flex;flex-wrap:wrap;gap:14px;justify-content:space-between;align-items:center;">
-                    <div style="font-size:14px;font-weight:700;color:#fbbf24;">Contato do responsÃ¡vel</div>
+                    <div style="font-size:14px;font-weight:700;color:#fbbf24;">Contato do responsável</div>
                     <a href="mailto:leopereita31@gmail.com" style="color:#e2e8f0;text-decoration:none;font-size:14px;display:flex;align-items:center;gap:8px;">
                         <i class="fa-solid fa-envelope" style="color:#fbbf24;"></i>
                         leopereita31@gmail.com
