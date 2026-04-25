@@ -407,20 +407,6 @@
 
     <script src="speed-insights.js" defer></script>
     <script>
-        // Usuário logado não deve permanecer na página pública de planos.
-        (function redirectLoggedUserToPrivatePlan() {
-            try {
-                const raw = localStorage.getItem('ldfpAuth');
-                const auth = raw ? JSON.parse(raw) : null;
-                const token = auth?.token || localStorage.getItem('token') || sessionStorage.getItem('token');
-                if (token) {
-                    window.location.replace('meu_plano.html');
-                }
-            } catch (_) {
-                // Se houver erro de parse no storage, segue fluxo público.
-            }
-        })();
-
         // ── Navbar scroll ──
         const navbar = document.getElementById('navbar');
         window.addEventListener('scroll', () => {
