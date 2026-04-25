@@ -244,7 +244,7 @@
         const bancosLinks = [
             ['bancos_lancamentos.html', 'fa-solid fa-file-invoice-dollar', 'Lançamentos Bancários', 'financeiro'],
             ['banco.html', 'fa-solid fa-building-columns', 'Cadastro de Bancos', 'financeiro'],
-            ['construcao.html?pag=Importacao de Extrato', 'fa-solid fa-file-import', 'Importação de Extrato', 'financeiro']
+            ['importacao_extrato.html', 'fa-solid fa-file-import', 'Importação de Extrato', 'financeiro']
         ];
 
         const otherLinks = [
@@ -363,8 +363,8 @@
                     ], activePath, false, user)}
 
                     ${renderLegacyGroup('Relatórios', 'fa-solid fa-print', [
-                        ['construcao.html?pag=Relatorios Secretaria', 'fa-regular fa-file-lines', 'Secretaria'],
-                        ['construcao.html?pag=Relatorios Tesouraria', 'fa-regular fa-file-lines', 'Tesouraria'],
+                        ['relatorios_secretaria.html', 'fa-regular fa-file-lines', 'Secretaria'],
+                        ['relatorios_tesouraria.html', 'fa-regular fa-file-lines', 'Tesouraria'],
                         ['construcao.html?pag=Relatorios Contabilidade', 'fa-regular fa-file-lines', 'Contabilidade']
                     ], activePath, false, user)}
                 </nav>

@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LDFP - Importacao de Extrato</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .ie-wrap { padding: 24px 26px 44px; }
+        .ie-hero {
+            border-radius: 18px;
+            padding: 20px;
+            color: #e2e8f0;
+            background:
+                radial-gradient(circle at 82% 16%, rgba(245, 158, 11, .24), rgba(245, 158, 11, 0) 42%),
+                radial-gradient(circle at 20% 24%, rgba(14, 165, 233, .24), rgba(14, 165, 233, 0) 44%),
+                linear-gradient(135deg, #0f172a 0%, #1f2937 52%, #0f766e 100%);
+            box-shadow: 0 18px 34px rgba(15, 23, 42, .22);
+            margin-bottom: 14px;
+        }
+        .ie-hero h2 { margin: 0 0 6px; font-size: 28px; }
+        .ie-hero p { margin: 0; color: #bfdbfe; font-size: 14px; }
+
+        .ie-grid {
+            display: grid;
+            grid-template-columns: .9fr 1.1fr;
+            gap: 10px;
+        }
+
+        .ie-card {
+            background: #fff;
+            border: 1px solid #d9e4f0;
+            border-radius: 14px;
+            box-shadow: 0 10px 24px rgba(15,23,42,.08);
+            padding: 14px;
+        }
+        .ie-card h3 { margin: 0 0 10px; color: #0f172a; font-size: 16px; }
+
+        .ie-field { margin-bottom: 10px; }
+        .ie-field label { display: block; margin-bottom: 6px; font-size: 12px; font-weight: 700; color: #475569; }
+        .ie-field input, .ie-field select {
+            width: 100%;
+            border: 1px solid #dbe6f3;
+            border-radius: 9px;
+            padding: 10px 12px;
+            font-size: 13px;
+        }
+
+        .ie-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+        .ie-btn {
+            border: 0;
+            border-radius: 9px;
+            padding: 10px 12px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            color: #fff;
+            background: linear-gradient(135deg, #0ea5e9, #0f766e);
+        }
+        .ie-btn.secondary { background: #334155; }
+
+        .ie-table-wrap { overflow-x: auto; }
+        .ie-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .ie-table th { background: #eff6ff; color: #475569; text-align: left; font-size: 11px; text-transform: uppercase; padding: 8px; }
+        .ie-table td { border-bottom: 1px solid #f1f5f9; padding: 8px; color: #1e293b; }
+
+        .ie-chip {
+            border-radius: 999px;
+            display: inline-flex;
+            padding: 2px 8px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+        .ie-chip.entrada { background: #dcfce7; color: #166534; }
+        .ie-chip.saida { background: #fee2e2; color: #991b1b; }
+
+        .ie-msg { margin-top: 10px; font-size: 13px; color: #0f766e; }
+        .ie-msg.error { color: #b91c1c; }
+
+        .ie-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px; }
+        .ie-summary .box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px; }
+        .ie-summary .box small { color: #64748b; }
+        .ie-summary .box b { display: block; margin-top: 4px; color: #0f172a; font-size: 18px; }
+
+        .ie-empty { color: #94a3b8; text-align: center; padding: 18px; font-size: 13px; }
+
+        @media (max-width: 980px) {
+            .ie-wrap { padding: 16px; }
+            .ie-grid { grid-template-columns: 1fr; }
+            .ie-summary { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body class="theme-petroleo" data-shell-title="Importacao de Extrato" data-shell-breadcrumb="LDFP / Tesouraria / Bancos / Importacao de Extrato" data-shell-active="importacao_extrato.html" data-shell-chip="Tesouraria" data-shell-role="Financeiro">
+    <main class="main-content enterprise-main">
+        <section class="ie-wrap">
+            <article class="ie-hero">
+                <h2><i class="fa-solid fa-file-import"></i> Importacao de Extrato</h2>
+                <p>Importe arquivos OFX, CSV ou TXT, revise os lancamentos e publique no caixa em lote.</p>
+            </article>
+
+            <div class="ie-grid">
+                <article class="ie-card">
+                    <h3>Entrada e mapeamento</h3>
+                    <div class="ie-field">
+                        <label for="fileInput">Arquivo de extrato</label>
+                        <input id="fileInput" type="file" accept=".ofx,.csv,.txt">
+                    </div>
+
+                    <div class="ie-field">
+                        <label for="defaultPrefix">Prefixo da descricao</label>
+                        <input id="defaultPrefix" type="text" placeholder="EXTRATO" value="EXTRATO">
+                    </div>
+
+                    <div class="ie-field">
+                        <label for="publishMode">Publicar como</label>
+                        <select id="publishMode">
+                            <option value="transacoes">Transacoes do caixa</option>
+                        </select>
+                    </div>
+
+                    <div class="ie-actions">
+                        <button id="btnLer" type="button" class="ie-btn"><i class="fa-solid fa-bolt"></i> Ler arquivo</button>
+                        <button id="btnPublicar" type="button" class="ie-btn secondary"><i class="fa-solid fa-cloud-arrow-up"></i> Publicar lancamentos</button>
+                    </div>
+
+                    <div class="ie-summary">
+                        <div class="box"><small>Itens</small><b id="sumItens">0</b></div>
+                        <div class="box"><small>Total entradas</small><b id="sumEntradas">R$ 0,00</b></div>
+                        <div class="box"><small>Total saidas</small><b id="sumSaidas">R$ 0,00</b></div>
+                    </div>
+
+                    <div id="statusMsg" class="ie-msg"></div>
+                </article>
+
+                <article class="ie-card">
+                    <h3>Preview do extrato</h3>
+                    <div class="ie-table-wrap">
+                        <table class="ie-table">
+                            <thead>
+                                <tr>
+                                    <th>Data</th>
+                                    <th>Descricao</th>
+                                    <th>Tipo</th>
+                                    <th>Valor</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbPreview">
+                                <tr><td colspan="4" class="ie-empty">Nenhum arquivo processado ainda.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </article>
+            </div>
+        </section>
+    </main>
+
+    <script src="session.js"></script>
+    <script src="enterprise-shell.js"></script>
+    <script>
+        requireAuthSession();
+
+        let importedRows = [];
+
+        function setMsg(text, isError) {
+            const el = document.getElementById('statusMsg');
+            el.className = isError ? 'ie-msg error' : 'ie-msg';
+            el.textContent = text || '';
+        }
+
+        function money(v) {
+            return Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        }
+
+        function normalizeAmount(raw) {
+            if (raw === null || raw === undefined) return 0;
+            const cleaned = String(raw).replace(/\s/g, '').replace(/\./g, '').replace(',', '.').replace(/[^0-9\-.]/g, '');
+            const n = Number(cleaned);
+            return Number.isFinite(n) ? n : 0;
+        }
+
+        function parseDateGuess(raw) {
+            const v = String(raw || '').trim();
+            if (!v) return new Date().toISOString().slice(0, 10);
+
+            if (/^\d{4}-\d{2}-\d{2}/.test(v)) return v.slice(0, 10);
+
+            if (/^\d{8}$/.test(v)) {
+                return v.slice(0, 4) + '-' + v.slice(4, 6) + '-' + v.slice(6, 8);
+            }
+
+            if (/^\d{2}\/\d{2}\/\d{4}$/.test(v)) {
+                const p = v.split('/');
+                return p[2] + '-' + p[1] + '-' + p[0];
+            }
+
+            const d = new Date(v);
+            if (!Number.isNaN(d.getTime())) return d.toISOString().slice(0, 10);
+            return new Date().toISOString().slice(0, 10);
+        }
+
+        function parseCsv(text) {
+            const lines = text.split(/\r?\n/).filter((l) => l.trim());
+            if (lines.length < 2) return [];
+
+            const delimiter = lines[0].includes(';') ? ';' : ',';
+            const rows = lines.slice(1).map((line) => line.split(delimiter).map((x) => x.trim()));
+            return rows.map((cols) => {
+                const date = parseDateGuess(cols[0]);
+                const desc = cols[1] || 'Movimentacao importada';
+                const value = normalizeAmount(cols[2]);
+                const tipo = value < 0 ? 'saida' : 'entrada';
+                return { data: date, descricao: desc, tipo, valor: Math.abs(value) };
+            }).filter((x) => x.valor > 0);
+        }
+
+        function parseTxt(text) {
+            const lines = text.split(/\r?\n/).filter((l) => l.trim());
+            return lines.map((line) => {
+                const parts = line.split(/[;|]/).map((x) => x.trim());
+                const date = parseDateGuess(parts[0]);
+                const desc = parts[1] || line.slice(0, 60);
+                const value = normalizeAmount(parts[2] || parts[parts.length - 1]);
+                const tipo = value < 0 ? 'saida' : 'entrada';
+                return { data: date, descricao: desc, tipo, valor: Math.abs(value) };
+            }).filter((x) => x.valor > 0);
+        }
+
+        function parseOfx(text) {
+            const blocks = text.match(/<STMTTRN>[\s\S]*?<\/STMTTRN>/gi) || [];
+            return blocks.map((block) => {
+                const amt = (block.match(/<TRNAMT>([^\r\n<]+)/i) || [])[1] || '0';
+                const posted = (block.match(/<DTPOSTED>([^\r\n<]+)/i) || [])[1] || '';
+                const memo = (block.match(/<MEMO>([^\r\n<]+)/i) || [])[1] || 'Movimentacao OFX';
+                const value = normalizeAmount(amt);
+                const tipo = value < 0 ? 'saida' : 'entrada';
+                return {
+                    data: parseDateGuess(posted.replace(/[^0-9]/g, '').slice(0, 8)),
+                    descricao: memo,
+                    tipo,
+                    valor: Math.abs(value)
+                };
+            }).filter((x) => x.valor > 0);
+        }
+
+        function renderPreview(rows) {
+            const tb = document.getElementById('tbPreview');
+            if (!rows.length) {
+                tb.innerHTML = '<tr><td colspan="4" class="ie-empty">Nenhum registro encontrado no arquivo.</td></tr>';
+                return;
+            }
+
+            tb.innerHTML = rows.slice(0, 200).map((r) => `
+                <tr>
+                    <td>${r.data}</td>
+                    <td>${r.descricao}</td>
+                    <td><span class="ie-chip ${r.tipo}">${r.tipo}</span></td>
+                    <td>${money(r.valor)}</td>
+                </tr>
+            `).join('');
+        }
+
+        function renderSummary(rows) {
+            const ent = rows.filter((x) => x.tipo === 'entrada').reduce((a, b) => a + Number(b.valor || 0), 0);
+            const sai = rows.filter((x) => x.tipo === 'saida').reduce((a, b) => a + Number(b.valor || 0), 0);
+            document.getElementById('sumItens').textContent = rows.length;
+            document.getElementById('sumEntradas').textContent = money(ent);
+            document.getElementById('sumSaidas').textContent = money(sai);
+        }
+
+        async function readFile() {
+            const file = document.getElementById('fileInput').files[0];
+            if (!file) {
+                setMsg('Selecione um arquivo para leitura.', true);
+                return;
+            }
+
+            const text = await file.text();
+            const lower = file.name.toLowerCase();
+
+            if (lower.endsWith('.ofx')) importedRows = parseOfx(text);
+            else if (lower.endsWith('.csv')) importedRows = parseCsv(text);
+            else importedRows = parseTxt(text);
+
+            const prefix = document.getElementById('defaultPrefix').value.trim();
+            importedRows = importedRows.map((r) => ({
+                data: r.data,
+                descricao: prefix ? (prefix + ' - ' + r.descricao) : r.descricao,
+                tipo: r.tipo,
+                valor: r.valor
+            }));
+
+            renderPreview(importedRows);
+            renderSummary(importedRows);
+            setMsg('Arquivo processado com sucesso.');
+        }
+
+        async function publicarLancamentos() {
+            if (!importedRows.length) {
+                setMsg('Nenhum item para publicar.', true);
+                return;
+            }
+
+            setMsg('Publicando lancamentos...');
+            let ok = 0;
+            let fail = 0;
+
+            for (const row of importedRows) {
+                try {
+                    const response = await fetch('/transacoes', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            descricao: row.descricao,
+                            tipo: row.tipo,
+                            valor: row.valor
+                        })
+                    });
+                    if (!response.ok) {
+                        fail += 1;
+                    } else {
+                        ok += 1;
+                    }
+                } catch (_error) {
+                    fail += 1;
+                }
+            }
+
+            if (fail === 0) {
+                setMsg('Publicacao concluida com sucesso: ' + ok + ' lancamentos enviados.');
+            } else {
+                setMsg('Publicacao concluida com alertas. Sucesso: ' + ok + ', falhas: ' + fail + '.', true);
+            }
+        }
+
+        document.getElementById('btnLer').addEventListener('click', readFile);
+        document.getElementById('btnPublicar').addEventListener('click', publicarLancamentos);
+    </script>
+</body>
+</html>
