@@ -339,6 +339,7 @@
                     ${renderLegacyGroup('Menu LDFP', 'fa-solid fa-house', [
                         ['dashboard.html', 'fa-regular fa-eye', 'Visão Geral', 'dashboard'],
                         ['app_membro.html', 'fa-solid fa-mobile-screen-button', 'App do Membro'],
+                        ['acervo_modulos.html', 'fa-solid fa-cubes-stacked', 'Acervo de Modulos'],
                         ['novidades.html', 'fa-solid fa-star', 'Novidades'],
                         ['meu_plano.html', 'fa-solid fa-credit-card', 'Meu Plano'],
                         ['configuracoes.html', 'fa-solid fa-gear', 'Configurações', 'configuracoes'],
