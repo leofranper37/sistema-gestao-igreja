@@ -125,76 +125,35 @@
     }
 
     function renderSecretariaGroup(activePath, user) {
-        const membrosLinks = [
-            ['membros.html', 'fa-regular fa-id-card', 'Ficha Cadastral', 'membros'],
-            ['cadastro.html', 'fa-solid fa-file-pen', 'Ficha de Cadastro', 'membros'],
-            ['cargos.html', 'fa-solid fa-briefcase', 'Cargos', 'cargos'],
-            ['situacoes.html', 'fa-solid fa-toggle-on', 'Situações', 'membros'],
-            ['congregacoes.html', 'fa-solid fa-church', 'Congregações', 'membros']
+        const pessoasLinks = [
+            ['membros.html', 'fa-solid fa-user-check', 'Membros', 'membros'],
+            ['congregados.html', 'fa-solid fa-user-clock', 'Congregados', 'membros'],
+            ['visitantes.html', 'fa-solid fa-walking', 'Visitantes', 'visitantes'],
+            ['criancas.html', 'fa-solid fa-child-reaching', 'Crianças', 'criancas']
         ];
 
-        const historicoLinks = [
-            ['historico_pastoral.html', 'fa-solid fa-book-bible', 'Histórico Pastoral', 'membros'],
-            ['tipos_historico.html', 'fa-solid fa-list-check', 'Tipo de Histórico', 'membros']
-        ];
-
-        const grupoLinks = [
-            ['grupos.html', 'fa-solid fa-people-group', 'Grupos', 'membros'],
-            ['grupo_novo.html', 'fa-solid fa-plus', 'Cadastro', 'membros'],
-            ['grupos_categorias.html', 'fa-solid fa-tags', 'Categorias', 'membros'],
-            ['grupos_reunioes.html', 'fa-solid fa-users-rectangle', 'Reuniões', 'membros']
-        ];
-
-        const escalaLinks = [
-            ['escalas.html?tab=eventos', 'fa-regular fa-calendar', 'Eventos', 'agenda'],
-            ['escalas.html?tab=dashboard', 'fa-solid fa-clipboard-list', 'Gestão de Escalas', 'agenda'],
-            ['escalas.html?tab=matriz', 'fa-solid fa-calendar-days', 'Escala Mensal', 'agenda']
-        ];
-
-        const ebdLinks = [
-            ['ebd_alunos.html', 'fa-solid fa-user-graduate', 'Alunos', 'criancas'],
-            ['ebd_turmas.html', 'fa-solid fa-people-group', 'Turmas', 'criancas'],
-            ['ebd_grades.html', 'fa-solid fa-table-cells-large', 'Grades EBD', 'criancas']
-        ];
-
-        const batismoLinks = [
+        const organizacaoLinks = [
+            ['grupos.html', 'fa-solid fa-people-group', 'Grupos / Células', 'membros'],
+            ['escalas.html?tab=dashboard', 'fa-solid fa-clipboard-list', 'Escalas', 'agenda'],
             ['batismos.html', 'fa-solid fa-water', 'Batismos', 'membros'],
-            ['batismo_novo.html', 'fa-solid fa-plus', 'Cadastrar', 'membros'],
-            ['batismos_inscricoes.html', 'fa-solid fa-clipboard-check', 'Inscrições', 'membros']
+            ['agenda.html', 'fa-solid fa-calendar-days', 'Agenda', 'agenda']
         ];
 
-        const otherLinks = [
-            ['lista_membros.html', 'fa-solid fa-users', 'Lista de Membros', 'membros'],
-            ['agenda.html', 'fa-solid fa-calendar-days', 'Agenda', 'agenda'],
-            ['outras_igrejas.html', 'fa-solid fa-globe', 'Outras Igrejas', 'igrejas'],
-            ['missionarios.html', 'fa-solid fa-person-rays', 'Missionários', 'missionarios'],
-            ['visitantes.html', 'fa-solid fa-user-plus', 'Visitantes', 'visitantes'],
-            ['congregados.html', 'fa-solid fa-people-arrows-left-right', 'Congregados', 'membros'],
-            ['criancas.html', 'fa-solid fa-child-reaching', 'Crianças', 'criancas'],
+        const espiritualidadeLinks = [
+            ['ebd_alunos.html', 'fa-solid fa-book-bible', 'EBD', 'criancas'],
             ['oracoes.html', 'fa-solid fa-hands-praying', 'Orações', 'oracoes'],
-            ['comunicacao_whatsapp.html', 'fa-brands fa-whatsapp', 'WhatsApp', 'whatsapp'],
-            ['autocadastro_aprovacoes.html', 'fa-solid fa-user-check', 'Aprovação de Cadastro', 'autocadastro'],
-            ['portaria_checkin.html', 'fa-solid fa-qrcode', 'Portaria QR', 'portaria_qr'],
-            ['app_midia.html', 'fa-solid fa-tv', 'App Midia', 'app_midia'],
-            ['telao_visitantes.html', 'fa-solid fa-display', 'Telão', 'telao']
+            ['missionarios.html', 'fa-solid fa-globe', 'Missionários', 'missionarios'],
+            ['outras_igrejas.html', 'fa-solid fa-church', 'Outras Igrejas', 'igrejas']
         ];
 
-        const allowedMembrosLinks = filterLinksByRole(membrosLinks, user);
-        const allowedHistoricoLinks = filterLinksByRole(historicoLinks, user);
-        const allowedGrupoLinks = filterLinksByRole(grupoLinks, user);
-        const allowedEscalaLinks = filterLinksByRole(escalaLinks, user);
-        const allowedEbdLinks = filterLinksByRole(ebdLinks, user);
-        const allowedBatismoLinks = filterLinksByRole(batismoLinks, user);
-        const allowedOtherLinks = filterLinksByRole(otherLinks, user);
+        const allowedPessoasLinks = filterLinksByRole(pessoasLinks, user);
+        const allowedOrganizacaoLinks = filterLinksByRole(organizacaoLinks, user);
+        const allowedEspiritualidadeLinks = filterLinksByRole(espiritualidadeLinks, user);
 
         const allLinks = [
-            ...allowedMembrosLinks,
-            ...allowedHistoricoLinks,
-            ...allowedGrupoLinks,
-            ...allowedEscalaLinks,
-            ...allowedEbdLinks,
-            ...allowedBatismoLinks,
-            ...allowedOtherLinks
+            ...allowedPessoasLinks,
+            ...allowedOrganizacaoLinks,
+            ...allowedEspiritualidadeLinks
         ];
 
         if (!allLinks.length) {
@@ -202,44 +161,21 @@
         }
 
         const secretariaHasActive = allLinks.some(({ href }) => isLinkActive(href, activePath));
-        const membrosActive = allowedMembrosLinks.some(({ href }) => isLinkActive(href, activePath));
-        const historicoActive = allowedHistoricoLinks.some(({ href }) => isLinkActive(href, activePath));
-        const grupoActive = allowedGrupoLinks.some(({ href }) => isLinkActive(href, activePath));
-        const escalaActive = allowedEscalaLinks.some(({ href }) => isLinkActive(href, activePath));
-        const ebdActive = allowedEbdLinks.some(({ href }) => isLinkActive(href, activePath));
-        const batismoActive = allowedBatismoLinks.some(({ href }) => isLinkActive(href, activePath));
+        const pessoasActive = allowedPessoasLinks.some(({ href }) => isLinkActive(href, activePath));
+        const organizacaoActive = allowedOrganizacaoLinks.some(({ href }) => isLinkActive(href, activePath));
+        const espiritualidadeActive = allowedEspiritualidadeLinks.some(({ href }) => isLinkActive(href, activePath));
 
-        const membrosHtml = allowedMembrosLinks.map(({ href, icon: linkIcon, label }) => {
+        const pessoasHtml = allowedPessoasLinks.map(({ href, icon: linkIcon, label }) => {
             const activeClass = isLinkActive(href, activePath) ? 'active-link' : '';
             return `<a href="${href}" class="${activeClass}"><i class="${linkIcon}"></i><span>${label}</span></a>`;
         }).join('');
 
-        const historicoHtml = allowedHistoricoLinks.map(({ href, icon: linkIcon, label }) => {
+        const organizacaoHtml = allowedOrganizacaoLinks.map(({ href, icon: linkIcon, label }) => {
             const activeClass = isLinkActive(href, activePath) ? 'active-link' : '';
             return `<a href="${href}" class="${activeClass}"><i class="${linkIcon}"></i><span>${label}</span></a>`;
         }).join('');
 
-        const grupoHtml = allowedGrupoLinks.map(({ href, icon: linkIcon, label }) => {
-            const activeClass = isLinkActive(href, activePath) ? 'active-link' : '';
-            return `<a href="${href}" class="${activeClass}"><i class="${linkIcon}"></i><span>${label}</span></a>`;
-        }).join('');
-
-        const escalaHtml = allowedEscalaLinks.map(({ href, icon: linkIcon, label }) => {
-            const activeClass = isLinkActive(href, activePath) ? 'active-link' : '';
-            return `<a href="${href}" class="${activeClass}"><i class="${linkIcon}"></i><span>${label}</span></a>`;
-        }).join('');
-
-        const ebdHtml = allowedEbdLinks.map(({ href, icon: linkIcon, label }) => {
-            const activeClass = isLinkActive(href, activePath) ? 'active-link' : '';
-            return `<a href="${href}" class="${activeClass}"><i class="${linkIcon}"></i><span>${label}</span></a>`;
-        }).join('');
-
-        const batismoHtml = allowedBatismoLinks.map(({ href, icon: linkIcon, label }) => {
-            const activeClass = isLinkActive(href, activePath) ? 'active-link' : '';
-            return `<a href="${href}" class="${activeClass}"><i class="${linkIcon}"></i><span>${label}</span></a>`;
-        }).join('');
-
-        const otherHtml = allowedOtherLinks.map(({ href, icon: linkIcon, label }) => {
+        const espiritualidadeHtml = allowedEspiritualidadeLinks.map(({ href, icon: linkIcon, label }) => {
             const activeClass = isLinkActive(href, activePath) ? 'active-link' : '';
             return `<a href="${href}" class="${activeClass}"><i class="${linkIcon}"></i><span>${label}</span></a>`;
         }).join('');
@@ -250,55 +186,29 @@
                 <i class="fa-solid fa-chevron-right arrow"></i>
             </button>
             <div class="dropdown-container" style="${secretariaHasActive ? 'display: block;' : 'display: none;'}">
-                ${allowedMembrosLinks.length ? `<button class="sub-dropdown-btn ${membrosActive ? 'active' : ''}" type="button">
-                    <span><i class="fa-solid fa-users icon-left"></i> Membros</span>
+                ${allowedPessoasLinks.length ? `<button class="sub-dropdown-btn ${pessoasActive ? 'active' : ''}" type="button">
+                    <span><i class="fa-solid fa-address-book icon-left"></i> Pessoas</span>
                     <i class="fa-solid fa-chevron-right arrow"></i>
                 </button>
-                <div class="sub-dropdown-container" style="${membrosActive ? 'display: block;' : 'display: none;'}">
-                    ${membrosHtml}
+                <div class="sub-dropdown-container" style="${pessoasActive ? 'display: block;' : 'display: none;'}">
+                    ${pessoasHtml}
                 </div>` : ''}
 
-                ${allowedHistoricoLinks.length ? `<button class="sub-dropdown-btn ${historicoActive ? 'active' : ''}" type="button">
-                    <span><i class="fa-solid fa-book-bible icon-left"></i> Histórico Pastoral</span>
+                ${allowedOrganizacaoLinks.length ? `<button class="sub-dropdown-btn ${organizacaoActive ? 'active' : ''}" type="button">
+                    <span><i class="fa-solid fa-calendar-check icon-left"></i> Organização e Eventos</span>
                     <i class="fa-solid fa-chevron-right arrow"></i>
                 </button>
-                <div class="sub-dropdown-container" style="${historicoActive ? 'display: block;' : 'display: none;'}">
-                    ${historicoHtml}
+                <div class="sub-dropdown-container" style="${organizacaoActive ? 'display: block;' : 'display: none;'}">
+                    ${organizacaoHtml}
                 </div>` : ''}
 
-                ${allowedGrupoLinks.length ? `<button class="sub-dropdown-btn ${grupoActive ? 'active' : ''}" type="button">
-                    <span><i class="fa-solid fa-people-group icon-left"></i> Grupos</span>
+                ${allowedEspiritualidadeLinks.length ? `<button class="sub-dropdown-btn ${espiritualidadeActive ? 'active' : ''}" type="button">
+                    <span><i class="fa-solid fa-book-open-reader icon-left"></i> Espiritualidade e Comunhão</span>
                     <i class="fa-solid fa-chevron-right arrow"></i>
                 </button>
-                <div class="sub-dropdown-container" style="${grupoActive ? 'display: block;' : 'display: none;'}">
-                    ${grupoHtml}
+                <div class="sub-dropdown-container" style="${espiritualidadeActive ? 'display: block;' : 'display: none;'}">
+                    ${espiritualidadeHtml}
                 </div>` : ''}
-
-                ${allowedEscalaLinks.length ? `<button class="sub-dropdown-btn ${escalaActive ? 'active' : ''}" type="button">
-                    <span><i class="fa-solid fa-calendar-check icon-left"></i> Escalas</span>
-                    <i class="fa-solid fa-chevron-right arrow"></i>
-                </button>
-                <div class="sub-dropdown-container" style="${escalaActive ? 'display: block;' : 'display: none;'}">
-                    ${escalaHtml}
-                </div>` : ''}
-
-                ${allowedEbdLinks.length ? `<button class="sub-dropdown-btn ${ebdActive ? 'active' : ''}" type="button">
-                    <span><i class="fa-solid fa-graduation-cap icon-left"></i> EBD</span>
-                    <i class="fa-solid fa-chevron-right arrow"></i>
-                </button>
-                <div class="sub-dropdown-container" style="${ebdActive ? 'display: block;' : 'display: none;'}">
-                    ${ebdHtml}
-                </div>` : ''}
-
-                ${allowedBatismoLinks.length ? `<button class="sub-dropdown-btn ${batismoActive ? 'active' : ''}" type="button">
-                    <span><i class="fa-solid fa-water icon-left"></i> Batismos</span>
-                    <i class="fa-solid fa-chevron-right arrow"></i>
-                </button>
-                <div class="sub-dropdown-container" style="${batismoActive ? 'display: block;' : 'display: none;'}">
-                    ${batismoHtml}
-                </div>` : ''}
-
-                ${otherHtml}
             </div>
         `;
     }

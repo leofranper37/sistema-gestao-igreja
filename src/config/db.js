@@ -528,6 +528,16 @@ async function initializeDatabase() {
         try { await activePgPool.query(`ALTER TABLE igrejas ADD COLUMN ultimo_pagamento TIMESTAMP`); } catch(_){}
         try { await activePgPool.query(`ALTER TABLE igrejas ADD COLUMN proximo_vencimento TIMESTAMP`); } catch(_){}
 
+        await activePgPool.query(`CREATE TABLE IF NOT EXISTS password_reset_tokens (
+            id SERIAL PRIMARY KEY,
+            usuario_id INTEGER NOT NULL,
+            token VARCHAR(128) NOT NULL UNIQUE,
+            expires_at TIMESTAMP NOT NULL,
+            used SMALLINT NOT NULL DEFAULT 0,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )`);
+        await activePgPool.query(`CREATE INDEX IF NOT EXISTS idx_prt_token ON password_reset_tokens (token)`);
+
         console.log('✅ Tabelas principais verificadas/criadas no PostgreSQL.');
         return;
     }
@@ -673,6 +683,17 @@ async function initializeDatabase() {
         try { await activeMysqlPool.query(`ALTER TABLE igrejas ADD COLUMN mensalidade_valor DECIMAL(10,2) NOT NULL DEFAULT 0`); } catch(_){}
         try { await activeMysqlPool.query(`ALTER TABLE igrejas ADD COLUMN ultimo_pagamento DATETIME`); } catch(_){}
         try { await activeMysqlPool.query(`ALTER TABLE igrejas ADD COLUMN proximo_vencimento DATETIME`); } catch(_){}
+
+        await activeMysqlPool.query(`CREATE TABLE IF NOT EXISTS password_reset_tokens (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            usuario_id INT NOT NULL,
+            token VARCHAR(128) NOT NULL UNIQUE,
+            expires_at DATETIME NOT NULL,
+            used TINYINT(1) NOT NULL DEFAULT 0,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            INDEX idx_prt_token (token),
+            INDEX idx_prt_usuario (usuario_id)
+        )`);
 
         console.log('✅ Tabelas principais verificadas/criadas no MySQL.');
         return;
@@ -874,6 +895,16 @@ async function initializeDatabase() {
             safeAlter('ALTER TABLE igrejas ADD COLUMN mensalidade_valor REAL NOT NULL DEFAULT 0');
             safeAlter('ALTER TABLE igrejas ADD COLUMN ultimo_pagamento TEXT');
             safeAlter('ALTER TABLE igrejas ADD COLUMN proximo_vencimento TEXT');
+
+            db.run(`CREATE TABLE IF NOT EXISTS password_reset_tokens (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                usuario_id INTEGER NOT NULL,
+                token TEXT NOT NULL UNIQUE,
+                expires_at TEXT NOT NULL,
+                used INTEGER NOT NULL DEFAULT 0,
+                created_at TEXT DEFAULT CURRENT_TIMESTAMP
+            )`);
+            db.run(`CREATE INDEX IF NOT EXISTS idx_prt_token ON password_reset_tokens (token)`);
 
             // Sentinela: garante que todos os comandos acima já foram executados antes de resolver.
             db.run('SELECT 1', (err) => {

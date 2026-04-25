@@ -264,34 +264,34 @@
                 Visão Geral do Sistema
             </div>
 
-            <!-- Seção: Comunidade -->
-            <div class="section-title"><i class="fa-solid fa-people-group" style="margin-right: 8px; color: #0ea5e9;"></i>Comunidade</div>
+            <!-- Seção: Pessoas -->
+            <div class="section-title"><i class="fa-solid fa-address-book" style="margin-right: 8px; color: #0ea5e9;"></i>Pessoas</div>
             <div class="dash-grid">
                 <div class="stat-card members" onclick="location.href='membros.html'">
                     <div class="stat-card-header">
                         <div>
-                            <div class="stat-label">Total de Membros</div>
+                            <div class="stat-label">Membros</div>
                             <div class="stat-value" id="totalMembros">0</div>
                         </div>
                         <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
                     </div>
                     <div class="stat-footer">
                         <i class="fa-solid fa-arrow-right" style="font-size: 10px;"></i>
-                        Visualizar membros
+                        Abrir módulo
                     </div>
                 </div>
 
-                <div class="stat-card birthday" onclick="location.href='lista_membros.html?filtro=aniversariantes'">
+                <div class="stat-card birthday" onclick="location.href='congregados.html'">
                     <div class="stat-card-header">
                         <div>
-                            <div class="stat-label">Aniversariantes</div>
-                            <div class="stat-value" id="totalAniversariantes">0</div>
+                            <div class="stat-label">Congregados</div>
+                            <div class="stat-value" id="totalCongregados">0</div>
                         </div>
-                        <div class="stat-icon"><i class="fa-solid fa-cake-candles"></i></div>
+                        <div class="stat-icon"><i class="fa-solid fa-user-clock"></i></div>
                     </div>
                     <div class="stat-footer">
                         <i class="fa-solid fa-arrow-right" style="font-size: 10px;"></i>
-                        Ver hoje
+                        Abrir módulo
                     </div>
                 </div>
 
@@ -305,60 +305,116 @@
                     </div>
                     <div class="stat-footer">
                         <i class="fa-solid fa-arrow-right" style="font-size: 10px;"></i>
-                        Gerenciar visitantes
+                        Abrir módulo
                     </div>
                 </div>
 
                 <div class="stat-card children" onclick="location.href='criancas.html'">
                     <div class="stat-card-header">
                         <div>
-                            <div class="stat-label">Crianças EBD</div>
+                            <div class="stat-label">Crianças</div>
                             <div class="stat-value" id="totalCriancas">0</div>
                         </div>
                         <div class="stat-icon"><i class="fa-solid fa-child"></i></div>
                     </div>
                     <div class="stat-footer">
                         <i class="fa-solid fa-arrow-right" style="font-size: 10px;"></i>
-                        Turmas e alunos
+                        Abrir módulo
                     </div>
                 </div>
             </div>
 
-            <!-- Seção: Espiritualidade -->
-            <div class="section-title"><i class="fa-solid fa-hands-praying" style="margin-right: 8px; color: #ec4899;"></i>Espiritualidade</div>
+            <!-- Seção: Organização e Eventos -->
+            <div class="section-title"><i class="fa-solid fa-calendar-check" style="margin-right: 8px; color: #10b981;"></i>Organização e Eventos</div>
             <div class="dash-grid">
-                <div class="stat-card prayers" onclick="location.href='oracoes.html'">
+                <div class="stat-card members" onclick="location.href='grupos.html'">
                     <div class="stat-card-header">
                         <div>
-                            <div class="stat-label">Pedidos de Oração</div>
-                            <div class="stat-value" id="totalOracoes">0</div>
+                            <div class="stat-label">Grupos / Células</div>
+                            <div class="stat-value" id="totalGrupos">0</div>
                         </div>
-                        <div class="stat-icon"><i class="fa-solid fa-hands-praying"></i></div>
+                        <div class="stat-icon"><i class="fa-solid fa-people-group"></i></div>
                     </div>
                     <div class="stat-footer">
                         <i class="fa-solid fa-arrow-right" style="font-size: 10px;"></i>
-                        Acompanhar mural
+                        Abrir módulo
+                    </div>
+                </div>
+
+                <div class="stat-card visitors" onclick="location.href='escalas.html?tab=dashboard'">
+                    <div class="stat-card-header">
+                        <div>
+                            <div class="stat-label">Escalas</div>
+                            <div class="stat-value" id="totalEscalas">0</div>
+                        </div>
+                        <div class="stat-icon"><i class="fa-solid fa-clipboard-list"></i></div>
+                    </div>
+                    <div class="stat-footer">
+                        <i class="fa-solid fa-arrow-right" style="font-size: 10px;"></i>
+                        Abrir módulo
+                    </div>
+                </div>
+
+                <div class="stat-card prayers" onclick="location.href='batismos.html'">
+                    <div class="stat-card-header">
+                        <div>
+                            <div class="stat-label">Batismos</div>
+                            <div class="stat-value" id="totalBatismos">0</div>
+                        </div>
+                        <div class="stat-icon"><i class="fa-solid fa-water"></i></div>
+                    </div>
+                    <div class="stat-footer">
+                        <i class="fa-solid fa-arrow-right" style="font-size: 10px;"></i>
+                        Abrir módulo
                     </div>
                 </div>
 
                 <div class="stat-card events" onclick="location.href='agenda.html'">
                     <div class="stat-card-header">
                         <div>
-                            <div class="stat-label">Eventos Agendados</div>
+                            <div class="stat-label">Agenda</div>
                             <div class="stat-value" id="totalEventos">0</div>
                         </div>
                         <div class="stat-icon"><i class="fa-solid fa-calendar-days"></i></div>
                     </div>
                     <div class="stat-footer">
                         <i class="fa-solid fa-arrow-right" style="font-size: 10px;"></i>
-                        Ver agenda completa
+                        Abrir módulo
                     </div>
                 </div>
             </div>
 
-            <!-- Seção: Missões -->
-            <div class="section-title"><i class="fa-solid fa-globe" style="margin-right: 8px; color: #f59e0b;"></i>Missões e Comunhão</div>
+            <!-- Seção: Espiritualidade e Comunhão -->
+            <div class="section-title"><i class="fa-solid fa-book-open-reader" style="margin-right: 8px; color: #ec4899;"></i>Espiritualidade e Comunhão</div>
             <div class="dash-grid">
+                <div class="stat-card children" onclick="location.href='ebd_alunos.html'">
+                    <div class="stat-card-header">
+                        <div>
+                            <div class="stat-label">EBD</div>
+                            <div class="stat-value" id="totalEbd">0</div>
+                        </div>
+                        <div class="stat-icon"><i class="fa-solid fa-book-bible"></i></div>
+                    </div>
+                    <div class="stat-footer">
+                        <i class="fa-solid fa-arrow-right" style="font-size: 10px;"></i>
+                        Abrir módulo
+                    </div>
+                </div>
+
+                <div class="stat-card prayers" onclick="location.href='oracoes.html'">
+                    <div class="stat-card-header">
+                        <div>
+                            <div class="stat-label">Orações</div>
+                            <div class="stat-value" id="totalOracoes">0</div>
+                        </div>
+                        <div class="stat-icon"><i class="fa-solid fa-hands-praying"></i></div>
+                    </div>
+                    <div class="stat-footer">
+                        <i class="fa-solid fa-arrow-right" style="font-size: 10px;"></i>
+                        Abrir módulo
+                    </div>
+                </div>
+
                 <div class="stat-card missionaries" onclick="location.href='missionarios.html'">
                     <div class="stat-card-header">
                         <div>
@@ -369,7 +425,7 @@
                     </div>
                     <div class="stat-footer">
                         <i class="fa-solid fa-arrow-right" style="font-size: 10px;"></i>
-                        Contatos e informações
+                        Abrir módulo
                     </div>
                 </div>
 
@@ -383,7 +439,7 @@
                     </div>
                     <div class="stat-footer">
                         <i class="fa-solid fa-arrow-right" style="font-size: 10px;"></i>
-                        Comunhão e rede
+                        Abrir módulo
                     </div>
                 </div>
             </div>
@@ -407,7 +463,6 @@
     <script src="session.js"></script>
     <script src="pwa.js"></script>
     <script src="enterprise-shell.js"></script>
-    <script>
     <script>
         requireAuthSession();
 
@@ -456,13 +511,16 @@
         }
 
         async function carregarDashboard() {
-            // Membros e Aniversariantes
+            // Membros
             const membrosData = await fetchJson('/membros', []);
             const members = Array.isArray(membrosData) ? membrosData : (membrosData.items || []);
-            const birthdayMembers = members.filter(isBirthdayThisMonth);
             document.getElementById('totalMembros').textContent = String(members.length);
-            document.getElementById('totalAniversariantes').textContent = String(birthdayMembers.length);
             renderRecentMembers(members);
+
+            // Congregados
+            const congregadosData = await fetchJson('/congregados', []);
+            const congregados = Array.isArray(congregadosData) ? congregadosData : (congregadosData.items || []);
+            document.getElementById('totalCongregados').textContent = String(congregados.length);
 
             // Visitantes
             const visitantesData = await fetchJson('/visitantes', []);
@@ -474,6 +532,21 @@
             const criancas = Array.isArray(criancasData) ? criancasData : (criancasData.items || []);
             document.getElementById('totalCriancas').textContent = String(criancas.length);
 
+            // Grupos
+            const gruposData = await fetchJson('/grupos', []);
+            const grupos = Array.isArray(gruposData) ? gruposData : (gruposData.items || []);
+            document.getElementById('totalGrupos').textContent = String(grupos.length);
+
+            // Escalas
+            const escalasData = await fetchJson('/escalas', []);
+            const escalas = Array.isArray(escalasData) ? escalasData : (escalasData.items || []);
+            document.getElementById('totalEscalas').textContent = String(escalas.length);
+
+            // Batismos
+            const batismosData = await fetchJson('/batismos', []);
+            const batismos = Array.isArray(batismosData) ? batismosData : (batismosData.items || []);
+            document.getElementById('totalBatismos').textContent = String(batismos.length);
+
             // Orações
             const oracoesData = await fetchJson('/oracoes/mural', []);
             const oracoes = Array.isArray(oracoesData) ? oracoesData : (oracoesData.items || []);
@@ -483,6 +556,11 @@
             const eventosData = await fetchJson('/agenda', []);
             const eventos = Array.isArray(eventosData) ? eventosData : (eventosData.items || []);
             document.getElementById('totalEventos').textContent = String(eventos.length);
+
+            // EBD
+            const ebdData = await fetchJson('/ebd/alunos', []);
+            const ebd = Array.isArray(ebdData) ? ebdData : (ebdData.items || []);
+            document.getElementById('totalEbd').textContent = String(ebd.length);
 
             // Missionários
             const missionariosData = await fetchJson('/missionarios', []);

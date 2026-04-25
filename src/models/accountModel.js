@@ -55,9 +55,37 @@ async function findUserByEmail(email) {
     return rows[0] || null;
 }
 
+async function createPasswordResetToken(usuarioId, token, expiresAt) {
+    await pool.query('DELETE FROM password_reset_tokens WHERE usuario_id = ?', [usuarioId]);
+    await pool.query(
+        'INSERT INTO password_reset_tokens (usuario_id, token, expires_at) VALUES (?, ?, ?)',
+        [usuarioId, token, expiresAt.toISOString()]
+    );
+}
+
+async function findPasswordResetToken(token) {
+    const [rows] = await pool.query(
+        'SELECT * FROM password_reset_tokens WHERE token = ? AND used = 0 LIMIT 1',
+        [token]
+    );
+    return rows[0] || null;
+}
+
+async function markTokenUsed(token) {
+    await pool.query('UPDATE password_reset_tokens SET used = 1 WHERE token = ?', [token]);
+}
+
+async function updateUserPassword(userId, passwordHash) {
+    await pool.query('UPDATE usuarios SET password_hash = ? WHERE id = ?', [passwordHash, userId]);
+}
+
 module.exports = {
     createChurch,
     createUser,
     findChurchByName,
-    findUserByEmail
+    findUserByEmail,
+    createPasswordResetToken,
+    findPasswordResetToken,
+    markTokenUsed,
+    updateUserPassword
 };

@@ -1,8 +1,11 @@
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 
 const config = require('../config');
 const accountModel = require('../models/accountModel');
+const { createHttpError } = require('../utils/httpError');
+const { sendMail } = require('../utils/mailer');
 
 function buildAuthResponse(userRecord) {
     const user = {
@@ -93,5 +96,52 @@ async function login(payload) {
 
 module.exports = {
     login,
-    registerAccount
+    registerAccount,
+    requestPasswordReset,
+    resetPassword
 };
+
+async function requestPasswordReset(email) {
+    const userRecord = await accountModel.findUserByEmail(email);
+    if (!userRecord) return; // silencia: não revela se e-mail existe
+
+    const token = crypto.randomBytes(32).toString('hex');
+    const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hora
+
+    await accountModel.createPasswordResetToken(userRecord.id, token, expiresAt);
+
+    const baseUrl = process.env.APP_BASE_URL || 'https://www.ldfp.com.br';
+    const link = `${baseUrl}/redefinir_senha.html?token=${token}`;
+
+    await sendMail({
+        to: email,
+        subject: 'Redefinição de senha – LDFP',
+        html: `
+            <div style="font-family:'Segoe UI',sans-serif;max-width:480px;margin:0 auto;padding:24px;">
+                <h2 style="color:#111;margin-bottom:8px;">Redefinição de senha</h2>
+                <p>Olá, <strong>${userRecord.nome}</strong>!</p>
+                <p>Você solicitou a redefinição de sua senha no sistema LDFP. Clique no botão abaixo para criar uma nova senha:</p>
+                <p style="text-align:center;margin:28px 0;">
+                    <a href="${link}" style="background:#f59e0b;color:#111;padding:12px 28px;border-radius:6px;text-decoration:none;font-weight:bold;font-size:15px;">Redefinir minha senha</a>
+                </p>
+                <p style="color:#555;font-size:13px;">Este link é válido por <strong>1 hora</strong>. Se você não solicitou, ignore este e-mail.</p>
+            </div>
+        `
+    });
+}
+
+async function resetPassword(token, novaSenha) {
+    const record = await accountModel.findPasswordResetToken(token);
+    if (!record) {
+        throw createHttpError(400, 'Token inválido ou já utilizado.');
+    }
+
+    const expires = new Date(record.expires_at);
+    if (expires < new Date()) {
+        throw createHttpError(400, 'Token expirado. Solicite um novo link de recuperação.');
+    }
+
+    const passwordHash = await bcrypt.hash(novaSenha, config.security.passwordSaltRounds);
+    await accountModel.updateUserPassword(record.usuario_id, passwordHash);
+    await accountModel.markTokenUsed(token);
+}
