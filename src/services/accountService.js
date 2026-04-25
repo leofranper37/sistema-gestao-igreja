@@ -23,20 +23,27 @@ function buildAuthResponse(userRecord) {
         maxCongregacoes: userRecord.max_congregacoes || 1
     };
 
-    const token = jwt.sign(
-        {
-            sub: userRecord.id,
-            email: userRecord.email,
-            igreja: userRecord.igreja,
-            igrejaId: userRecord.igreja_id,
-            role: userRecord.role,
-            nome: userRecord.nome,
-            plano: user.plano,
-            statusAssinatura: user.statusAssinatura
-        },
+    const jwtPayload = {
+        sub: userRecord.id,
+        email: userRecord.email,
+        igreja: userRecord.igreja,
+        igrejaId: userRecord.igreja_id,
+        role: userRecord.role,
+        nome: userRecord.nome,
+        plano: user.plano,
+        statusAssinatura: user.statusAssinatura
+    };
+
+    let token = jwt.sign(
+        jwtPayload,
         config.security.jwtSecret,
         { expiresIn: config.security.jwtExpiresIn }
     );
+
+    const decoded = jwt.decode(token);
+    if (!decoded?.exp || (decoded?.iat && decoded.exp <= decoded.iat)) {
+        token = jwt.sign(jwtPayload, config.security.jwtSecret, { expiresIn: '12h' });
+    }
 
     return { token, user };
 }
