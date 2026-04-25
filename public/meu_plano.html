@@ -727,7 +727,7 @@
 
                         <div class="mp-actions">
                             <button class="btn-primary" id="btnOpenPlans"><i class="fa-solid fa-arrow-up-right-dots"></i> Alterar Plano</button>
-                            <button class="btn-outline" id="btnOpenPublic"><i class="fa-solid fa-grid-2"></i> Ver Planos Públicos</button>
+                            <button class="btn-outline" id="btnOpenPublic"><i class="fa-solid fa-table-list"></i> Comparar Planos</button>
                         </div>
                     </div>
 
@@ -1299,7 +1299,8 @@
 
         function bootstrapActions() {
             byId('btnOpenPublic').addEventListener('click', function() {
-                window.location.href = 'planos.html';
+                renderPlanGrid();
+                openModal('modalPlanos');
             });
 
             byId('btnOpenPlans').addEventListener('click', function() {
