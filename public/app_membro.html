@@ -1,160 +1,4 @@
 <!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#0f766e">
-    <title>App do Membro</title>
-    <link rel="manifest" href="manifest.json">
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        body {
-            margin: 0;
-            font-family: 'Segoe UI', sans-serif;
-            background: #f1f5f9;
-            color: #0f172a;
-        }
-
-        .app-shell {
-            max-width: 980px;
-            margin: 0 auto;
-            padding: 20px 14px 28px;
-        }
-
-        .hero {
-            background: linear-gradient(135deg, #115e59, #0f766e 60%, #0891b2);
-            color: #ecfeff;
-            border-radius: 16px;
-            padding: 20px;
-            box-shadow: 0 12px 28px rgba(15, 23, 42, 0.2);
-            margin-bottom: 16px;
-        }
-
-        .hero h1 {
-            margin: 0;
-            font-size: 1.2rem;
-        }
-
-        .hero p {
-            margin: 8px 0 0;
-            font-size: 0.92rem;
-            color: #ccfbf1;
-        }
-
-        .chips {
-            margin-top: 12px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-
-        .chip {
-            background: rgba(255, 255, 255, 0.16);
-            border: 1px solid rgba(255, 255, 255, 0.32);
-            border-radius: 999px;
-            padding: 5px 10px;
-            font-size: 12px;
-        }
-
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(4, minmax(0, 1fr));
-            gap: 12px;
-            margin-bottom: 14px;
-        }
-
-        .stat {
-            background: #fff;
-            border-radius: 12px;
-            padding: 12px;
-            border: 1px solid #e2e8f0;
-            box-shadow: 0 4px 10px rgba(15, 23, 42, 0.08);
-        }
-
-        .stat small {
-            color: #64748b;
-            font-size: 11px;
-            text-transform: uppercase;
-        }
-
-        .stat strong {
-            display: block;
-            margin-top: 6px;
-            font-size: 1.4rem;
-        }
-
-        .quick-actions {
-            display: grid;
-            grid-template-columns: repeat(4, minmax(0, 1fr));
-            gap: 10px;
-            margin-bottom: 14px;
-        }
-
-        .action {
-            border-radius: 10px;
-            padding: 11px;
-            border: 1px solid #cbd5e1;
-            background: #fff;
-            text-decoration: none;
-            color: #0f172a;
-            font-weight: 700;
-            text-align: center;
-            font-size: 13px;
-        }
-
-        .panels {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-        }
-
-        .panel {
-            background: #fff;
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            padding: 12px;
-        }
-
-        .panel h2 {
-            margin: 0 0 8px;
-            font-size: 14px;
-            color: #155e75;
-        }
-
-        .item {
-            border-top: 1px solid #f1f5f9;
-            padding: 8px 0;
-            font-size: 13px;
-        }
-
-        .item:first-child {
-            border-top: 0;
-        }
-
-        .muted {
-            color: #94a3b8;
-            font-size: 12px;
-        }
-
-        @media (max-width: 900px) {
-            .stats,
-            .quick-actions {
-                grid-template-columns: repeat(2, minmax(0, 1fr));
-            }
-
-            .panels {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        @media (max-width: 540px) {
-            .stats,
-            .quick-actions {
-                grid-template-columns: 1fr;
-            }
-        }
-    <!DOCTYPE html>
     <html lang="pt-br">
     <head>
     <meta charset="UTF-8">
@@ -745,10 +589,12 @@
         </div>
     </div>
 
-    <script src="session.js"></script>
-    <script src="pwa.js"></script>
-    <script>
+<script src="session.js?v=20260425b"></script>
+<script src="pwa.js?v=20260425b"></script>
+<script>
+if (typeof requireAuthSession === 'function') {
     requireAuthSession();
+}
 
     // ── DADOS ──────────────────────────────────────────────────────────
     let currentUser = null, currentTab = 'inicio', calDate = new Date();
@@ -1118,7 +964,18 @@
 
     // ── LOGOUT ─────────────────────────────────────────────────────────
     function doLogout(){
-        if(confirm('Tem certeza que deseja sair?')){localStorage.removeItem('ldfp_session');sessionStorage.clear();location.href='login.html';}
+        if(!confirm('Tem certeza que deseja sair?')) return;
+        try {
+            if (typeof clearAuthSession === 'function') {
+                clearAuthSession();
+            }
+        } catch (e) {}
+        localStorage.removeItem('ldfpAuth');
+        localStorage.removeItem('ldfpUser');
+        localStorage.removeItem('token');
+        sessionStorage.removeItem('token');
+        sessionStorage.clear();
+        location.href='login.html';
     }
 
     // ── UTILS ──────────────────────────────────────────────────────────
@@ -1130,7 +987,32 @@
         return `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`;
     }
 
-    document.addEventListener('DOMContentLoaded', init);
+function forceOpenApp() {
+  const app = document.getElementById('app');
+  if (app) app.style.display = 'flex';
+  const sp = document.getElementById('splash');
+  if (!sp) return;
+  sp.classList.add('hidden');
+  sp.addEventListener('transitionend', () => sp.remove(), { once: true });
+}
+
+async function bootstrapApp() {
+  const hardTimeout = setTimeout(forceOpenApp, 1800);
+  try {
+    await init();
+  } catch (error) {
+    console.error('[app_membro] Falha na inicialização:', error);
+    forceOpenApp();
+  } finally {
+    clearTimeout(hardTimeout);
+  }
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', bootstrapApp);
+} else {
+  bootstrapApp();
+}
     </script>
     </body>
     </html>
