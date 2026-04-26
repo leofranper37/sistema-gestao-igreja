@@ -93,6 +93,17 @@
     .verse-text{font-size:.9rem;font-style:italic;color:rgba(255,255,255,.95);line-height:1.5;position:relative}
     .verse-ref{font-size:.73rem;font-weight:700;color:rgba(255,255,255,.65);margin-top:8px;position:relative}
 
+    /* PROMO APP MEMBRO */
+    .member-promo{margin:0 16px 16px;background:linear-gradient(130deg,rgba(10,22,40,.96) 0%,rgba(15,118,110,.28) 45%,rgba(14,165,233,.22) 100%);border:1px solid rgba(14,165,233,.28);border-radius:16px;padding:16px;position:relative;overflow:hidden}
+    .member-promo::after{content:'';position:absolute;right:-40px;top:-40px;width:130px;height:130px;background:radial-gradient(circle,rgba(249,115,22,.28),transparent 68%)}
+    .member-promo-kicker{font-size:.68rem;color:var(--warning);font-weight:800;text-transform:uppercase;letter-spacing:.09em;margin-bottom:7px;display:flex;align-items:center;gap:6px}
+    .member-promo-title{font-size:1.02rem;font-weight:800;line-height:1.25;margin-bottom:6px}
+    .member-promo-sub{font-size:.8rem;color:var(--text2);line-height:1.5;margin-bottom:12px}
+    .member-promo-actions{display:flex;gap:8px;flex-wrap:wrap}
+    .member-promo-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:10px;font-size:.75rem;font-weight:700;text-decoration:none;cursor:pointer}
+    .member-promo-btn.primary{background:linear-gradient(135deg,var(--warning),var(--accent));color:#111;border:none}
+    .member-promo-btn.ghost{background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--text)}
+
     /* STATS ROW */
     .stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:0 16px;margin-bottom:16px}
     .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 12px;text-align:center}
@@ -331,6 +342,16 @@
                     <div class="verse-label"><i class="fa-solid fa-book-open"></i> Versículo do Dia</div>
                     <div class="verse-text" id="verseText">Carregando...</div>
                     <div class="verse-ref" id="verseRef">—</div>
+                </div>
+
+                <div class="member-promo">
+                    <div class="member-promo-kicker"><i class="fa-solid fa-cross"></i> Campanha em destaque</div>
+                    <div class="member-promo-title">Cruz e Leo mostrando o App do Membro</div>
+                    <div class="member-promo-sub">Conheca a experiencia completa do app: perfil, credencial digital, agenda e oracao em um so lugar.</div>
+                    <div class="member-promo-actions">
+                        <a class="member-promo-btn primary" href="index.html"><i class="fa-solid fa-circle-play"></i> Ver apresentacao</a>
+                        <button class="member-promo-btn ghost" type="button" onclick="switchTab('perfil')"><i class="fa-solid fa-id-card"></i> Abrir credencial</button>
+                    </div>
                 </div>
 
                 <div class="sp" style="padding-bottom:0"><div class="sec-title">Acesso Rápido</div></div>
@@ -771,9 +792,10 @@
                 return;
             }
             saveMembroSession(data.token, data.membro);
-            document.getElementById('loginScreen').style.display = 'none';
             currentUser = data.membro;
             await startApp(data.membro);
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('app').style.display = 'flex';
         } catch (err) {
             errEl.textContent = 'Servidor indisponível. Tente novamente em instantes.';
         } finally {
@@ -783,12 +805,12 @@
     }
 
     async function startApp(user) {
+        document.getElementById('app').style.display = 'flex';
         renderGreeting(user);
         renderVerse();
         renderQuickActions(user);
         populateCredential(user);
         populateProfileInfo(user);
-        document.getElementById('app').style.display = 'flex';
         renderCalendar();
         Promise.allSettled([loadEvents(), loadPrayers(), loadStats(), loadFeed()]);
         // Busca perfil completo do servidor e atualiza

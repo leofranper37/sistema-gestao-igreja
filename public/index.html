@@ -145,6 +145,106 @@
             color: #9ca3af;
         }
 
+        .promo-main {
+            background: linear-gradient(125deg, #07101f 0%, #0b1b34 50%, #1f2937 100%);
+            border-top: 1px solid #1f2937;
+            border-bottom: 1px solid #1f2937;
+            padding: 36px 40px;
+        }
+
+        .promo-main .landing-container {
+            display: grid;
+            grid-template-columns: 1.2fr .8fr;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .promo-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid rgba(245, 158, 11, .45);
+            background: rgba(245, 158, 11, .12);
+            color: #fbbf24;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            padding: 6px 12px;
+            border-radius: 999px;
+            margin-bottom: 12px;
+        }
+
+        .promo-title {
+            margin: 0 0 10px;
+            font-size: 32px;
+            color: #f9fafb;
+            line-height: 1.15;
+        }
+
+        .promo-title span {
+            color: #f59e0b;
+        }
+
+        .promo-sub {
+            margin: 0 0 18px;
+            color: #9ca3af;
+            max-width: 620px;
+            line-height: 1.65;
+        }
+
+        .promo-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .promo-list span {
+            background: #0b1120;
+            border: 1px solid #1f2937;
+            color: #cbd5e1;
+            border-radius: 999px;
+            padding: 6px 10px;
+            font-size: 12px;
+        }
+
+        .promo-main a {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            background: linear-gradient(45deg, #f59e0b, #d97706);
+            color: #111;
+            font-weight: 800;
+            padding: 12px 18px;
+            border-radius: 10px;
+        }
+
+        .promo-visual {
+            background: radial-gradient(circle at 20% 20%, rgba(245, 158, 11, .35), transparent 56%), #0b1120;
+            border: 1px solid #1f2937;
+            border-radius: 16px;
+            padding: 20px;
+            min-height: 170px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .promo-visual strong {
+            color: #f9fafb;
+            font-size: 18px;
+        }
+
+        .promo-visual p {
+            margin: 0;
+            color: #94a3b8;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
         .credibility-wrap {
             display: flex;
             flex-wrap: wrap;
@@ -255,6 +355,18 @@
 
             .metrics-grid {
                 grid-template-columns: 1fr;
+            }
+
+            .promo-main {
+                padding: 28px 20px;
+            }
+
+            .promo-main .landing-container {
+                grid-template-columns: 1fr;
+            }
+
+            .promo-title {
+                font-size: 26px;
             }
 
             .logo-container img {
@@ -406,6 +518,27 @@
             </div>
         </div>
     </div>
+
+    <section class="promo-main">
+        <div class="landing-container">
+            <div>
+                <div class="promo-chip"><i class="fa-solid fa-cross"></i> Cruz e Leo</div>
+                <h2 class="promo-title">Leo mostrando o <span>App do Membro</span> para toda a igreja</h2>
+                <p class="promo-sub">Uma propaganda direta na tela principal para fortalecer adocao: acompanhe agenda, credencial digital, pedidos de oracao e comunicados em segundos.</p>
+                <div class="promo-list">
+                    <span>CPF + senha</span>
+                    <span>Credencial digital</span>
+                    <span>Agenda em tempo real</span>
+                    <span>Mural da igreja</span>
+                </div>
+                <a href="app_membro.html"><i class="fa-solid fa-mobile-screen-button"></i> Abrir App do Membro</a>
+            </div>
+            <div class="promo-visual">
+                <strong>Campanha ativa: Cruz e Leo</strong>
+                <p>Mostre este app em culto, celula e reunioes de lideranca para engajar membros no uso diario da plataforma.</p>
+            </div>
+        </div>
+    </section>
 
     <section class="landing-section">
         <div class="landing-container">
