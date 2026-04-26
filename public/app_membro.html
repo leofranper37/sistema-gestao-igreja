@@ -751,9 +751,14 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ cpf, senha })
             });
-            const data = await r.json();
+            let data;
+            try { data = await r.json(); } catch(_) { data = null; }
             if (!r.ok) {
-                errEl.textContent = data.message || data.error || 'Erro ao autenticar.';
+                errEl.textContent = data?.message || data?.error || `Erro ${r.status}. Tente novamente.`;
+                return;
+            }
+            if (!data?.token) {
+                errEl.textContent = 'Resposta inesperada do servidor.';
                 return;
             }
             saveMembroSession(data.token, data.membro);
@@ -761,7 +766,7 @@
             currentUser = data.membro;
             await startApp(data.membro);
         } catch (err) {
-            errEl.textContent = 'Erro de conexão. Verifique sua internet.';
+            errEl.textContent = 'Servidor indisponível. Tente novamente em instantes.';
         } finally {
             btn.disabled = false;
             btn.textContent = currentLoginMode === 'first' ? 'Criar Senha e Entrar' : 'Entrar';
@@ -781,9 +786,7 @@
         try {
             const sess = getMembroSession();
             if (sess?.token) {
-                const r = await fetch('/app-membro/meu-perfil', {
-                    headers: { 'Authorization': 'Bearer ' + sess.token }
-                });
+                const r = await authFetch('/app-membro/meu-perfil');
                 if (r.ok) {
                     const perfil = await r.json();
                     const merged = { ...user, ...perfil };
@@ -847,10 +850,23 @@
         }[a]||(() => {}))();
     }
 
+    // ── AUTH HELPERS ───────────────────────────────────────────────────
+    function authHeaders() {
+        const sess = getMembroSession();
+        return sess?.token ? { 'Authorization': 'Bearer ' + sess.token, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
+    }
+    function authFetch(url, opts = {}) {
+        const sess = getMembroSession();
+        if (sess?.token) {
+            opts.headers = { ...(opts.headers || {}), 'Authorization': 'Bearer ' + sess.token };
+        }
+        return fetch(url, opts);
+    }
+
     // ── LOAD DATA ──────────────────────────────────────────────────────
     async function loadEvents() {
         try {
-            const r = await fetch('/agenda/eventos');
+            const r = await authFetch('/agenda/eventos');
             if (!r.ok) { allEvents=[]; renderEvStrip([]); renderEvList([]); return; }
             allEvents = await r.json().then(d => d.eventos || d || []);
             renderEvStrip(allEvents); renderCalendar(); renderEvList(allEvents);
@@ -861,7 +877,7 @@
 
     async function loadPrayers() {
         try {
-            const r = await fetch('/oracoes/mural');
+            const r = await authFetch('/oracoes/mural');
             allPrayers = r.ok ? await r.json().then(d => d.pedidos||d||[]) : [];
             renderPrayers(allPrayers);
         } catch(e) { allPrayers=[]; renderPrayers([]); }
@@ -869,7 +885,7 @@
 
     async function loadStats() {
         try {
-            const r = await fetch('/app-membro/context');
+            const r = await authFetch('/app-membro/context');
             const d = r.ok ? await r.json() : null;
             renderStats(d?.quickStats);
         } catch(e) { renderStats(null); }
@@ -877,8 +893,8 @@
 
     async function loadFeed() {
         try {
-            const r = await fetch('/comunicacao/historico?limit=5');
-            renderFeed(r.ok ? await r.json().then(d=>d.historico||d||[]) : []);
+            const r = await authFetch('/comunicacao/whatsapp/logs?limit=5');
+            renderFeed(r.ok ? await r.json().then(d=>d.logs||d.historico||d||[]) : []);
         } catch(e) { renderFeed([]); }
     }
 
@@ -973,7 +989,7 @@
 
     function prayFor(n){showToast(`🙏 Você está orando por ${n}!`);}
     async function markAnswered(id){
-        try{await fetch(`/oracoes/${id}/respondida`,{method:'PATCH'});}catch(e){}
+        try{await authFetch(`/oracoes/${id}/respondida`,{method:'PATCH'});}catch(e){}
         showToast('✓ Glória a Deus! Oração respondida!'); loadPrayers();
     }
 
@@ -982,7 +998,7 @@
         e.preventDefault();
         const payload={nome:document.getElementById('prayerName').value||'Anônimo',pedido:document.getElementById('prayerText').value,visibilidade:document.getElementById('prayerVis').value};
         try{
-            const r=await fetch('/oracoes',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+            const r=await authFetch('/oracoes',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
             if(r.ok){closeModal('modal-oracao');document.getElementById('prayerText').value='';showToast('🙏 Pedido enviado! Estamos orando por você.');setTimeout(loadPrayers,500);}
             else showToast('Erro ao enviar. Tente novamente.');
         }catch(err){showToast('Erro de conexão.');}
@@ -990,19 +1006,19 @@
 
     async function submitConectar(e){
         e.preventDefault();
-        try{await fetch('/visitantes/contato',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nome:document.getElementById('conNome').value,whatsapp:document.getElementById('conWpp').value,mensagem:document.getElementById('conMsg').value,tipo:'conectar'})});}catch(e){}
+        try{await authFetch('/visitantes/contato',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nome:document.getElementById('conNome').value,whatsapp:document.getElementById('conWpp').value,mensagem:document.getElementById('conMsg').value,tipo:'conectar'})});}catch(e){}
         closeModal('modal-conectar'); showToast('🤝 Ótimo! Em breve entraremos em contato!');
     }
 
     async function submitJesus(e){
         e.preventDefault();
-        try{await fetch('/visitantes/decisao',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nome:document.getElementById('jesNome').value,contato:document.getElementById('jesContato').value,tipo:'decisao_fe'})});}catch(e){}
+        try{await authFetch('/visitantes/decisao',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nome:document.getElementById('jesNome').value,contato:document.getElementById('jesContato').value,tipo:'decisao_fe'})});}catch(e){}
         closeModal('modal-jesus'); showToast('🎉 Glória a Deus! Bem-vindo à família!');
     }
 
     async function submitAjuda(e){
         e.preventDefault();
-        try{await fetch('/visitantes/contato',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tipo_ajuda:document.getElementById('ajudaTipo').value,mensagem:document.getElementById('ajudaMsg').value,contato:document.getElementById('ajudaContato').value,tipo:'ajuda'})});}catch(e){}
+        try{await authFetch('/visitantes/contato',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tipo_ajuda:document.getElementById('ajudaTipo').value,mensagem:document.getElementById('ajudaMsg').value,contato:document.getElementById('ajudaContato').value,tipo:'ajuda'})});}catch(e){}
         closeModal('modal-ajuda'); showToast('💙 Pedido recebido! Em breve entraremos em contato.');
     }
 
@@ -1073,7 +1089,7 @@
 
     // ── CONTRIBUIR ─────────────────────────────────────────────────────
     async function openContribuir(){
-        try{const r=await fetch('/pagamentos/links');if(r.ok){const d=await r.json();const l=d.links||[];if(l.length){window.open(l[0].url,'_blank');return;}}}catch(e){}
+        try{const r=await authFetch('/pagamentos/links');if(r.ok){const d=await r.json();const l=d.links||[];if(l.length){window.open(l[0].url,'_blank');return;}}}catch(e){}
         showToast('💛 Em breve nossa área de contribuição estará disponível!');
     }
 

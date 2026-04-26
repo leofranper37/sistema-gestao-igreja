@@ -32,6 +32,59 @@ async function requireAuth(req, res, next) {
 
     try {
         const payload = jwt.verify(token, config.security.jwtSecret);
+
+        // ── Token do App de Membro (app_mode) ─────────────────────────────
+        if (payload.app_mode) {
+            const membroId = payload.membro_id || payload.id;
+            const [rows] = await pool.query(
+                `SELECT m.id, m.nome, m.email, m.cpf, m.situacao, m.igreja_id,
+                        i.plano, i.status_assinatura, i.trial_starts_at, i.trial_ends_at, i.max_cadastros, i.max_congregacoes,
+                        i.modulo_app_membro, i.modulo_app_midia, i.modulo_ebd,
+                        i.modulo_agenda_eventos, i.modulo_escala_culto, i.modulo_pedidos_oracao, i.modulo_mural_oracao,
+                        i.nome AS nome_igreja
+                 FROM membros m
+                 INNER JOIN igrejas i ON i.id = m.igreja_id
+                 WHERE m.id = ?
+                 LIMIT 1`,
+                [membroId]
+            );
+
+            const membro = rows[0];
+            if (!membro) {
+                return next(createHttpError(401, 'Membro do token não encontrado.'));
+            }
+
+            req.auth = {
+                ...payload,
+                id: membro.id,
+                membro_id: membro.id,
+                nome: membro.nome,
+                email: membro.email || '',
+                igrejaId: membro.igreja_id,
+                nome_igreja: membro.nome_igreja,
+                role: payload.role || 'membro',
+                app_mode: true,
+                plano: membro.plano || 'teste-7-dias',
+                statusAssinatura: membro.status_assinatura || 'trial',
+                trialStartsAt: membro.trial_starts_at || null,
+                trialEndsAt: membro.trial_ends_at || null,
+                maxCadastros: membro.max_cadastros || 40,
+                maxCongregacoes: membro.max_congregacoes || 1,
+                modules: {
+                    financeiro: false,
+                    appMembro: Boolean(Number(membro.modulo_app_membro ?? 1)),
+                    appMidia: Boolean(Number(membro.modulo_app_midia || 0)),
+                    ebd: Boolean(Number(membro.modulo_ebd || 0)),
+                    agendaEventos: Boolean(Number(membro.modulo_agenda_eventos ?? 1)),
+                    escalaCulto: Boolean(Number(membro.modulo_escala_culto || 0)),
+                    pedidosOracao: Boolean(Number(membro.modulo_pedidos_oracao ?? 1)),
+                    muralOracao: Boolean(Number(membro.modulo_mural_oracao ?? 1))
+                }
+            };
+            return next();
+        }
+
+        // ── Token de Admin/Usuário padrão ──────────────────────────────────
         const [rows] = await pool.query(
             `SELECT u.id, u.nome, u.email, u.igreja, u.igreja_id, u.role,
                     i.plano, i.status_assinatura, i.trial_starts_at, i.trial_ends_at, i.max_cadastros, i.max_congregacoes,
@@ -41,7 +94,7 @@ async function requireAuth(req, res, next) {
              LEFT JOIN igrejas i ON i.id = u.igreja_id
              WHERE u.id = ?
              LIMIT 1`,
-            [payload.sub]
+            [payload.sub || payload.id]
         );
 
         const user = rows[0];

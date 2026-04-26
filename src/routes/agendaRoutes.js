@@ -17,7 +17,7 @@ const {
 
 const router = express.Router();
 
-router.get('/agenda/eventos', requireAuth, requireModuleEnabled('agendaEventos'), authorize(['admin', 'secretaria']), validateQuery(agendaEventoQuerySchema), listEventos);
+router.get('/agenda/eventos', requireAuth, requireModuleEnabled('agendaEventos'), authorize(['admin', 'secretaria', 'pastor', 'oficial', 'membro', 'tesoureiro', 'diacono', 'presbitero', 'ministerio', 'visitante']), validateQuery(agendaEventoQuerySchema), listEventos);
 router.post('/agenda/eventos', requireAuth, requireModuleEnabled('agendaEventos'), authorize(['admin', 'secretaria']), validateBody(agendaEventoSchema), createEvento);
 router.put('/agenda/eventos/:id', requireAuth, requireModuleEnabled('agendaEventos'), authorize(['admin', 'secretaria']), validateBody(agendaEventoSchema), updateEvento);
 router.delete('/agenda/eventos/:id', requireAuth, requireModuleEnabled('agendaEventos'), authorize(['admin', 'secretaria']), deleteEvento);
