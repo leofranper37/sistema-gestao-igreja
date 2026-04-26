@@ -552,10 +552,13 @@ async function initializeDatabase() {
         )`);
         await activePgPool.query(`INSERT INTO saas_planos (slug,nome,subtitulo,preco_mensal,preco_anual,max_cadastros,max_congregacoes,modulo_app_membro,features_json) VALUES
             ('eden','Éden','O começo de tudo',0,0,30,1,0,'["App Web (PWA)","Até 30 cadastros","1 congregação","EBD Dominical","Grupos/Células","Financeiro (com limites)","Relatórios (com limites)"]'),
-            ('hebrom','Hebrom','Igrejas em formação',50,500,150,1,0,'["App Web (PWA)","Até 150 cadastros","1 congregação","Suporte via e-mail"]'),
-            ('betel','Betel','Igrejas em crescimento',80,800,300,5,1,'["App Web (PWA)","App do Membro","Até 300 cadastros","Até 5 congregações","Credencial de Membro","Grupos/Células","Suporte via e-mail","Suporte via WhatsApp"]'),
-            ('siao','Sião','Igrejas consolidadas',100,1000,500,10,1,'["App Web (PWA)","App do Membro","Até 500 cadastros","Até 10 congregações","EBD Dominical","Credencial de Membro","Grupos/Células","Financeiro completo","Relatórios completos","Suporte via Telefone","Consultoria Contábil"]')
+            ('hebrom','Hebrom','Igrejas em formação',50,540,150,1,0,'["App Web (PWA)","Até 150 cadastros","1 congregação","Suporte via e-mail"]'),
+            ('betel','Betel','Igrejas em crescimento',80,864,300,5,1,'["App Web (PWA)","App do Membro","Até 300 cadastros","Até 5 congregações","Credencial de Membro","Grupos/Células","Suporte via e-mail","Suporte via WhatsApp"]'),
+            ('siao','Sião','Igrejas consolidadas',100,1080,500,10,1,'["App Web (PWA)","App do Membro","Até 500 cadastros","Até 10 congregações","EBD Dominical","Credencial de Membro","Grupos/Células","Financeiro completo","Relatórios completos","Suporte via Telefone","Consultoria Contábil"]')
             ON CONFLICT (slug) DO NOTHING`);
+        await activePgPool.query(`UPDATE saas_planos SET preco_anual=540 WHERE slug='hebrom' AND preco_anual=500`);
+        await activePgPool.query(`UPDATE saas_planos SET preco_anual=864 WHERE slug='betel' AND preco_anual=800`);
+        await activePgPool.query(`UPDATE saas_planos SET preco_anual=1080 WHERE slug='siao' AND preco_anual=1000`);
         await activePgPool.query(`UPDATE saas_planos SET features_json='["App Web (PWA)","Até 150 cadastros","1 congregação","Suporte via e-mail"]' WHERE slug='hebrom'`);
         await activePgPool.query(`UPDATE saas_planos SET features_json='["App Web (PWA)","App do Membro","Até 300 cadastros","Até 5 congregações","Credencial de Membro","Grupos/Células","Suporte via e-mail","Suporte via WhatsApp"]' WHERE slug='betel'`);
         try { await activePgPool.query(`ALTER TABLE saas_planos ADD COLUMN versiculo TEXT`); } catch(_){ }
@@ -748,9 +751,12 @@ async function initializeDatabase() {
         )`);
         await activeMysqlPool.query(`INSERT IGNORE INTO saas_planos (slug,nome,subtitulo,preco_mensal,preco_anual,max_cadastros,max_congregacoes,modulo_app_membro,features_json) VALUES
             ('eden','Éden','O começo de tudo',0,0,30,1,0,'["App Web (PWA)","Até 30 cadastros","1 congregação","EBD Dominical","Grupos/Células","Financeiro (com limites)","Relatórios (com limites)"]'),
-            ('hebrom','Hebrom','Igrejas em formação',50,500,150,1,0,'["App Web (PWA)","Até 150 cadastros","1 congregação","Suporte via e-mail"]'),
-            ('betel','Betel','Igrejas em crescimento',80,800,300,5,1,'["App Web (PWA)","App do Membro","Até 300 cadastros","Até 5 congregações","Credencial de Membro","Grupos/Células","Suporte via e-mail","Suporte via WhatsApp"]'),
-            ('siao','Sião','Igrejas consolidadas',100,1000,500,10,1,'["App Web (PWA)","App do Membro","Até 500 cadastros","Até 10 congregações","EBD Dominical","Credencial de Membro","Grupos/Células","Financeiro completo","Relatórios completos","Suporte via Telefone","Consultoria Contábil"]')`);
+            ('hebrom','Hebrom','Igrejas em formação',50,540,150,1,0,'["App Web (PWA)","Até 150 cadastros","1 congregação","Suporte via e-mail"]'),
+            ('betel','Betel','Igrejas em crescimento',80,864,300,5,1,'["App Web (PWA)","App do Membro","Até 300 cadastros","Até 5 congregações","Credencial de Membro","Grupos/Células","Suporte via e-mail","Suporte via WhatsApp"]'),
+            ('siao','Sião','Igrejas consolidadas',100,1080,500,10,1,'["App Web (PWA)","App do Membro","Até 500 cadastros","Até 10 congregações","EBD Dominical","Credencial de Membro","Grupos/Células","Financeiro completo","Relatórios completos","Suporte via Telefone","Consultoria Contábil"]')`)
+        await activeMysqlPool.query(`UPDATE saas_planos SET preco_anual=540 WHERE slug='hebrom' AND preco_anual=500`);
+        await activeMysqlPool.query(`UPDATE saas_planos SET preco_anual=864 WHERE slug='betel' AND preco_anual=800`);
+        await activeMysqlPool.query(`UPDATE saas_planos SET preco_anual=1080 WHERE slug='siao' AND preco_anual=1000`);
         await activeMysqlPool.query(`UPDATE saas_planos SET features_json='["App Web (PWA)","Até 150 cadastros","1 congregação","Suporte via e-mail"]' WHERE slug='hebrom'`);
         await activeMysqlPool.query(`UPDATE saas_planos SET features_json='["App Web (PWA)","App do Membro","Até 300 cadastros","Até 5 congregações","Credencial de Membro","Grupos/Células","Suporte via e-mail","Suporte via WhatsApp"]' WHERE slug='betel'`);
         try { await activeMysqlPool.query(`ALTER TABLE saas_planos ADD COLUMN versiculo TEXT`); } catch(_){ }
@@ -996,10 +1002,13 @@ async function initializeDatabase() {
             )`);
             db.run(`INSERT OR IGNORE INTO saas_planos (slug,nome,subtitulo,preco_mensal,preco_anual,max_cadastros,max_congregacoes,modulo_app_membro,features_json) VALUES
                 ('eden','Éden','O começo de tudo',0,0,30,1,0,'["App Web (PWA)","Até 30 cadastros","1 congregação","EBD Dominical","Grupos/Células","Financeiro (com limites)","Relatórios (com limites)"]'),
-                ('hebrom','Hebrom','Igrejas em formação',50,500,150,1,0,'["App Web (PWA)","Até 150 cadastros","1 congregação","Suporte via e-mail"]'),
-                ('betel','Betel','Igrejas em crescimento',80,800,300,5,1,'["App Web (PWA)","App do Membro","Até 300 cadastros","Até 5 congregações","Credencial de Membro","Grupos/Células","Suporte via e-mail","Suporte via WhatsApp"]'),
-                ('siao','Sião','Igrejas consolidadas',100,1000,500,10,1,'["App Web (PWA)","App do Membro","Até 500 cadastros","Até 10 congregações","EBD Dominical","Credencial de Membro","Grupos/Células","Financeiro completo","Relatórios completos","Suporte via Telefone","Consultoria Contábil"]')`
+                ('hebrom','Hebrom','Igrejas em formação',50,540,150,1,0,'["App Web (PWA)","Até 150 cadastros","1 congregação","Suporte via e-mail"]'),
+                ('betel','Betel','Igrejas em crescimento',80,864,300,5,1,'["App Web (PWA)","App do Membro","Até 300 cadastros","Até 5 congregações","Credencial de Membro","Grupos/Células","Suporte via e-mail","Suporte via WhatsApp"]'),
+                ('siao','Sião','Igrejas consolidadas',100,1080,500,10,1,'["App Web (PWA)","App do Membro","Até 500 cadastros","Até 10 congregações","EBD Dominical","Credencial de Membro","Grupos/Células","Financeiro completo","Relatórios completos","Suporte via Telefone","Consultoria Contábil"]')`
             );
+            db.run(`UPDATE saas_planos SET preco_anual=540 WHERE slug='hebrom' AND preco_anual=500`);
+            db.run(`UPDATE saas_planos SET preco_anual=864 WHERE slug='betel' AND preco_anual=800`);
+            db.run(`UPDATE saas_planos SET preco_anual=1080 WHERE slug='siao' AND preco_anual=1000`);
             db.run(`UPDATE saas_planos SET features_json='["App Web (PWA)","Até 150 cadastros","1 congregação","Suporte via e-mail"]' WHERE slug='hebrom'`);
             db.run(`UPDATE saas_planos SET features_json='["App Web (PWA)","App do Membro","Até 300 cadastros","Até 5 congregações","Credencial de Membro","Grupos/Células","Suporte via e-mail","Suporte via WhatsApp"]' WHERE slug='betel'`);
             safeAlter('ALTER TABLE igrejas ADD COLUMN responsavel TEXT');
