@@ -77,64 +77,15 @@
         }
     </style>
 </head>
-<body class="theme-azul-verde">
-    <aside class="sidebar">
-        <div class="sidebar-profile">
-            <div class="profile-avatar"><i class="fa-solid fa-user"></i></div>
-            <div class="profile-info">
-                <h4>LEONARDO FRANCISCO...</h4>
-                <span>Online</span>
-            </div>
-        </div>
-
-        <nav class="menu">
-            <div class="menu-section-label">Meu LDFP</div>
-            <button class="dropdown-btn">
-                <span><i class="fa-solid fa-house icon-left"></i> Visão Geral</span>
-                <i class="fa-solid fa-chevron-right arrow"></i>
-            </button>
-            <div class="dropdown-container">
-                <a href="dashboard.html">Painel</a>
-                <a href="novidades.html">Novidades</a>
-                <a href="meu_plano.html">Meu Plano</a>
-                <a href="configuracoes.html">Configurações</a>
-                <a href="index.html">Sair</a>
-            </div>
-
-            <div class="menu-section-label">Tesouraria</div>
-            <button class="dropdown-btn tesouraria-btn active">
-                <span><i class="fa-solid fa-money-bill-1 icon-left"></i> Tesouraria</span>
-                <i class="fa-solid fa-chevron-right arrow"></i>
-            </button>
-            <div class="dropdown-container tesouraria-menu" style="display:block;">
-                <a href="construcao.html?pag=Dizimos"><i class="fa-solid fa-coins"></i> Dízimos</a>
-                <a href="financeiro.html"><i class="fa-solid fa-cash-register"></i> Caixa</a>
-                <a href="caixa_lancamentos.html" class="current-page"><i class="fa-solid fa-file-invoice"></i> Lançamentos do Caixa</a>
-                <a href="caixa_saldo_inicial.html"><i class="fa-solid fa-circle-dollar-to-slot"></i> Saldo Inicial do Caixa</a>
-                <a href="construcao.html?pag=Banco"><i class="fa-solid fa-building-columns"></i> Banco</a>
-                <a href="construcao.html?pag=Contas a Pagar"><i class="fa-solid fa-file-invoice-dollar"></i> Contas a Pagar</a>
-                <a href="construcao.html?pag=Recibo"><i class="fa-solid fa-receipt"></i> Recibo</a>
-                <a href="construcao.html?pag=Transferencias"><i class="fa-solid fa-right-left"></i> Transferências</a>
-            </div>
-        </nav>
-
-        <div class="sidebar-footer">
-            Copyright © 2026 LDFP.<br>Todos os Direitos Reservados.
-        </div>
-    </aside>
-
-    <main class="main-content">
-        <header>
-            <div class="header-left"><i class="fa-solid fa-bars"></i></div>
-            <div class="header-right"><span>LEONARDO FRANCISCO PEREIRA</span><i class="fa-solid fa-user-circle"></i></div>
-        </header>
-
-        <div class="pagina-conteudo">
-            <div class="pagina-topo">
+<body class="theme-petroleo enterprise-shell-page" data-shell-title="Lançamentos do Caixa" data-shell-breadcrumb="LDFP / Tesouraria / Caixa / Lançamentos" data-shell-active="caixa_lancamentos.html" data-shell-chip="Tesouraria ativa" data-shell-role="Admin">
+    <main class="main-content enterprise-main">
+        <div class="enterprise-page-shell">
+            <div class="enterprise-page-hero">
                 <div>
-                    <div class="breadcrumb">Meu LDFP <span>/</span> Tesouraria <span>/</span> Caixa <span>/</span> Lançamentos do Caixa</div>
-                    <h1>Lançamentos do Caixa <span>Movimentações</span></h1>
+                    <h2>Lançamentos do Caixa</h2>
+                    <p>Registre entradas e saídas com histórico consolidado e atualização imediata do saldo.</p>
                 </div>
+                <div class="enterprise-page-badge"><i class="fa-solid fa-cash-register"></i> Caixa</div>
             </div>
 
             <div class="lancamentos-grid">
@@ -194,36 +145,9 @@
     </main>
 
     <script src="session.js"></script>
+    <script src="enterprise-shell.js"></script>
     <script>
         requireAuthSession();
-
-        const botoes = document.querySelectorAll('.dropdown-btn');
-        botoes.forEach(btn => {
-            btn.addEventListener('click', function() {
-                this.classList.toggle('active');
-                const conteudo = this.nextElementSibling;
-                if (conteudo && conteudo.classList.contains('dropdown-container')) {
-                    conteudo.style.display = conteudo.style.display === 'block' ? 'none' : 'block';
-                }
-            });
-        });
-
-        document.querySelector('.header-left i.fa-bars').addEventListener('click', function() {
-            const sidebar = document.querySelector('.sidebar');
-            sidebar.style.display = sidebar.style.display === 'none' || sidebar.style.display === '' ? 'flex' : 'none';
-        });
-
-        function checkSidebarVisibility() {
-            const sidebar = document.querySelector('.sidebar');
-            if (window.innerWidth <= 900) {
-                sidebar.style.display = 'none';
-            } else {
-                sidebar.style.display = 'flex';
-            }
-        }
-
-        window.addEventListener('resize', checkSidebarVisibility);
-        checkSidebarVisibility();
 
         const saldoAtualEl = document.getElementById('saldoAtual');
         const form = document.getElementById('formLancamento');

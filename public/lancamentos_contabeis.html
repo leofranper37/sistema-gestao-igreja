@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LDFP - Lançamentos Contábeis</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .grid { display: grid; grid-template-columns: 1.1fr 1.9fr; gap: 16px; }
+        .card { background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; box-shadow: 0 8px 24px rgba(15,23,42,.06); padding: 16px; }
+        .field { margin-bottom: 10px; }
+        .field label { display: block; margin-bottom: 6px; font-size: 12px; font-weight: 700; color: #475569; text-transform: uppercase; }
+        .field input { width: 100%; border: 1px solid #dbe3ef; border-radius: 8px; padding: 9px 11px; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th, td { border-bottom: 1px solid #eef2f7; padding: 9px 8px; text-align: left; }
+        th { font-size: 11px; color: #64748b; text-transform: uppercase; }
+        .msg { min-height: 18px; margin-top: 8px; font-size: 12px; color: #0f766e; }
+        .msg.error { color: #b91c1c; }
+        @media (max-width: 1050px) { .grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body class="theme-petroleo enterprise-shell-page" data-shell-title="Lançamentos Contábeis" data-shell-breadcrumb="LDFP / Contabilidade / Lançamentos Contábeis" data-shell-active="lancamentos_contabeis.html" data-shell-chip="Contabilidade" data-shell-role="Admin">
+<main class="main-content enterprise-main">
+    <div class="enterprise-page-shell">
+        <div class="enterprise-page-hero">
+            <div>
+                <h2>Lançamentos Contábeis</h2>
+                <p>Registre partidas de débito e crédito para compor razão, diário e relatórios de fechamento.</p>
+            </div>
+            <div class="enterprise-page-badge"><i class="fa-solid fa-clipboard-list"></i> Módulo ativo</div>
+        </div>
+
+        <div class="grid">
+            <section class="card">
+                <h3><i class="fa-solid fa-plus"></i> Novo Lançamento</h3>
+                <form id="form">
+                    <div class="field">
+                        <label for="data">Data</label>
+                        <input id="data" type="date" required>
+                    </div>
+                    <div class="field">
+                        <label for="historico">Histórico</label>
+                        <input id="historico" placeholder="Descrição do lançamento" required>
+                    </div>
+                    <div class="field">
+                        <label for="contaDebito">Conta Débito</label>
+                        <input id="contaDebito" placeholder="Ex: 1.01.01 - Caixa" required>
+                    </div>
+                    <div class="field">
+                        <label for="contaCredito">Conta Crédito</label>
+                        <input id="contaCredito" placeholder="Ex: 4.01.01 - Receita" required>
+                    </div>
+                    <div class="field">
+                        <label for="valor">Valor</label>
+                        <input id="valor" placeholder="0,00" required>
+                    </div>
+                    <button class="btn-primario" type="submit">Lançar</button>
+                    <div class="msg" id="msg"></div>
+                </form>
+            </section>
+
+            <section class="card">
+                <h3><i class="fa-solid fa-table"></i> Diário Contábil</h3>
+                <div style="overflow:auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Histórico</th>
+                                <th>Débito</th>
+                                <th>Crédito</th>
+                                <th>Valor</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tb"></tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+    </div>
+</main>
+
+<script src="session.js"></script>
+<script src="enterprise-shell.js"></script>
+<script>
+    requireAuthSession();
+
+    const KEY = 'ldfp_lancamentos_contabeis';
+    const tb = document.getElementById('tb');
+
+    function toNumber(v) {
+        const normalized = String(v || '').replace(/\./g, '').replace(',', '.').replace(/[^\d.-]/g, '');
+        const value = Number(normalized);
+        return Number.isFinite(value) ? value : 0;
+    }
+
+    function toMoney(v) {
+        return Number(v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function readItems() {
+        try {
+            const raw = localStorage.getItem(KEY);
+            const items = raw ? JSON.parse(raw) : [];
+            return Array.isArray(items) ? items : [];
+        } catch (_) {
+            return [];
+        }
+    }
+
+    function saveItems(items) { localStorage.setItem(KEY, JSON.stringify(items)); }
+
+    function render() {
+        const items = readItems();
+        if (!items.length) {
+            tb.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#64748b;padding:16px;">Nenhum lançamento registrado.</td></tr>';
+            return;
+        }
+        tb.innerHTML = items.map((i) => `<tr><td>${i.data}</td><td>${i.historico}</td><td>${i.debito}</td><td>${i.credito}</td><td>R$ ${toMoney(i.valor)}</td></tr>`).join('');
+    }
+
+    document.getElementById('form').addEventListener('submit', (event) => {
+        event.preventDefault();
+        const item = {
+            data: document.getElementById('data').value,
+            historico: document.getElementById('historico').value.trim(),
+            debito: document.getElementById('contaDebito').value.trim(),
+            credito: document.getElementById('contaCredito').value.trim(),
+            valor: toNumber(document.getElementById('valor').value.trim())
+        };
+        const msg = document.getElementById('msg');
+
+        if (!item.data || !item.historico || !item.debito || !item.credito || item.valor <= 0) {
+            msg.className = 'msg error';
+            msg.textContent = 'Preencha os campos e informe valor maior que zero.';
+            return;
+        }
+
+        const items = readItems();
+        items.unshift(item);
+        saveItems(items);
+        event.target.reset();
+        msg.className = 'msg';
+        msg.textContent = 'Lançamento contábil registrado.';
+        render();
+    });
+
+    render();
+</script>
+</body>
+</html>

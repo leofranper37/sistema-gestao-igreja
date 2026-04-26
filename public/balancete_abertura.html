@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LDFP - Balancete de Abertura</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .grid { display: grid; grid-template-columns: 1.15fr 1.85fr; gap: 16px; }
+        .card { background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; box-shadow: 0 8px 24px rgba(15,23,42,.06); padding: 16px; }
+        .card h3 { margin: 0 0 12px; }
+        .field { margin-bottom: 10px; }
+        .field label { display: block; margin-bottom: 6px; font-size: 12px; font-weight: 700; color: #475569; text-transform: uppercase; }
+        .field input { width: 100%; border: 1px solid #dbe3ef; border-radius: 8px; padding: 9px 11px; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th, td { border-bottom: 1px solid #eef2f7; padding: 9px 8px; text-align: left; }
+        th { font-size: 11px; color: #64748b; text-transform: uppercase; }
+        .totais { margin-top: 10px; display: grid; grid-template-columns: repeat(2,1fr); gap: 8px; }
+        .kpi { border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px; background: #f8fafc; }
+        .kpi small { display: block; font-size: 11px; color: #64748b; margin-bottom: 4px; }
+        .kpi strong { font-size: 20px; }
+        .msg { min-height: 18px; margin-top: 8px; font-size: 12px; color: #0f766e; }
+        .msg.error { color: #b91c1c; }
+        @media (max-width: 1050px) { .grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body class="theme-petroleo enterprise-shell-page" data-shell-title="Balancete de Abertura" data-shell-breadcrumb="LDFP / Contabilidade / Balancete de Abertura" data-shell-active="balancete_abertura.html" data-shell-chip="Contabilidade" data-shell-role="Admin">
+<main class="main-content enterprise-main">
+    <div class="enterprise-page-shell">
+        <div class="enterprise-page-hero">
+            <div>
+                <h2>Balancete de Abertura</h2>
+                <p>Registre os saldos iniciais de débito e crédito para iniciar a competência contábil.</p>
+            </div>
+            <div class="enterprise-page-badge"><i class="fa-solid fa-book-open"></i> Módulo ativo</div>
+        </div>
+
+        <div class="grid">
+            <section class="card">
+                <h3><i class="fa-solid fa-pen"></i> Novo Saldo</h3>
+                <form id="formSaldo">
+                    <div class="field">
+                        <label for="conta">Conta</label>
+                        <input id="conta" placeholder="Ex: 1.01.01 - Caixa" required>
+                    </div>
+                    <div class="field">
+                        <label for="debito">Débito</label>
+                        <input id="debito" placeholder="0,00" required>
+                    </div>
+                    <div class="field">
+                        <label for="credito">Crédito</label>
+                        <input id="credito" placeholder="0,00" required>
+                    </div>
+                    <button class="btn-primario" type="submit">Adicionar</button>
+                    <div class="msg" id="msg"></div>
+                </form>
+            </section>
+
+            <section class="card">
+                <h3><i class="fa-solid fa-table-list"></i> Saldos de Abertura</h3>
+                <div style="overflow:auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Conta</th>
+                                <th>Débito</th>
+                                <th>Crédito</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tb"></tbody>
+                    </table>
+                </div>
+                <div class="totais">
+                    <div class="kpi"><small>Total Débito</small><strong id="totalDebito">R$ 0,00</strong></div>
+                    <div class="kpi"><small>Total Crédito</small><strong id="totalCredito">R$ 0,00</strong></div>
+                </div>
+            </section>
+        </div>
+    </div>
+</main>
+
+<script src="session.js"></script>
+<script src="enterprise-shell.js"></script>
+<script>
+    requireAuthSession();
+
+    const KEY = 'ldfp_balancete_abertura';
+    const tb = document.getElementById('tb');
+
+    function moneyToNumber(v) {
+        const normalized = String(v || '').replace(/\./g, '').replace(',', '.').replace(/[^\d.-]/g, '');
+        const value = Number(normalized);
+        return Number.isFinite(value) ? value : 0;
+    }
+
+    function numberToMoney(v) {
+        return Number(v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function readItems() {
+        try {
+            const raw = localStorage.getItem(KEY);
+            const items = raw ? JSON.parse(raw) : [];
+            return Array.isArray(items) ? items : [];
+        } catch (_) {
+            return [];
+        }
+    }
+
+    function saveItems(items) { localStorage.setItem(KEY, JSON.stringify(items)); }
+
+    function render() {
+        const items = readItems();
+        if (!items.length) {
+            tb.innerHTML = '<tr><td colspan="3" style="text-align:center;color:#64748b;padding:16px;">Nenhum saldo lançado.</td></tr>';
+            document.getElementById('totalDebito').textContent = 'R$ 0,00';
+            document.getElementById('totalCredito').textContent = 'R$ 0,00';
+            return;
+        }
+
+        tb.innerHTML = items.map((i) => `<tr><td>${i.conta}</td><td>R$ ${numberToMoney(i.debito)}</td><td>R$ ${numberToMoney(i.credito)}</td></tr>`).join('');
+        const totalDebito = items.reduce((acc, i) => acc + i.debito, 0);
+        const totalCredito = items.reduce((acc, i) => acc + i.credito, 0);
+        document.getElementById('totalDebito').textContent = `R$ ${numberToMoney(totalDebito)}`;
+        document.getElementById('totalCredito').textContent = `R$ ${numberToMoney(totalCredito)}`;
+    }
+
+    document.getElementById('formSaldo').addEventListener('submit', (event) => {
+        event.preventDefault();
+        const conta = document.getElementById('conta').value.trim();
+        const debito = moneyToNumber(document.getElementById('debito').value.trim());
+        const credito = moneyToNumber(document.getElementById('credito').value.trim());
+        const msg = document.getElementById('msg');
+
+        if (!conta) {
+            msg.className = 'msg error';
+            msg.textContent = 'Informe a conta.';
+            return;
+        }
+
+        const items = readItems();
+        items.push({ conta, debito, credito });
+        saveItems(items);
+        event.target.reset();
+        msg.className = 'msg';
+        msg.textContent = 'Saldo de abertura registrado.';
+        render();
+    });
+
+    render();
+</script>
+</body>
+</html>

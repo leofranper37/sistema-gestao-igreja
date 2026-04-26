@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LDFP - Encerramento do Exercício</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .grid { display: grid; grid-template-columns: 1.2fr 1.8fr; gap: 16px; }
+        .card { background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; box-shadow: 0 8px 24px rgba(15,23,42,.06); padding: 16px; }
+        .check { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 10px; font-size: 14px; color: #334155; }
+        .check input { margin-top: 3px; }
+        .status { margin-top: 10px; min-height: 18px; font-size: 12px; color: #0f766e; }
+        .status.error { color: #b91c1c; }
+        .log { margin-top: 12px; border: 1px solid #e2e8f0; border-radius: 10px; background: #f8fafc; padding: 12px; font-size: 13px; color: #334155; max-height: 280px; overflow: auto; }
+        .log-item { padding: 6px 0; border-bottom: 1px dashed #dbe3ef; }
+        .log-item:last-child { border-bottom: 0; }
+        @media (max-width: 1050px) { .grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body class="theme-petroleo enterprise-shell-page" data-shell-title="Encerramento do Exercício" data-shell-breadcrumb="LDFP / Contabilidade / Encerramento do Exercício" data-shell-active="encerramento_exercicio.html" data-shell-chip="Contabilidade" data-shell-role="Admin">
+<main class="main-content enterprise-main">
+    <div class="enterprise-page-shell">
+        <div class="enterprise-page-hero">
+            <div>
+                <h2>Encerramento do Exercício</h2>
+                <p>Execute os passos finais com checklist de conformidade e trilha de auditoria.</p>
+            </div>
+            <div class="enterprise-page-badge"><i class="fa-solid fa-flag-checkered"></i> Módulo ativo</div>
+        </div>
+
+        <div class="grid">
+            <section class="card">
+                <h3><i class="fa-solid fa-list-check"></i> Checklist de Fechamento</h3>
+                <label class="check"><input type="checkbox" data-step="conferiu_balancete"> Balancete conferido e equilibrado</label>
+                <label class="check"><input type="checkbox" data-step="lancamentos_conciliados"> Lançamentos conciliados com caixa/bancos</label>
+                <label class="check"><input type="checkbox" data-step="provisoes_validas"> Provisões e ajustes validados</label>
+                <label class="check"><input type="checkbox" data-step="parecer_aprovado"> Parecer pastoral/tesouraria aprovado</label>
+                <button class="btn-primario" id="btnEncerrar" type="button">Encerrar Exercício</button>
+                <div class="status" id="status"></div>
+            </section>
+
+            <section class="card">
+                <h3><i class="fa-solid fa-file-signature"></i> Log de Encerramentos</h3>
+                <div class="log" id="log"></div>
+            </section>
+        </div>
+    </div>
+</main>
+
+<script src="session.js"></script>
+<script src="enterprise-shell.js"></script>
+<script>
+    requireAuthSession();
+
+    const KEY = 'ldfp_encerramento_log';
+
+    function readLogs() {
+        try {
+            const raw = localStorage.getItem(KEY);
+            const items = raw ? JSON.parse(raw) : [];
+            return Array.isArray(items) ? items : [];
+        } catch (_) {
+            return [];
+        }
+    }
+
+    function saveLogs(items) {
+        localStorage.setItem(KEY, JSON.stringify(items));
+    }
+
+    function renderLogs() {
+        const log = document.getElementById('log');
+        const items = readLogs();
+        if (!items.length) {
+            log.innerHTML = '<div class="log-item">Nenhum encerramento registrado.</div>';
+            return;
+        }
+        log.innerHTML = items.map((item) => `<div class="log-item"><strong>${item.data}</strong> - ${item.usuario} - ${item.obs}</div>`).join('');
+    }
+
+    document.getElementById('btnEncerrar').addEventListener('click', () => {
+        const status = document.getElementById('status');
+        const checks = Array.from(document.querySelectorAll('input[type="checkbox"][data-step]'));
+        const incompletos = checks.filter((c) => !c.checked);
+
+        if (incompletos.length) {
+            status.className = 'status error';
+            status.textContent = 'Finalize todos os itens do checklist antes de encerrar.';
+            return;
+        }
+
+        const auth = window.getStoredAuth ? window.getStoredAuth() : null;
+        const user = auth?.user?.name || auth?.user?.nome || auth?.user?.email || 'Usuário';
+        const now = new Date();
+        const data = now.toLocaleString('pt-BR');
+
+        const logs = readLogs();
+        logs.unshift({ data, usuario: user, obs: 'Exercício encerrado com checklist completo.' });
+        saveLogs(logs);
+
+        status.className = 'status';
+        status.textContent = 'Encerramento registrado com sucesso.';
+        checks.forEach((c) => { c.checked = false; });
+        renderLogs();
+    });
+
+    renderLogs();
+</script>
+</body>
+</html>

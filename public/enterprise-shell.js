@@ -373,10 +373,10 @@
                     ${renderTesourariaGroup(activePath, user)}
 
                     ${renderLegacyGroup('Contabilidade', 'fa-solid fa-scale-balanced', [
-                        ['construcao.html?pag=Plano de Contas', 'fa-solid fa-list-ol', 'Plano de Contas'],
-                        ['construcao.html?pag=Balancete de Abertura', 'fa-solid fa-book-open', 'Balancete de Abertura'],
-                        ['construcao.html?pag=Lancamentos Contabeis', 'fa-solid fa-clipboard-list', 'Lançamentos Contábeis'],
-                        ['construcao.html?pag=Encerramento do Exercicio', 'fa-solid fa-flag-checkered', 'Encerramento do Exercício']
+                        ['plano_contas.html', 'fa-solid fa-list-ol', 'Plano de Contas'],
+                        ['balancete_abertura.html', 'fa-solid fa-book-open', 'Balancete de Abertura'],
+                        ['lancamentos_contabeis.html', 'fa-solid fa-clipboard-list', 'Lançamentos Contábeis'],
+                        ['encerramento_exercicio.html', 'fa-solid fa-flag-checkered', 'Encerramento do Exercício']
                     ], activePath, false, user)}
 
                     ${renderLegacyGroup('Gráficos', 'fa-solid fa-chart-column', [
