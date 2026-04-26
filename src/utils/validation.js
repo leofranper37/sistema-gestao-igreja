@@ -405,6 +405,30 @@ const transacaoFiltroSchema = Joi.object({
     ...paginationSchemaPart
 });
 
+const contabilidadePlanoContaSchema = Joi.object({
+    codigo: Joi.string().trim().min(2).max(50).required().label('Código'),
+    nome: Joi.string().trim().min(2).max(255).required().label('Nome'),
+    natureza: Joi.string().valid('ativo', 'passivo', 'receita', 'despesa').required().label('Natureza')
+});
+
+const contabilidadeBalanceteSchema = Joi.object({
+    conta: Joi.string().trim().min(2).max(255).required().label('Conta'),
+    debito: decimalInput.label('Débito'),
+    credito: decimalInput.label('Crédito')
+});
+
+const contabilidadeLancamentoSchema = Joi.object({
+    dataLancamento: Joi.string().trim().pattern(/^\d{4}-\d{2}-\d{2}$/).required().label('Data'),
+    historico: Joi.string().trim().min(2).max(500).required().label('Histórico'),
+    contaDebito: Joi.string().trim().min(2).max(255).required().label('Conta Débito'),
+    contaCredito: Joi.string().trim().min(2).max(255).required().label('Conta Crédito'),
+    valor: decimalInput.label('Valor')
+});
+
+const contabilidadeEncerramentoSchema = Joi.object({
+    observacao: Joi.string().trim().min(4).max(500).required().label('Observação')
+});
+
 const membroFiltroSchema = Joi.object({
     nome: Joi.string().trim().max(255).allow('', null).label('Nome'),
     email: Joi.string().trim().max(255).allow('', null).label('E-mail'),
@@ -499,6 +523,10 @@ module.exports = {
     bancoContaSchema,
     bancoLancamentoSchema,
     contaPagarSchema,
+    contabilidadeBalanceteSchema,
+    contabilidadeEncerramentoSchema,
+    contabilidadeLancamentoSchema,
+    contabilidadePlanoContaSchema,
     validateBody,
     validateQuery,
     visitanteQrPublicoSchema,

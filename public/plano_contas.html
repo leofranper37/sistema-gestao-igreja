@@ -85,22 +85,16 @@
 <script>
     requireAuthSession();
 
-    const STORAGE_KEY = 'ldfp_plano_contas';
     const tbContas = document.getElementById('tbContas');
     const msgConta = document.getElementById('msgConta');
 
-    function readContas() {
-        try {
-            const raw = localStorage.getItem(STORAGE_KEY);
-            const items = raw ? JSON.parse(raw) : [];
-            return Array.isArray(items) ? items : [];
-        } catch (_) {
-            return [];
-        }
-    }
-
-    function saveContas(items) {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+    function escapeHtml(value) {
+        return String(value || '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
     }
 
     function setMsg(text, isError) {
@@ -108,8 +102,15 @@
         msgConta.textContent = text || '';
     }
 
-    function renderContas() {
-        const contas = readContas();
+    async function renderContas() {
+        const response = await fetch('/contabilidade/plano-contas');
+        const data = await response.json().catch(() => ({ items: [] }));
+
+        if (!response.ok) {
+            throw new Error(data.error || 'Não foi possível carregar o plano de contas.');
+        }
+
+        const contas = data.items || [];
         if (!contas.length) {
             tbContas.innerHTML = '<tr><td colspan="3" style="text-align:center;color:#64748b;padding:16px;">Nenhuma conta cadastrada.</td></tr>';
             return;
@@ -117,14 +118,14 @@
 
         tbContas.innerHTML = contas.map((c) => `
             <tr>
-                <td>${c.codigo}</td>
-                <td>${c.nome}</td>
-                <td><span class="badge ${c.natureza === 'ativo' || c.natureza === 'passivo' ? 'badge-a' : 'badge-p'}">${c.natureza}</span></td>
+                <td>${escapeHtml(c.codigo)}</td>
+                <td>${escapeHtml(c.nome)}</td>
+                <td><span class="badge ${c.natureza === 'ativo' || c.natureza === 'passivo' ? 'badge-a' : 'badge-p'}">${escapeHtml(c.natureza)}</span></td>
             </tr>
         `).join('');
     }
 
-    document.getElementById('formConta').addEventListener('submit', (event) => {
+    document.getElementById('formConta').addEventListener('submit', async (event) => {
         event.preventDefault();
         const codigo = document.getElementById('codigoConta').value.trim();
         const nome = document.getElementById('nomeConta').value.trim();
@@ -135,21 +136,26 @@
             return;
         }
 
-        const contas = readContas();
-        if (contas.some((c) => c.codigo === codigo)) {
-            setMsg('Já existe uma conta com este código.', true);
+        const response = await fetch('/contabilidade/plano-contas', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ codigo, nome, natureza })
+        });
+        const data = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+            setMsg(data.error || 'Não foi possível salvar a conta.', true);
             return;
         }
 
-        contas.push({ codigo, nome, natureza });
-        contas.sort((a, b) => a.codigo.localeCompare(b.codigo));
-        saveContas(contas);
         event.target.reset();
         setMsg('Conta adicionada com sucesso.', false);
-        renderContas();
+        await renderContas();
     });
 
-    renderContas();
+    renderContas().catch((error) => {
+        setMsg(error.message || 'Erro ao carregar dados.', true);
+    });
 </script>
 </body>
 </html>

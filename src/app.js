@@ -11,6 +11,7 @@ const agendaRoutes = require('./routes/agendaRoutes');
 const bancoRoutes = require('./routes/bancoRoutes');
 const cargoRoutes = require('./routes/cargoRoutes');
 const contasPagarRoutes = require('./routes/contasPagarRoutes');
+const contabilidadeRoutes = require('./routes/contabilidadeRoutes');
 const financeRoutes = require('./routes/financeRoutes');
 const engagementRoutes = require('./routes/engagementRoutes');
 const missionariosRoutes = require('./routes/missionariosRoutes');
@@ -122,6 +123,7 @@ app.use((req, res, next) => {
 app.use(financeRoutes);
 app.use(bancoRoutes);
 app.use(contasPagarRoutes);
+app.use(contabilidadeRoutes);
 app.use(engagementRoutes);
 app.use(cargoRoutes);
 app.use(accountRoutes);

@@ -86,7 +86,6 @@
 <script>
     requireAuthSession();
 
-    const KEY = 'ldfp_lancamentos_contabeis';
     const tb = document.getElementById('tb');
 
     function toNumber(v) {
@@ -99,54 +98,72 @@
         return Number(v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
 
-    function readItems() {
-        try {
-            const raw = localStorage.getItem(KEY);
-            const items = raw ? JSON.parse(raw) : [];
-            return Array.isArray(items) ? items : [];
-        } catch (_) {
-            return [];
-        }
+    function escapeHtml(value) {
+        return String(value || '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
     }
 
-    function saveItems(items) { localStorage.setItem(KEY, JSON.stringify(items)); }
+    async function render() {
+        const response = await fetch('/contabilidade/lancamentos');
+        const data = await response.json().catch(() => ({ items: [] }));
 
-    function render() {
-        const items = readItems();
+        if (!response.ok) {
+            throw new Error(data.error || 'Não foi possível carregar os lançamentos.');
+        }
+
+        const items = data.items || [];
         if (!items.length) {
             tb.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#64748b;padding:16px;">Nenhum lançamento registrado.</td></tr>';
             return;
         }
-        tb.innerHTML = items.map((i) => `<tr><td>${i.data}</td><td>${i.historico}</td><td>${i.debito}</td><td>${i.credito}</td><td>R$ ${toMoney(i.valor)}</td></tr>`).join('');
+        tb.innerHTML = items.map((i) => `<tr><td>${escapeHtml(i.data_lancamento || '')}</td><td>${escapeHtml(i.historico)}</td><td>${escapeHtml(i.conta_debito)}</td><td>${escapeHtml(i.conta_credito)}</td><td>R$ ${toMoney(i.valor)}</td></tr>`).join('');
     }
 
-    document.getElementById('form').addEventListener('submit', (event) => {
+    document.getElementById('form').addEventListener('submit', async (event) => {
         event.preventDefault();
         const item = {
-            data: document.getElementById('data').value,
+            dataLancamento: document.getElementById('data').value,
             historico: document.getElementById('historico').value.trim(),
-            debito: document.getElementById('contaDebito').value.trim(),
-            credito: document.getElementById('contaCredito').value.trim(),
+            contaDebito: document.getElementById('contaDebito').value.trim(),
+            contaCredito: document.getElementById('contaCredito').value.trim(),
             valor: toNumber(document.getElementById('valor').value.trim())
         };
         const msg = document.getElementById('msg');
 
-        if (!item.data || !item.historico || !item.debito || !item.credito || item.valor <= 0) {
+        if (!item.dataLancamento || !item.historico || !item.contaDebito || !item.contaCredito || item.valor <= 0) {
             msg.className = 'msg error';
             msg.textContent = 'Preencha os campos e informe valor maior que zero.';
             return;
         }
 
-        const items = readItems();
-        items.unshift(item);
-        saveItems(items);
+        const response = await fetch('/contabilidade/lancamentos', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(item)
+        });
+        const data = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+            msg.className = 'msg error';
+            msg.textContent = data.error || 'Não foi possível registrar o lançamento.';
+            return;
+        }
+
         event.target.reset();
         msg.className = 'msg';
         msg.textContent = 'Lançamento contábil registrado.';
-        render();
+        await render();
     });
 
-    render();
+    render().catch((error) => {
+        const msg = document.getElementById('msg');
+        msg.className = 'msg error';
+        msg.textContent = error.message || 'Erro ao carregar lançamentos.';
+    });
 </script>
 </body>
 </html>

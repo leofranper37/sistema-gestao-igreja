@@ -85,7 +85,6 @@
 <script>
     requireAuthSession();
 
-    const KEY = 'ldfp_balancete_abertura';
     const tb = document.getElementById('tb');
 
     function moneyToNumber(v) {
@@ -98,20 +97,24 @@
         return Number(v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
 
-    function readItems() {
-        try {
-            const raw = localStorage.getItem(KEY);
-            const items = raw ? JSON.parse(raw) : [];
-            return Array.isArray(items) ? items : [];
-        } catch (_) {
-            return [];
-        }
+    function escapeHtml(value) {
+        return String(value || '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
     }
 
-    function saveItems(items) { localStorage.setItem(KEY, JSON.stringify(items)); }
+    async function render() {
+        const response = await fetch('/contabilidade/balancete-abertura');
+        const data = await response.json().catch(() => ({ items: [], totals: { totalDebito: 0, totalCredito: 0 } }));
 
-    function render() {
-        const items = readItems();
+        if (!response.ok) {
+            throw new Error(data.error || 'Não foi possível carregar o balancete.');
+        }
+
+        const items = data.items || [];
         if (!items.length) {
             tb.innerHTML = '<tr><td colspan="3" style="text-align:center;color:#64748b;padding:16px;">Nenhum saldo lançado.</td></tr>';
             document.getElementById('totalDebito').textContent = 'R$ 0,00';
@@ -119,14 +122,14 @@
             return;
         }
 
-        tb.innerHTML = items.map((i) => `<tr><td>${i.conta}</td><td>R$ ${numberToMoney(i.debito)}</td><td>R$ ${numberToMoney(i.credito)}</td></tr>`).join('');
-        const totalDebito = items.reduce((acc, i) => acc + i.debito, 0);
-        const totalCredito = items.reduce((acc, i) => acc + i.credito, 0);
+        tb.innerHTML = items.map((i) => `<tr><td>${escapeHtml(i.conta)}</td><td>R$ ${numberToMoney(i.debito)}</td><td>R$ ${numberToMoney(i.credito)}</td></tr>`).join('');
+        const totalDebito = Number(data.totals?.totalDebito || 0);
+        const totalCredito = Number(data.totals?.totalCredito || 0);
         document.getElementById('totalDebito').textContent = `R$ ${numberToMoney(totalDebito)}`;
         document.getElementById('totalCredito').textContent = `R$ ${numberToMoney(totalCredito)}`;
     }
 
-    document.getElementById('formSaldo').addEventListener('submit', (event) => {
+    document.getElementById('formSaldo').addEventListener('submit', async (event) => {
         event.preventDefault();
         const conta = document.getElementById('conta').value.trim();
         const debito = moneyToNumber(document.getElementById('debito').value.trim());
@@ -139,16 +142,30 @@
             return;
         }
 
-        const items = readItems();
-        items.push({ conta, debito, credito });
-        saveItems(items);
+        const response = await fetch('/contabilidade/balancete-abertura', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ conta, debito, credito })
+        });
+        const data = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+            msg.className = 'msg error';
+            msg.textContent = data.error || 'Não foi possível registrar o saldo.';
+            return;
+        }
+
         event.target.reset();
         msg.className = 'msg';
         msg.textContent = 'Saldo de abertura registrado.';
-        render();
+        await render();
     });
 
-    render();
+    render().catch((error) => {
+        const msg = document.getElementById('msg');
+        msg.className = 'msg error';
+        msg.textContent = error.message || 'Erro ao carregar balancete.';
+    });
 </script>
 </body>
 </html>

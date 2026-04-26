@@ -54,33 +54,33 @@
 <script>
     requireAuthSession();
 
-    const KEY = 'ldfp_encerramento_log';
-
-    function readLogs() {
-        try {
-            const raw = localStorage.getItem(KEY);
-            const items = raw ? JSON.parse(raw) : [];
-            return Array.isArray(items) ? items : [];
-        } catch (_) {
-            return [];
-        }
+    function escapeHtml(value) {
+        return String(value || '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
     }
 
-    function saveLogs(items) {
-        localStorage.setItem(KEY, JSON.stringify(items));
-    }
-
-    function renderLogs() {
+    async function renderLogs() {
         const log = document.getElementById('log');
-        const items = readLogs();
+        const response = await fetch('/contabilidade/encerramentos');
+        const data = await response.json().catch(() => ({ items: [] }));
+
+        if (!response.ok) {
+            throw new Error(data.error || 'Não foi possível carregar o log.');
+        }
+
+        const items = data.items || [];
         if (!items.length) {
             log.innerHTML = '<div class="log-item">Nenhum encerramento registrado.</div>';
             return;
         }
-        log.innerHTML = items.map((item) => `<div class="log-item"><strong>${item.data}</strong> - ${item.usuario} - ${item.obs}</div>`).join('');
+        log.innerHTML = items.map((item) => `<div class="log-item"><strong>${escapeHtml(new Date(item.created_at).toLocaleString('pt-BR'))}</strong> - ${escapeHtml(item.usuario_nome)} - ${escapeHtml(item.observacao)}</div>`).join('');
     }
 
-    document.getElementById('btnEncerrar').addEventListener('click', () => {
+    document.getElementById('btnEncerrar').addEventListener('click', async () => {
         const status = document.getElementById('status');
         const checks = Array.from(document.querySelectorAll('input[type="checkbox"][data-step]'));
         const incompletos = checks.filter((c) => !c.checked);
@@ -91,22 +91,30 @@
             return;
         }
 
-        const auth = window.getStoredAuth ? window.getStoredAuth() : null;
-        const user = auth?.user?.name || auth?.user?.nome || auth?.user?.email || 'Usuário';
-        const now = new Date();
-        const data = now.toLocaleString('pt-BR');
+        const response = await fetch('/contabilidade/encerramentos', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ observacao: 'Exercício encerrado com checklist completo.' })
+        });
+        const data = await response.json().catch(() => ({}));
 
-        const logs = readLogs();
-        logs.unshift({ data, usuario: user, obs: 'Exercício encerrado com checklist completo.' });
-        saveLogs(logs);
+        if (!response.ok) {
+            status.className = 'status error';
+            status.textContent = data.error || 'Não foi possível registrar encerramento.';
+            return;
+        }
 
         status.className = 'status';
         status.textContent = 'Encerramento registrado com sucesso.';
         checks.forEach((c) => { c.checked = false; });
-        renderLogs();
+        await renderLogs();
     });
 
-    renderLogs();
+    renderLogs().catch((error) => {
+        const status = document.getElementById('status');
+        status.className = 'status error';
+        status.textContent = error.message || 'Erro ao carregar log.';
+    });
 </script>
 </body>
 </html>

@@ -7,16 +7,17 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="theme-azul-verde">
+<body class="theme-petroleo enterprise-shell-page" data-shell-title="Novo Lançamento de Caixa" data-shell-breadcrumb="LDFP / Tesouraria / Caixa / Novo Lançamento" data-shell-active="caixa.html" data-shell-chip="Tesouraria ativa" data-shell-role="Admin financeiro">
 
-    <main class="main-content">
-        <div class="pagina-topo">
-            <div>
-                <h1>Lançamentos de Caixa</h1>
-                <div class="breadcrumb">Meu LDFP › Tesouraria › Caixa</div>
+    <main class="main-content enterprise-main">
+        <div class="enterprise-page-shell">
+            <div class="enterprise-page-hero">
+                <div>
+                    <h2>Lançamentos de Caixa</h2>
+                    <p>Registre entradas e saídas com rastreabilidade e atualização imediata do saldo.</p>
+                </div>
+                <div class="enterprise-page-badge"><i class="fa-solid fa-file-invoice"></i> Movimento</div>
             </div>
-            <div style="align-self:center;color:#6b7280;">Caixa Ativo: <strong>04/2026</strong></div>
-        </div>
 
         <div class="caixa-container">
             <div class="caixa-card">
@@ -86,6 +87,7 @@
     </main>
 
     <script src="session.js"></script>
+    <script src="enterprise-shell.js"></script>
     <script>
         requireAuthSession();
 
