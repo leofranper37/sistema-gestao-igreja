@@ -7,8 +7,8 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        .wrap { max-width: 1200px; margin: 0 auto; padding: 18px 14px 32px; }
-        .top-cards { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 18px; }
+        .wrap { max-width: 1280px; margin: 0 auto; padding: 0; }
+        .top-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin-bottom: 18px; }
         .kpi { background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 18px 16px; box-shadow: 0 4px 14px rgba(15,23,42,.07); }
         .kpi small { display: block; font-size: 11px; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px; }
         .kpi strong { display: block; font-size: 1.6rem; font-weight: 800; color: #0f172a; }
@@ -17,9 +17,10 @@
         .kpi.oferta strong { color: #16a34a; }
         .kpi.missoes strong { color: #2563eb; }
         .kpi.outros strong { color: #0f766e; }
-        .main-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 14px; }
+        .main-grid { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(340px, 1fr); gap: 14px; }
+        .main-grid > * { min-width: 0; }
         .card { background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; box-shadow: 0 6px 20px rgba(15,23,42,.08); padding: 16px; }
-        .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+        .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; gap: 8px; flex-wrap: wrap; }
         .card-header h2 { margin: 0; font-size: 15px; color: #155e75; }
         .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
         .form-row .full { grid-column: 1 / -1; }
@@ -28,10 +29,18 @@
         .btn { border: 0; border-radius: 8px; padding: 10px 14px; font-size: 13px; font-weight: 700; cursor: pointer; color: #fff; }
         .btn-primary { background: #0f766e; width: 100%; margin-top: 4px; }
         .btn-del { background: #dc2626; padding: 5px 8px; font-size: 11px; }
-        .filtros { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; align-items: flex-end; }
-        .filtros input, .filtros select { max-width: 180px; margin: 0; }
+        .filtros {
+            display: grid;
+            grid-template-columns: minmax(140px, 170px) minmax(130px, 160px) minmax(160px, 1fr) auto;
+            gap: 8px;
+            margin-bottom: 12px;
+            align-items: end;
+            width: 100%;
+        }
+        .filtros input, .filtros select { margin: 0; max-width: 100%; }
         table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
         th, td { border-bottom: 1px solid #f1f5f9; padding: 9px 8px; text-align: left; vertical-align: top; }
+        td { word-break: break-word; }
         th { background: #f8fafc; color: #64748b; font-size: 11px; text-transform: uppercase; font-weight: 700; }
         .badge { display: inline-block; padding: 2px 8px; border-radius: 99px; font-size: 10.5px; font-weight: 700; }
         .badge-dizimo { background: #dbeafe; color: #1d4ed8; }
@@ -44,8 +53,17 @@
         .pag button { border: 1px solid #e2e8f0; background: #fff; border-radius: 8px; padding: 6px 12px; font-size: 12px; cursor: pointer; }
         .pag button:disabled { opacity: .45; cursor: not-allowed; }
         .pag span { font-size: 12px; color: #64748b; }
-        @media (max-width: 1000px) { .top-cards { grid-template-columns: repeat(2, 1fr); } .main-grid { grid-template-columns: 1fr; } }
-        @media (max-width: 600px) { .top-cards { grid-template-columns: 1fr; } .filtros input, .filtros select { max-width: 100%; } }
+        @media (max-width: 1180px) { .main-grid { grid-template-columns: 1fr; } }
+        @media (max-width: 900px) {
+            .filtros { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .filtros #filtroNome { grid-column: 1 / -1; }
+        }
+        @media (max-width: 700px) {
+            .top-cards { grid-template-columns: 1fr; }
+            .form-row { grid-template-columns: 1fr; }
+            .filtros { grid-template-columns: 1fr; }
+            .filtros #filtroNome { grid-column: auto; }
+        }
     </style>
 </head>
 <body class="theme-petroleo enterprise-shell-page" data-shell-title="Dízimos e Ofertas" data-shell-breadcrumb="LDFP / Tesouraria / Dízimos" data-shell-active="dizimos.html" data-shell-chip="Tesouraria ativa" data-shell-role="Admin financeiro">
@@ -85,7 +103,7 @@
                         <option value="missoes">Missões</option>
                         <option value="outros">Outros</option>
                     </select>
-                    <input type="text" id="filtroNome" placeholder="Buscar por nome..." style="max-width:160px;">
+                    <input type="text" id="filtroNome" placeholder="Buscar por nome...">
                     <button class="btn" style="background:#2563eb;" type="button" id="btnFiltrar">Filtrar</button>
                 </div>
             </div>
@@ -127,7 +145,7 @@
                         <option value="missoes">Missões</option>
                         <option value="outros">Outros</option>
                     </select>
-                    <input type="month" id="competencia" required>
+                    <input class="full" type="month" id="competencia" required>
                     <textarea class="full" id="observacao" placeholder="Observação (opcional)"></textarea>
                 </div>
                 <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> Registrar</button>

@@ -7,9 +7,7 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        .visitantes-wrap {
-            padding: 24px 30px 30px;
-        }
+        .visitantes-wrap { padding: 0; max-width: 1280px; margin: 0 auto; }
 
         .page-header {
             display: flex;
@@ -58,13 +56,14 @@
             background: #fff;
             border: 1px solid #e5e7eb;
             border-radius: 10px;
-            overflow: hidden;
+            overflow-x: auto;
             box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
+            min-width: 900px;
         }
 
         th,
@@ -95,8 +94,10 @@
             inset: 0;
             background: rgba(2, 6, 23, 0.65);
             display: none;
-            align-items: center;
+            align-items: flex-start;
             justify-content: center;
+            overflow-y: auto;
+            padding: 22px 14px;
             z-index: 1000;
         }
 
@@ -104,10 +105,11 @@
             background: white;
             padding: 26px;
             border-radius: 12px;
-            width: min(94vw, 980px);
-            max-height: 90vh;
-            overflow: auto;
+            width: min(96vw, 1080px);
+            max-height: calc(100vh - 44px);
+            overflow-y: auto;
             box-shadow: 0 12px 28px rgba(2, 6, 23, 0.24);
+            margin: 0 auto;
         }
 
         .modal-grid {
@@ -174,7 +176,7 @@
         .modal textarea {
             width: 100%;
             padding: 10px;
-            margin: 8px 0;
+            margin: 0;
             border: 1px solid #dbe3ef;
             border-radius: 8px;
             font-family: inherit;
@@ -215,7 +217,7 @@
 
         @media (max-width: 780px) {
             .visitantes-wrap {
-                padding: 18px 16px 22px;
+                padding: 0;
             }
 
             th,
@@ -224,9 +226,8 @@
                 font-size: 12px;
             }
 
-            .modal-grid {
-                grid-template-columns: repeat(2, minmax(0, 1fr));
-            }
+            .modal { padding: 18px; }
+            .modal-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 
             .modal-grid .full,
             .modal-grid .col-2,
@@ -236,11 +237,19 @@
         }
     </style>
 </head>
-<body class="theme-petroleo" data-shell-title="Visitantes" data-shell-breadcrumb="LDFP / Secretaria / Visitantes" data-shell-active="visitantes.html" data-shell-chip="Ambiente autenticado" data-shell-role="Administrador">
+<body class="theme-petroleo enterprise-shell-page" data-shell-title="Visitantes" data-shell-breadcrumb="LDFP / Secretaria / Visitantes" data-shell-active="visitantes.html" data-shell-chip="Ambiente autenticado" data-shell-role="Administrador">
     <main class="main-content enterprise-main">
+        <div class="enterprise-page-shell">
         <div class="visitantes-wrap">
+            <div class="enterprise-page-hero" style="margin-bottom:16px;">
+                <div>
+                    <h2>Visitantes</h2>
+                    <p>Cadastro estruturado de visitantes com historico, dados de contato e acompanhamento pastoral.</p>
+                </div>
+                <div class="enterprise-page-badge"><i class="fa-solid fa-user-group"></i> Secretaria</div>
+            </div>
             <div class="page-header">
-                <h2 style="margin:0;color:#1f2937;">Visitantes</h2>
+                <h2 style="margin:0;color:#1f2937;">Lista de Visitantes</h2>
                 <button class="btn-novo" onclick="abrirModal()"><i class="fa-solid fa-plus"></i> Novo Visitante</button>
             </div>
             <div class="search-bar">
@@ -265,6 +274,7 @@
                     <tbody></tbody>
                 </table>
             </div>
+        </div>
         </div>
     </main>
 

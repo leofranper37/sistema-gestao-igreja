@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        .wrap { max-width: 1180px; margin: 0 auto; padding: 24px 18px 44px; }
+        .wrap { max-width: 1280px; margin: 0 auto; padding: 0; }
         .hero {
             background: linear-gradient(130deg, #0f172a 0%, #0b3340 55%, #115e59 100%);
             border-radius: 16px;
@@ -18,7 +18,8 @@
         }
         .hero h2 { margin: 0 0 6px; font-size: 21px; }
         .hero p { margin: 0; color: #bfdbfe; font-size: 13px; }
-        .main-grid { display: grid; grid-template-columns: 1.55fr 1fr; gap: 14px; }
+        .main-grid { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(360px, 1fr); gap: 14px; }
+        .main-grid > * { min-width: 0; }
         .card {
             background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
             border: 1px solid #d9e4f0;
@@ -26,7 +27,7 @@
             box-shadow: 0 10px 24px rgba(15,23,42,.08);
             padding: 16px;
         }
-        .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+        .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; gap: 8px; flex-wrap: wrap; }
         .card-header h2 { margin: 0; font-size: 15px; color: #0f4c66; }
         .btn {
             border: 0;
@@ -44,10 +45,11 @@
         .btn-edit { background: #0284c7; padding: 5px 8px; font-size: 11px; }
         input, select, textarea { width: 100%; border: 1px solid #dbe3ef; border-radius: 8px; padding: 9px 12px; font-size: 13.5px; box-sizing: border-box; margin-bottom: 6px; }
         textarea { resize: vertical; min-height: 55px; }
-        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .form-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
         .form-row .full { grid-column: 1/-1; }
         table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
         th, td { border-bottom: 1px solid #f1f5f9; padding: 9px 8px; text-align: left; }
+        td { word-break: break-word; }
         th { background: #eff6ff; color: #475569; font-size: 11px; text-transform: uppercase; font-weight: 700; }
         tbody tr:hover { background: #f0f9ff; }
         .badge { display: inline-block; padding: 2px 8px; border-radius: 99px; font-size: 10.5px; font-weight: 700; }
@@ -60,12 +62,14 @@
         .msg.ok { color: #0f766e; } .msg.error { color: #b91c1c; }
         .ativo-off { opacity: .5; }
         .saldo { font-weight: 700; color: #0f766e; }
-        @media (max-width: 900px) { .main-grid { grid-template-columns: 1fr; } }
+        @media (max-width: 1180px) { .main-grid { grid-template-columns: 1fr; } }
+        @media (max-width: 760px) { .form-row { grid-template-columns: 1fr; } }
     </style>
 </head>
-<body class="theme-petroleo" data-shell-title="Contas Bancárias" data-shell-breadcrumb="LDFP / Tesouraria / Banco" data-shell-active="banco.html" data-shell-chip="Tesouraria ativa">
+    <body class="theme-petroleo enterprise-shell-page" data-shell-title="Contas Bancárias" data-shell-breadcrumb="LDFP / Tesouraria / Banco" data-shell-active="banco.html" data-shell-chip="Tesouraria ativa" data-shell-role="Admin financeiro">
 <main class="main-content enterprise-main">
-<div class="wrap">
+    <div class="enterprise-page-shell">
+    <div class="wrap">
     <section class="hero">
         <h2><i class="fa-solid fa-building-columns"></i> Contas Bancarias</h2>
         <p>Gestao centralizada das contas da igreja com operacao rapida e visual profissional no padrao LDFP.</p>
