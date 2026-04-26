@@ -210,6 +210,8 @@
 
         <!-- COLUNA PLANO -->
         <div class="co-plan-col">
+            <!-- Seletor de planos -->
+            <div id="planSeletor" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;"></div>
             <div class="co-plan-card">
                 <div class="co-plan-header">
                     <div class="co-plan-badge" id="planBadge">Plano Selecionado</div>
@@ -246,47 +248,73 @@
 
     <script src="session.js"></script>
     <script>
-        // — Dados dos planos —
-        const PLANOS = {
-            gratuito: { nome:'Gratuito', sub:'Com Anúncios', preco:0, trial:'1 mês grátis', hoje:'R$ 0,00',
-                features:['App Web instalável (PWA)','Até 40 cadastros','1 congregação','Escola Bíblica (EBD)','Grupos e Células','Financeiro com limites'] },
-            ararate: { nome:'Ararate', sub:'Igrejas Pequenas', preco:50, trial:'7 dias grátis', hoje:'R$ 0,00',
-                features:['App Web instalável (PWA)','Até 100 cadastros','1 congregação','Escola Bíblica (EBD)','Credencial de Membro','Grupos e Células','Suporte via e-mail'] },
-            hebrom: { nome:'Hebrom', sub:'Igrejas em Crescimento', preco:80, trial:'7 dias grátis', hoje:'R$ 0,00',
-                features:['App Web instalável (PWA)','Até 150 cadastros','1 congregação','Escola Bíblica (EBD)','Credencial de Membro','Grupos e Células','Suporte via e-mail'] },
-            betel: { nome:'Betel', sub:'Igrejas Ativas', preco:100, trial:'7 dias grátis', hoje:'R$ 0,00',
-                features:['App Web instalável (PWA)','App do Membro','Até 300 cadastros','Até 5 congregações','EBD','Credencial de Membro','Grupos e Células','Suporte via e-mail','Suporte via WhatsApp'] },
-            siao: { nome:'Sião', sub:'Igrejas Grandes', preco:150, trial:'7 dias grátis', hoje:'R$ 0,00',
-                features:['App Web instalável (PWA)','App do Membro','1.000+ cadastros','Congregações ilimitadas','EBD','Credencial de Membro','Grupos e Células','Suporte prioritário','Consultoria Contábil'] },
-            carmelo: { nome:'Carmelo', sub:'Igrejas em Crescimento', preco:100, trial:'7 dias grátis', hoje:'R$ 0,00',
-                features:['App Web instalável (PWA)','App do Membro','Até 500 cadastros','Até 10 congregações','EBD','Credencial de Membro','Grupos e Células','Suporte via e-mail','Suporte via WhatsApp','Suporte via Telefone'] }
-        };
+        // — Planos carregados dinamicamente da API —
+        let todosPlanos = [];
+        let planoAtual = null;
+
+        async function loadPlanos() {
+            try {
+                const resp = await fetch('/api/pagamentos/planos');
+                todosPlanos = await resp.json();
+            } catch(_) {
+                todosPlanos = [];
+            }
+            renderSeletor();
+            renderPlano();
+        }
+
+        function renderSeletor() {
+            const cont = document.getElementById('planSeletor');
+            if (!cont || !todosPlanos.length) return;
+            cont.innerHTML = todosPlanos.map(p => {
+                const ativo = p.slug === planoAtual?.slug;
+                return `<button type="button" onclick="selecionarPlano('${p.slug}')" style="
+                    background:${ativo ? 'rgba(245,158,11,0.18)' : 'rgba(255,255,255,0.04)'};
+                    border:1.5px solid ${ativo ? 'var(--accent)' : 'var(--border)'};
+                    color:${ativo ? 'var(--accent)' : 'var(--text)'};
+                    border-radius:8px; padding:8px 14px; font-size:13px; font-weight:700;
+                    cursor:pointer; transition:all .2s; white-space:nowrap;
+                ">${p.nome} — R$${p.preco_mensal}/mês</button>`;
+            }).join('');
+        }
+
+        function selecionarPlano(slug) {
+            planoAtual = todosPlanos.find(p => p.slug === slug) || todosPlanos[0];
+            renderSeletor();
+            renderPlano();
+            // Atualiza URL sem reload
+            const url = new URL(window.location.href);
+            url.searchParams.set('plano', slug);
+            history.replaceState({}, '', url.toString());
+        }
 
         function renderPlano() {
             const params = new URLSearchParams(window.location.search);
-            const slug = (params.get('plano') || 'ararate').toLowerCase();
-            const p = PLANOS[slug] || PLANOS['ararate'];
+            const slug = (params.get('plano') || '').toLowerCase();
+            const p = (slug ? todosPlanos.find(x => x.slug === slug) : null) || todosPlanos[0];
+            if (!p) return;
+            planoAtual = p;
+
+            const features = (() => { try { return JSON.parse(p.features_json || '[]'); } catch(_){ return []; } })();
+            const isFree = !p.preco_mensal || p.preco_mensal === 0;
 
             document.getElementById('planNome').textContent = p.nome;
-            document.getElementById('planSub').textContent = p.sub;
-            document.getElementById('planVal').textContent = p.preco === 0 ? '0' : p.preco.toString().padStart(2,'0');
+            document.getElementById('planSub').textContent = p.subtitulo || '';
+            document.getElementById('planVal').textContent = p.preco_mensal || '0';
             document.getElementById('planCur').textContent = 'R$';
-            document.getElementById('planTrialTxt').textContent = p.trial;
-            document.getElementById('planHoje').textContent = p.hoje;
-
-            if (p.preco === 0) {
-                document.getElementById('planBadge').textContent = 'Gratuito com Anúncios';
-            } else {
-                document.getElementById('planBadge').textContent = 'Plano ' + p.nome;
-            }
+            document.getElementById('planTrialTxt').textContent = isFree ? '1 mês grátis' : '7 dias grátis';
+            document.getElementById('planHoje').textContent = 'R$ 0,00';
+            document.getElementById('planBadge').textContent = isFree ? 'Gratuito com Anúncios' : 'Plano ' + p.nome;
 
             const ul = document.getElementById('planFeatures');
-            ul.innerHTML = p.features.map(f =>
+            ul.innerHTML = features.map(f =>
                 `<li><span class="icon-yes"><i class="fa-solid fa-check"></i></span>${f}</li>`
             ).join('');
+
+            renderSeletor();
         }
 
-        renderPlano();
+        loadPlanos();
 
         function extractErrorMessage(data, fallbackMessage) {
             if (!data) {

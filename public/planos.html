@@ -262,8 +262,7 @@
     <!-- PRICING GRID -->
     <section class="pricing-section">
         <div class="pricing-grid" id="pricingGrid">
-
-            <!-- PLANO HEBROM -->
+            <div style="grid-column:1/-1;text-align:center;color:#64748b;padding:40px;"><i class="fa-solid fa-spinner fa-spin"></i> Carregando planos...</div>
             <div class="plan-card">
                 <div class="plan-icon">⛰️</div>
                 <div class="plan-name-tag">Básico</div>
@@ -284,67 +283,6 @@
                     <li><span class="feat-icon yes"><i class="fa-solid fa-check"></i></span> Suporte via e-mail</li>
                 </ul>
                 <a href="criar_conta.html" class="plan-btn ghost">Assinar Hebrom</a>
-                <p class="trial-note">✦ 7 dias de teste gratuito</p>
-            </div>
-
-            <!-- PLANO BETEL — DESTAQUE -->
-            <div class="plan-card featured">
-                <div class="popular-badge">✦ Mais Popular</div>
-                <div class="plan-icon" style="margin-top:12px;">🏛️</div>
-                <div class="plan-name-tag">Recomendado</div>
-                <div class="plan-name">Betel</div>
-                <div class="plan-subtitle">Igrejas em crescimento</div>
-                <p class="plan-verse">"Esta é a casa de Deus e a porta do céu." — Gn 28:17</p>
-                <div class="plan-price-block">
-                    <span class="currency">R$</span><span class="amount" id="price-betel">80</span>
-                    <span class="period" id="period-betel">por mês · cobrado mensalmente</span>
-                    <span class="annual-note" id="annual-betel" style="display:none;">equivale a R$ 67/mês · cobrado R$ 800/ano</span>
-                </div>
-                <hr class="plan-divider">
-                <ul class="plan-features">
-                    <li><span class="feat-icon yes"><i class="fa-solid fa-check"></i></span> App Web Instalável (PWA)</li>
-                    <li><span class="feat-icon yes"><i class="fa-solid fa-check"></i></span> App do Membro</li>
-                    <li><span class="feat-icon yes"><i class="fa-solid fa-check"></i></span> Até 300 cadastros</li>
-                    <li><span class="feat-icon yes"><i class="fa-solid fa-check"></i></span> Até 5 congregações</li>
-                    <li class="disabled"><span class="feat-icon no"><i class="fa-solid fa-xmark"></i></span> EBD Dominical</li>
-                    <li><span class="feat-icon yes"><i class="fa-solid fa-check"></i></span> Credencial de Membro</li>
-                    <li><span class="feat-icon yes"><i class="fa-solid fa-check"></i></span> Grupos / Células</li>
-                    <li class="disabled"><span class="feat-icon no"><i class="fa-solid fa-xmark"></i></span> Financeiro completo</li>
-                    <li class="disabled"><span class="feat-icon no"><i class="fa-solid fa-xmark"></i></span> Relatórios completos</li>
-                    <li><span class="feat-icon yes"><i class="fa-solid fa-check"></i></span> Suporte via e-mail</li>
-                    <li><span class="feat-icon yes"><i class="fa-solid fa-check"></i></span> Suporte via WhatsApp</li>
-                </ul>
-                <a href="criar_conta.html" class="plan-btn primary">Assinar Betel</a>
-                <p class="trial-note">✦ 7 dias de teste gratuito</p>
-            </div>
-
-            <!-- PLANO SIÃO -->
-            <div class="plan-card">
-                <div class="plan-icon">👑</div>
-                <div class="plan-name-tag">Premium</div>
-                <div class="plan-name">Sião</div>
-                <div class="plan-subtitle">Igrejas consolidadas</div>
-                <p class="plan-verse">"O Senhor reina em Sião para sempre." — Sl 146:10</p>
-                <div class="plan-price-block">
-                    <span class="currency">R$</span><span class="amount" id="price-siao">100</span>
-                    <span class="period" id="period-siao">por mês · cobrado mensalmente</span>
-                    <span class="annual-note" id="annual-siao" style="display:none;">equivale a R$ 83/mês · cobrado R$ 1.000/ano</span>
-                </div>
-                <hr class="plan-divider">
-                <ul class="plan-features">
-                    <li><span class="feat-icon yes"><i class="fa-solid fa-check"></i></span> App Web Instalável (PWA)</li>
-                    <li><span class="feat-icon yes"><i class="fa-solid fa-check"></i></span> App do Membro</li>
-                    <li><span class="feat-icon yes"><i class="fa-solid fa-check"></i></span> Até 500 cadastros</li>
-                    <li><span class="feat-icon yes"><i class="fa-solid fa-check"></i></span> Até 10 congregações</li>
-                    <li><span class="feat-icon yes"><i class="fa-solid fa-check"></i></span> EBD Dominical</li>
-                    <li><span class="feat-icon yes"><i class="fa-solid fa-check"></i></span> Credencial de Membro</li>
-                    <li><span class="feat-icon yes"><i class="fa-solid fa-check"></i></span> Grupos / Células</li>
-                    <li><span class="feat-icon yes"><i class="fa-solid fa-check"></i></span> Financeiro completo</li>
-                    <li><span class="feat-icon yes"><i class="fa-solid fa-check"></i></span> Relatórios completos</li>
-                    <li><span class="feat-icon yes"><i class="fa-solid fa-check"></i></span> Suporte via Telefone</li>
-                    <li><span class="feat-icon yes"><i class="fa-solid fa-check"></i></span> Consultoria Contábil</li>
-                </ul>
-                <a href="criar_conta.html" class="plan-btn ghost">Assinar Sião</a>
                 <p class="trial-note">✦ 7 dias de teste gratuito</p>
             </div>
 
@@ -419,6 +357,8 @@
         const btnAnual  = document.getElementById('btnAnual');
         const slider    = document.getElementById('toggleSlider');
 
+        let planosData = [];
+
         function setBilling(mode) {
             billing = mode;
             if (mode === 'mensal') {
@@ -426,36 +366,104 @@
                 btnAnual.classList.remove('active');
                 slider.style.left = '6px';
                 slider.style.width = btnMensal.offsetWidth + 'px';
-                setPrice('hebrom', '50', false);
-                setPrice('betel',  '80', false);
-                setPrice('siao',  '100', false);
             } else {
                 btnAnual.classList.add('active');
                 btnMensal.classList.remove('active');
                 slider.style.left = (btnMensal.offsetWidth + 6) + 'px';
                 slider.style.width = btnAnual.offsetWidth + 'px';
-                setPrice('hebrom', '42', true);
-                setPrice('betel',  '67', true);
-                setPrice('siao',   '83', true);
+            }
+            // Atualiza preços exibidos
+            planosData.forEach(p => {
+                const amtEl = document.getElementById('price-' + p.slug);
+                const perEl = document.getElementById('period-' + p.slug);
+                const annEl = document.getElementById('annual-' + p.slug);
+                if (!amtEl) return;
+                if (mode === 'anual' && p.preco_anual > 0) {
+                    const mensal = Math.round(p.preco_anual / 12);
+                    amtEl.textContent = mensal;
+                    if (perEl) perEl.style.display = 'none';
+                    if (annEl) annEl.style.display = 'block';
+                } else {
+                    amtEl.textContent = p.preco_mensal;
+                    if (perEl) perEl.style.display = 'block';
+                    if (annEl) annEl.style.display = 'none';
+                }
+            });
+        }
+
+        const PLAN_ICONS = ['⛰️','🏛️','👑','🌟','💎','🔑'];
+        const PLAN_TAGS  = ['Básico','Recomendado','Premium','Avançado','Enterprise','Especial'];
+        const PLAN_FEATURED_IDX = 1; // segundo plano com destaque por padrão
+
+        async function loadPlanos() {
+            try {
+                const resp = await fetch('/api/pagamentos/planos');
+                const planos = await resp.json();
+                planosData = planos;
+                renderGrid(planos);
+            } catch (e) {
+                document.getElementById('pricingGrid').innerHTML =
+                    '<div style="grid-column:1/-1;text-align:center;color:#ef4444;padding:40px;">Erro ao carregar planos. Tente novamente.</div>';
             }
         }
 
-        function setPrice(plan, value, isAnnual) {
-            document.getElementById('price-' + plan).textContent = value;
-            document.getElementById('period-' + plan).style.display  = isAnnual ? 'none' : 'block';
-            document.getElementById('annual-' + plan).style.display  = isAnnual ? 'block' : 'none';
-        }
+        function renderGrid(planos) {
+            const grid = document.getElementById('pricingGrid');
+            if (!planos.length) {
+                grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:#64748b;padding:40px;">Nenhum plano disponível.</div>';
+                return;
+            }
 
-        // Inicializa slider na posição correta
-        window.addEventListener('DOMContentLoaded', () => {
-            slider.style.width = btnMensal.offsetWidth + 'px';
-        });
+            // Ajusta colunas conforme quantidade
+            grid.style.gridTemplateColumns = planos.length <= 3
+                ? `repeat(${planos.length}, 1fr)`
+                : 'repeat(4, 1fr)';
+
+            // Índice do plano em destaque: preferir o do meio ou o segundo
+            const featIdx = planos.length > 1 ? Math.min(PLAN_FEATURED_IDX, planos.length - 1) : 0;
+
+            grid.innerHTML = planos.map((p, i) => {
+                const isFeat = (i === featIdx);
+                const features = (() => { try { return JSON.parse(p.features_json || '[]'); } catch(_){ return []; } })();
+                const mensal = Math.round(p.preco_mensal || 0);
+                const anualTotal = Math.round(p.preco_anual || 0);
+                const anualMensal = anualTotal > 0 ? Math.round(anualTotal / 12) : mensal;
+                const isFree = mensal === 0;
+
+                const featuresHtml = features.map(f =>
+                    `<li><span class="feat-icon yes"><i class="fa-solid fa-check"></i></span> ${f}</li>`
+                ).join('');
+
+                return `
+                <div class="plan-card${isFeat ? ' featured' : ''}" style="animation-delay:${i * 0.08}s">
+                    ${isFeat ? '<div class="popular-badge">✦ Mais Popular</div>' : ''}
+                    <div class="plan-icon"${isFeat ? ' style="margin-top:12px;"' : ''}>${PLAN_ICONS[i % PLAN_ICONS.length]}</div>
+                    <div class="plan-name-tag">${PLAN_TAGS[i % PLAN_TAGS.length]}</div>
+                    <div class="plan-name">${p.nome}</div>
+                    <div class="plan-subtitle">${p.subtitulo || ''}</div>
+                    ${p.versiculo ? `<p class="plan-verse">${p.versiculo}</p>` : ''}
+                    <div class="plan-price-block">
+                        <span class="currency">R$</span><span class="amount${isFree ? ' free' : ''}" id="price-${p.slug}">${mensal}</span>
+                        <span class="period" id="period-${p.slug}">por mês · cobrado mensalmente</span>
+                        ${anualTotal > 0 ? `<span class="annual-note" id="annual-${p.slug}" style="display:none;">equivale a R$ ${anualMensal}/mês · cobrado R$ ${anualTotal}/ano</span>` : ''}
+                    </div>
+                    <hr class="plan-divider">
+                    <ul class="plan-features">${featuresHtml}</ul>
+                    <a href="criar_conta.html?plano=${p.slug}" class="plan-btn ${isFeat ? 'primary' : 'ghost'}">${isFree ? 'Começar Grátis' : 'Assinar ' + p.nome}</a>
+                    <p class="trial-note">${isFree ? '✦ 1 mês de teste grátis' : '✦ 7 dias de teste gratuito'}</p>
+                </div>`;
+            }).join('');
+
+            // Reinicializa slider
+            setTimeout(() => {
+                slider.style.width = btnMensal.offsetWidth + 'px';
+            }, 50);
+        }
 
         // ── FAQ accordion ──
         function toggleFaq(btn) {
             const answer = btn.nextElementSibling;
             const isOpen = btn.classList.contains('open');
-            // Fecha todos
             document.querySelectorAll('.faq-question.open').forEach(q => {
                 q.classList.remove('open');
                 q.nextElementSibling.style.maxHeight = null;
@@ -465,6 +473,11 @@
                 answer.style.maxHeight = answer.scrollHeight + 'px';
             }
         }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            slider.style.width = btnMensal.offsetWidth + 'px';
+            loadPlanos();
+        });
     </script>
 </body>
 </html>
