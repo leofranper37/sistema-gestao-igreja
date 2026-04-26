@@ -1212,33 +1212,44 @@
                     byId('pixQrImg').src = 'data:image/png;base64,' + data.qrCodeBase64;
                     byId('pixQrImg').style.display = 'inline-block';
                     byId('pixPlaceholder').style.display = 'none';
+                } else if (data.qrCodeImageUrl) {
+                    byId('pixQrImg').src = data.qrCodeImageUrl;
+                    byId('pixQrImg').style.display = 'inline-block';
+                    byId('pixPlaceholder').style.display = 'none';
                 }
 
                 byId('pixCode').textContent = data.qrCode || '';
                 byId('pixCodeWrap').style.display = 'flex';
-                byId('pixStatus').textContent = 'Aguardando pagamento PIX...';
+                byId('pixStatus').classList.remove('paid');
+
+                const manualPix = data.provider === 'manual_pix_key';
+                byId('pixStatus').textContent = manualPix
+                    ? (data.statusMessage || 'PIX gerado com sua chave. Confirmação manual do pagamento.')
+                    : 'Aguardando pagamento PIX...';
 
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fa-brands fa-pix"></i> Gerar novo PIX';
 
                 clearInterval(pixPollInterval);
-                pixPollInterval = setInterval(async function() {
-                    try {
-                        const statusData = await apiJson('/api/pagamentos/status', {
-                            headers: { 'Authorization': `Bearer ${token}` }
-                        });
-                        if (statusData.status === 'ativa') {
-                            clearInterval(pixPollInterval);
-                            byId('pixStatus').textContent = 'Pagamento confirmado! Redirecionando...';
-                            byId('pixStatus').classList.add('paid');
-                            setTimeout(function() {
-                                window.location.href = 'dashboard.html';
-                            }, 1600);
+                if (!manualPix) {
+                    pixPollInterval = setInterval(async function() {
+                        try {
+                            const statusData = await apiJson('/api/pagamentos/status', {
+                                headers: { 'Authorization': `Bearer ${token}` }
+                            });
+                            if (statusData.status === 'ativa') {
+                                clearInterval(pixPollInterval);
+                                byId('pixStatus').textContent = 'Pagamento confirmado! Redirecionando...';
+                                byId('pixStatus').classList.add('paid');
+                                setTimeout(function() {
+                                    window.location.href = 'dashboard.html';
+                                }, 1600);
+                            }
+                        } catch (_) {
+                            // Mantém polling silencioso.
                         }
-                    } catch (_) {
-                        // Mantém polling silencioso.
-                    }
-                }, 5000);
+                    }, 5000);
+                }
             } catch (error) {
                 err.textContent = error.message;
                 err.classList.add('visible');

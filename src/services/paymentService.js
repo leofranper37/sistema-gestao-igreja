@@ -40,6 +40,58 @@ function gerarReference() {
     return `LDFP-${Date.now()}-${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
 }
 
+function normalizePixText(value, maxLen) {
+    const normalized = String(value || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^A-Za-z0-9 .\-]/g, '')
+        .toUpperCase()
+        .trim();
+    return maxLen ? normalized.slice(0, maxLen) : normalized;
+}
+
+function pixField(id, value) {
+    const str = String(value || '');
+    return `${id}${String(str.length).padStart(2, '0')}${str}`;
+}
+
+function crc16(payload) {
+    let crc = 0xffff;
+    for (let i = 0; i < payload.length; i += 1) {
+        crc ^= payload.charCodeAt(i) << 8;
+        for (let j = 0; j < 8; j += 1) {
+            if (crc & 0x8000) {
+                crc = (crc << 1) ^ 0x1021;
+            } else {
+                crc <<= 1;
+            }
+            crc &= 0xffff;
+        }
+    }
+    return crc.toString(16).toUpperCase().padStart(4, '0');
+}
+
+function buildManualPixPayload({ key, name, city, amount, txid, description }) {
+    const gui = pixField('00', 'br.gov.bcb.pix');
+    const pixKey = pixField('01', key);
+    const desc = description ? pixField('02', normalizePixText(description, 30)) : '';
+    const merchantInfo = pixField('26', `${gui}${pixKey}${desc}`);
+    const payloadSemCrc = [
+        pixField('00', '01'),
+        merchantInfo,
+        pixField('52', '0000'),
+        pixField('53', '986'),
+        pixField('54', Number(amount).toFixed(2)),
+        pixField('58', 'BR'),
+        pixField('59', normalizePixText(name, 25) || 'RECEBEDOR'),
+        pixField('60', normalizePixText(city, 15) || 'SAO PAULO'),
+        pixField('62', pixField('05', normalizePixText(txid, 25) || 'LDFP')),
+        '6304',
+    ].join('');
+
+    return `${payloadSemCrc}${crc16(payloadSemCrc)}`;
+}
+
 // ── PIX via Mercado Pago ─────────────────────────────────────────────────────
 async function gerarPix({ igrejaId, nomeIgreja, emailPagador, planoSlug, ciclo }) {
     const plano = await getPlano(planoSlug);
@@ -51,6 +103,46 @@ async function gerarPix({ igrejaId, nomeIgreja, emailPagador, planoSlug, ciclo }
     const referenceCode = gerarReference();
     const descricao = `LDFP — ${plano.nome} (${ciclo === 'anual' ? 'Anual' : 'Mensal'})`;
     const diasDuracao = ciclo === 'anual' ? 365 : 30;
+
+    const mpToken = process.env.MP_ACCESS_TOKEN || process.env.MERCADOPAGO_ACCESS_TOKEN;
+    const hasMpToken = !!mpToken && !mpToken.startsWith('APP_USR-COLE');
+
+    if (!hasMpToken) {
+        const manualPixKey = process.env.PIX_KEY || process.env.PIX_CHAVE || process.env.MP_PIX_KEY;
+        if (!manualPixKey) {
+            throw new Error('Token do Mercado Pago não configurado e PIX_KEY também não definido. Configure MP_ACCESS_TOKEN ou PIX_KEY no deploy.');
+        }
+
+        const payloadPix = buildManualPixPayload({
+            key: manualPixKey,
+            name: process.env.PIX_RECEIVER_NAME || 'LDFP SISTEMA',
+            city: process.env.PIX_RECEIVER_CITY || 'SAO PAULO',
+            amount: valor,
+            txid: referenceCode,
+            description: `${plano.nome} ${ciclo}`,
+        });
+
+        await pool.query(
+            `INSERT INTO payment_links
+                (igreja_id, reference_code, descricao, valor, payment_method, status,
+                 mp_payment_id, plano_destino, plano_duracao_dias, created_at)
+             VALUES (?, ?, ?, ?, 'pix', 'pendente', ?, ?, ?, NOW())`,
+            [igrejaId, referenceCode, descricao, valor, null, planoSlug, diasDuracao]
+        );
+
+        return {
+            referenceCode,
+            valor,
+            qrCode: payloadPix,
+            qrCodeBase64: null,
+            qrCodeImageUrl: `https://api.qrserver.com/v1/create-qr-code/?size=320x320&data=${encodeURIComponent(payloadPix)}`,
+            expiresAt: null,
+            descricao,
+            provider: 'manual_pix_key',
+            statusMessage: 'PIX gerado com sua chave. A confirmação do pagamento será manual.',
+        };
+    }
+
     const expiresAt = new Date(Date.now() + 30 * 60 * 1000); // 30 min de validade do QR
 
     const client = getMpClient();
