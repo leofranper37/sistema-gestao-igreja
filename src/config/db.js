@@ -540,7 +540,7 @@ async function initializeDatabase() {
             slug VARCHAR(50) NOT NULL UNIQUE,
             nome VARCHAR(120) NOT NULL,
             subtitulo VARCHAR(255),
-            versículo TEXT,
+            versiculo TEXT,
             preco_mensal DECIMAL(10,2) NOT NULL DEFAULT 0,
             preco_anual DECIMAL(10,2) NOT NULL DEFAULT 0,
             max_cadastros INTEGER NOT NULL DEFAULT 30,
@@ -558,6 +558,8 @@ async function initializeDatabase() {
             ON CONFLICT (slug) DO NOTHING`);
         await activePgPool.query(`UPDATE saas_planos SET features_json='["App Web (PWA)","Até 150 cadastros","1 congregação","Suporte via e-mail"]' WHERE slug='hebrom'`);
         await activePgPool.query(`UPDATE saas_planos SET features_json='["App Web (PWA)","App do Membro","Até 300 cadastros","Até 5 congregações","Credencial de Membro","Grupos/Células","Suporte via e-mail","Suporte via WhatsApp"]' WHERE slug='betel'`);
+        try { await activePgPool.query(`ALTER TABLE saas_planos ADD COLUMN versiculo TEXT`); } catch(_){ }
+        try { await activePgPool.query(`UPDATE saas_planos SET versiculo = COALESCE(versiculo, "versículo")`); } catch(_){ }
         try { await activePgPool.query(`ALTER TABLE igrejas ADD COLUMN responsavel VARCHAR(255)`); } catch(_){}
         try { await activePgPool.query(`ALTER TABLE igrejas ADD COLUMN email_admin VARCHAR(255)`); } catch(_){}
         try { await activePgPool.query(`ALTER TABLE igrejas ADD COLUMN telefone VARCHAR(60)`); } catch(_){}
@@ -734,7 +736,7 @@ async function initializeDatabase() {
             slug VARCHAR(50) NOT NULL UNIQUE,
             nome VARCHAR(120) NOT NULL,
             subtitulo VARCHAR(255),
-            versículo TEXT,
+            versiculo TEXT,
             preco_mensal DECIMAL(10,2) NOT NULL DEFAULT 0,
             preco_anual DECIMAL(10,2) NOT NULL DEFAULT 0,
             max_cadastros INT NOT NULL DEFAULT 30,
@@ -751,6 +753,8 @@ async function initializeDatabase() {
             ('siao','Sião','Igrejas consolidadas',100,1000,500,10,1,'["App Web (PWA)","App do Membro","Até 500 cadastros","Até 10 congregações","EBD Dominical","Credencial de Membro","Grupos/Células","Financeiro completo","Relatórios completos","Suporte via Telefone","Consultoria Contábil"]')`);
         await activeMysqlPool.query(`UPDATE saas_planos SET features_json='["App Web (PWA)","Até 150 cadastros","1 congregação","Suporte via e-mail"]' WHERE slug='hebrom'`);
         await activeMysqlPool.query(`UPDATE saas_planos SET features_json='["App Web (PWA)","App do Membro","Até 300 cadastros","Até 5 congregações","Credencial de Membro","Grupos/Células","Suporte via e-mail","Suporte via WhatsApp"]' WHERE slug='betel'`);
+        try { await activeMysqlPool.query(`ALTER TABLE saas_planos ADD COLUMN versiculo TEXT`); } catch(_){ }
+        try { await activeMysqlPool.query(`UPDATE saas_planos SET versiculo = COALESCE(versiculo, "versículo")`); } catch(_){ }
         try { await activeMysqlPool.query(`ALTER TABLE igrejas ADD COLUMN responsavel VARCHAR(255)`); } catch(_){}
         try { await activeMysqlPool.query(`ALTER TABLE igrejas ADD COLUMN email_admin VARCHAR(255)`); } catch(_){}
         try { await activeMysqlPool.query(`ALTER TABLE igrejas ADD COLUMN telefone VARCHAR(60)`); } catch(_){}

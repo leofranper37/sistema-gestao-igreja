@@ -108,6 +108,15 @@
         return /\/assinar\.html|\/conta_bloqueada\.html|\/pagamentos|\/api\/pagamentos/i.test(resourceUrl);
     }
 
+    function shouldRedirectUpgrade(message) {
+        const text = String(message || '').toLowerCase();
+        return text.includes('módulo não está ativo no contrato')
+            || text.includes('modulo não está ativo no contrato')
+            || text.includes('módulo contratado')
+            || text.includes('modulo contratado')
+            || text.includes('upgrade');
+    }
+
     window.fetch = async function (input, init = {}) {
         const requestUrl = typeof input === 'string' ? input : input?.url || '';
         const nextInit = { ...init };
@@ -125,6 +134,19 @@
         if (response.status === 401 && !isAuthRoute(requestUrl)) {
             clearAuthSession();
             redirectToLogin();
+        }
+
+        if (response.status === 403 && !/\/meu_plano\.html$/i.test(window.location.pathname)) {
+            try {
+                const payload = await response.clone().json().catch(() => ({}));
+                const errMessage = payload?.error || payload?.message || '';
+                if (shouldRedirectUpgrade(errMessage) && !isPaymentRoute(requestUrl)) {
+                    const from = `${window.location.pathname.split('/').pop() || ''}${window.location.search || ''}`;
+                    window.location.href = `meu_plano.html?upgrade=1&from=${encodeURIComponent(from)}`;
+                }
+            } catch (_) {
+                // Falha silenciosa para manter compatibilidade com páginas legadas.
+            }
         }
 
         // 402 = assinatura expirada/cancelada

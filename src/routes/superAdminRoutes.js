@@ -9,6 +9,7 @@ const {
     updateSaasIgrejaContrato,
     listPlanos,
     getPlano,
+    createPlano,
     updatePlano,
     listSaasAssinaturas,
     markSaasAssinaturaPaga,
@@ -35,6 +36,7 @@ router.patch('/api/saas/igrejas/:id/contrato', ...isSuperAdmin, updateSaasIgreja
 // Planos
 router.get('/api/saas/planos', ...isSuperAdmin, listPlanos);
 router.get('/api/saas/planos/:slug', ...isSuperAdmin, getPlano);
+router.post('/api/saas/planos', ...isSuperAdmin, createPlano);
 router.put('/api/saas/planos/:slug', ...isSuperAdmin, updatePlano);
 
 // Assinaturas & Faturas

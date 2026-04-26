@@ -22,6 +22,22 @@ function normDate(v) {
     return /^\d{4}-\d{2}-\d{2}$/.test(s) ? s + 'T00:00:00.000Z' : s;
 }
 
+let saasPlanSchemaEnsured = false;
+
+async function ensureSaasPlanSchema() {
+    if (saasPlanSchemaEnsured) {
+        return;
+    }
+
+    // Compatibilidade entre bancos legados que criaram a coluna com acento (versículo)
+    // e o código atual que usa versiculo sem acento.
+    try { await pool.query('ALTER TABLE saas_planos ADD COLUMN versiculo TEXT'); } catch (_) {}
+    try { await pool.query('UPDATE saas_planos SET versiculo = COALESCE(versiculo, "versículo")'); } catch (_) {}
+    try { await pool.query('UPDATE saas_planos SET versiculo = COALESCE(versiculo, `versículo`)'); } catch (_) {}
+
+    saasPlanSchemaEnsured = true;
+}
+
 function ensureResumeStateDir() {
     if (!fs.existsSync(RESUME_STATE_DIR)) {
         fs.mkdirSync(RESUME_STATE_DIR, { recursive: true });
@@ -305,6 +321,7 @@ async function updateSaasIgrejaContrato(req, res) {
 
 async function listPlanos(req, res) {
     try {
+        await ensureSaasPlanSchema();
         const [rows] = await pool.query(`SELECT * FROM saas_planos ORDER BY preco_mensal ASC`);
         const result = rows.map(r => ({ ...r, features: safeJson(r.features_json, []) }));
         res.json(result);
@@ -316,6 +333,7 @@ async function listPlanos(req, res) {
 async function getPlano(req, res) {
     const slug = req.params.slug;
     try {
+        await ensureSaasPlanSchema();
         const [rows] = await pool.query(`SELECT * FROM saas_planos WHERE slug = ? LIMIT 1`, [slug]);
         if (!rows.length) return res.status(404).json({ error: 'Plano não encontrado.' });
         const r = rows[0];
@@ -353,12 +371,77 @@ async function updatePlano(req, res) {
     if (!fields.length) return res.status(400).json({ error: 'Nenhum campo para atualizar.' });
 
     try {
+        await ensureSaasPlanSchema();
         vals.push(slug);
         await pool.query(`UPDATE saas_planos SET ${fields.join(', ')} WHERE slug = ?`, vals);
         const [updated] = await pool.query(`SELECT * FROM saas_planos WHERE slug = ? LIMIT 1`, [slug]);
         if (!updated.length) return res.status(404).json({ error: 'Plano não encontrado.' });
         const r = updated[0];
         res.json({ ...r, features: safeJson(r.features_json, []) });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}
+
+async function createPlano(req, res) {
+    const {
+        slug,
+        nome,
+        subtitulo,
+        versiculo,
+        preco_mensal,
+        preco_anual,
+        max_cadastros,
+        max_congregacoes,
+        modulo_app_membro,
+        features,
+        ativo
+    } = req.body || {};
+
+    const slugNorm = String(slug || '').trim().toLowerCase().replace(/\s+/g, '-');
+    const nomeNorm = String(nome || '').trim();
+
+    if (!slugNorm || !/^[a-z0-9-]{2,50}$/.test(slugNorm)) {
+        return res.status(400).json({ error: 'Slug inválido. Use letras minúsculas, números e hífen.' });
+    }
+
+    if (!nomeNorm) {
+        return res.status(400).json({ error: 'Nome do plano é obrigatório.' });
+    }
+
+    try {
+        await ensureSaasPlanSchema();
+
+        const [existing] = await pool.query(`SELECT slug FROM saas_planos WHERE slug = ? LIMIT 1`, [slugNorm]);
+        if (existing.length) {
+            return res.status(409).json({ error: 'Já existe um plano com este slug.' });
+        }
+
+        await pool.query(
+            `INSERT INTO saas_planos (
+                slug, nome, subtitulo, versiculo,
+                preco_mensal, preco_anual,
+                max_cadastros, max_congregacoes,
+                modulo_app_membro, features_json, ativo
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [
+                slugNorm,
+                nomeNorm,
+                subtitulo || null,
+                versiculo || null,
+                fmt(preco_mensal),
+                fmt(preco_anual),
+                Number(max_cadastros) || 0,
+                Number(max_congregacoes) || 0,
+                modulo_app_membro ? 1 : 0,
+                JSON.stringify(Array.isArray(features) ? features : []),
+                ativo === undefined ? 1 : (ativo ? 1 : 0)
+            ]
+        );
+
+        const [rows] = await pool.query(`SELECT * FROM saas_planos WHERE slug = ? LIMIT 1`, [slugNorm]);
+        const created = rows[0] || null;
+        res.status(201).json({ ...(created || {}), features: safeJson(created?.features_json, []) });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -494,6 +577,7 @@ module.exports = {
     updateSaasIgrejaContrato,
     listPlanos,
     getPlano,
+    createPlano,
     updatePlano,
     listSaasAssinaturas,
     markSaasAssinaturaPaga,

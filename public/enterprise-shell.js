@@ -24,6 +24,51 @@
         visitante: 'visitante'
     };
 
+    const PLAN_CAPABILITIES = {
+        eden: {
+            contabilidade: false,
+            graficos: false,
+            relatorios: false,
+            grupos: true,
+            ebd: true
+        },
+        hebrom: {
+            contabilidade: false,
+            graficos: false,
+            relatorios: false,
+            grupos: false,
+            ebd: false
+        },
+        betel: {
+            contabilidade: false,
+            graficos: false,
+            relatorios: false,
+            grupos: true,
+            ebd: false
+        },
+        siao: {
+            contabilidade: true,
+            graficos: true,
+            relatorios: true,
+            grupos: true,
+            ebd: true
+        },
+        'teste-7-dias': {
+            contabilidade: false,
+            graficos: false,
+            relatorios: false,
+            grupos: false,
+            ebd: false
+        },
+        gratis: {
+            contabilidade: false,
+            graficos: false,
+            relatorios: false,
+            grupos: false,
+            ebd: false
+        }
+    };
+
     function getAuthUser() {
         if (typeof window.getStoredAuth !== 'function') {
             return null;
@@ -70,29 +115,136 @@
             return true;
         }
 
-        if (!getVisibleFeatures(user).includes(feature)) {
-            return false;
-        }
+        return getVisibleFeatures(user).includes(feature);
+    }
 
-        const contractFeatureModule = {
-            agenda: 'agendaEventos',
-            oracoes: 'pedidosOracao',
-            midia: 'appMidia',
-            app_midia: 'appMidia',
-            telao: 'appMidia'
-        };
+    function getPlanSlug(user) {
+        return String(user?.plano || '').trim().toLowerCase() || 'gratis';
+    }
 
-        const requiredModule = contractFeatureModule[feature];
-        if (!requiredModule) {
+    function getPlanCapability(user, capability) {
+        const slug = getPlanSlug(user);
+        const caps = PLAN_CAPABILITIES[slug] || PLAN_CAPABILITIES.gratis;
+        return !!caps[capability];
+    }
+
+    function getModuleAccess(user, moduleKey) {
+        if (user?.role === 'super-admin') {
             return true;
         }
 
-        // Compatibilidade retroativa: tokens antigos sem "modules" não perdem acesso no menu.
-        if (!user?.modules || typeof user.modules !== 'object') {
-            return true;
+        const modules = user?.modules;
+        if (modules && typeof modules === 'object' && moduleKey in modules) {
+            return !!modules[moduleKey];
         }
 
-        return !!user.modules[requiredModule];
+        // Se não vier no token/session, mantém compatibilidade sem bloquear por engano.
+        return true;
+    }
+
+    const RESTRICTED_PATH_RULES = [
+        { regex: /^app_membro\.html$/, label: 'App do Membro', moduleKey: 'appMembro' },
+        { regex: /^app_midia\.html$/, label: 'App Mídia', moduleKey: 'appMidia' },
+        { regex: /^agenda\.html$/, label: 'Agenda e Eventos', moduleKey: 'agendaEventos' },
+        { regex: /^escalas\.html$/, label: 'Escalas de Culto', moduleKey: 'escalaCulto' },
+        { regex: /^oracoes\.html$/, label: 'Pedidos de Oração', moduleKey: 'pedidosOracao' },
+        { regex: /^grupos\.html$|^grupos_categorias\.html$|^grupos_reunioes\.html$/, label: 'Grupos e Células', capability: 'grupos' },
+        { regex: /^ebd_.*\.html$/, label: 'EBD', capability: 'ebd' },
+        { regex: /^plano_contas\.html$|^balancete_abertura\.html$|^lancamentos_contabeis\.html$|^encerramento_exercicio\.html$|^relatorios_contabilidade\.html$/, label: 'Contabilidade', capability: 'contabilidade' },
+        { regex: /^graficos_secretaria\.html$|^graficos_tesouraria\.html$/, label: 'Gráficos Avançados', capability: 'graficos' },
+        { regex: /^relatorios_secretaria\.html$|^relatorios_tesouraria\.html$/, label: 'Relatórios Avançados', capability: 'relatorios' }
+    ];
+
+    function getRestrictionForPath(path, user) {
+        const normalized = normalizePath(path).split('?')[0];
+        const rule = RESTRICTED_PATH_RULES.find((item) => item.regex.test(normalized));
+        if (!rule) {
+            return null;
+        }
+
+        if (rule.moduleKey && !getModuleAccess(user, rule.moduleKey)) {
+            return {
+                feature: rule.label,
+                reason: 'module',
+                from: normalized
+            };
+        }
+
+        if (rule.capability && !getPlanCapability(user, rule.capability)) {
+            return {
+                feature: rule.label,
+                reason: 'plan',
+                from: normalized
+            };
+        }
+
+        return null;
+    }
+
+    function showUpgradeNotice(restriction) {
+        if (!restriction) {
+            return;
+        }
+
+        const existing = document.getElementById('ldfpUpgradePrompt');
+        if (existing) {
+            existing.remove();
+        }
+
+        const wrapper = document.createElement('div');
+        wrapper.id = 'ldfpUpgradePrompt';
+        wrapper.style.cssText = 'position:fixed;inset:0;background:rgba(2,6,23,.62);z-index:2600;display:flex;align-items:center;justify-content:center;padding:16px;';
+
+        const card = document.createElement('div');
+        card.style.cssText = 'width:min(540px,100%);background:#fff;border-radius:14px;border:1px solid #dbe3ef;box-shadow:0 22px 56px rgba(2,6,23,.35);padding:18px;';
+        card.innerHTML = `
+            <h3 style="margin:0 0 8px;color:#0f172a;font-size:18px;"><i class="fa-solid fa-lock"></i> Recurso não contratado</h3>
+            <p style="margin:0 0 12px;color:#475569;font-size:13px;line-height:1.6;">
+                O recurso <strong>${restriction.feature}</strong> não está disponível no plano atual da sua igreja.
+                Você pode comparar os planos e fazer upgrade agora.
+            </p>
+            <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;">
+                <button id="ldfpUpgradeCancel" style="border:1px solid #dbe3ef;background:#fff;color:#334155;border-radius:8px;padding:9px 12px;font-weight:700;cursor:pointer;">Agora não</button>
+                <button id="ldfpUpgradeGo" style="border:0;background:linear-gradient(135deg,#22d3ee,#0ea5e9);color:#082f49;border-radius:8px;padding:9px 12px;font-weight:800;cursor:pointer;">Alterar plano</button>
+            </div>
+        `;
+
+        wrapper.appendChild(card);
+        document.body.appendChild(wrapper);
+
+        const toUpgradeUrl = `meu_plano.html?upgrade=1&feature=${encodeURIComponent(restriction.feature)}&from=${encodeURIComponent(restriction.from || '')}`;
+
+        card.querySelector('#ldfpUpgradeCancel').addEventListener('click', () => wrapper.remove());
+        card.querySelector('#ldfpUpgradeGo').addEventListener('click', () => {
+            window.location.href = toUpgradeUrl;
+        });
+    }
+
+    function bindPlanUpgradeGuards(user, activePath) {
+        const sidebar = document.getElementById('enterpriseSidebar');
+        if (!sidebar) {
+            return;
+        }
+
+        sidebar.querySelectorAll('a[href]').forEach((anchor) => {
+            const href = anchor.getAttribute('href') || '';
+            const restriction = getRestrictionForPath(href, user);
+            if (!restriction) {
+                return;
+            }
+
+            anchor.classList.add('locked-by-plan');
+            anchor.title = `${restriction.feature} não disponível no seu plano atual.`;
+            anchor.addEventListener('click', (event) => {
+                event.preventDefault();
+                showUpgradeNotice(restriction);
+            });
+        });
+
+        const currentRestriction = getRestrictionForPath(activePath, user);
+        if (currentRestriction && !/^meu_plano\.html$/i.test(normalizePath(activePath))) {
+            showUpgradeNotice(currentRestriction);
+        }
     }
 
     function filterLinksByRole(links, user) {
@@ -555,6 +707,7 @@
         main.insertAdjacentHTML('afterbegin', renderHeader(config));
         applyUserLabels();
         bindMenuToggle();
+        bindPlanUpgradeGuards(getAuthUser(), activePath);
     }
 
     if (document.readyState === 'loading') {

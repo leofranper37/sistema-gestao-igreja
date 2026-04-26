@@ -1356,9 +1356,29 @@
             });
         }
 
+        function handleUpgradeEntry() {
+            const qs = new URLSearchParams(window.location.search || '');
+            if (qs.get('upgrade') !== '1') {
+                return;
+            }
+
+            const feature = qs.get('feature') || 'este recurso';
+            const from = qs.get('from') || '';
+            const notice = byId('upgradeNotice');
+            notice.innerHTML = `
+                <strong>Upgrade recomendado:</strong> O acesso a <strong>${escapeHtml(feature)}</strong> não está liberado no seu plano atual.
+                Compare os planos e selecione o ideal para sua igreja.${from ? ` <br><small>Origem: ${escapeHtml(from)}</small>` : ''}
+            `;
+
+            renderPlanGrid();
+            openModal('modalPlanos');
+        }
+
         bootstrapActions();
         loadData().catch(function() {
             byId('heroDesc').textContent = 'Não foi possível carregar os dados da assinatura agora.';
+        }).finally(function() {
+            handleUpgradeEntry();
         });
     })();
     </script>

@@ -93,6 +93,7 @@ body{display:flex;background:var(--bg);color:var(--text);height:100vh;overflow:h
   <header class="topbar">
     <h1><i class="fa-solid fa-tags" style="color:var(--blue);margin-right:8px"></i>Gestão de Planos</h1>
     <div class="topbar-right">
+      <button class="btn btn-green" onclick="openCreateModal()"><i class="fa-solid fa-plus"></i> Novo plano</button>
       <button class="btn btn-outline" onclick="loadPlanos()"><i class="fa-solid fa-rotate-right"></i> Atualizar</button>
     </div>
   </header>
@@ -106,6 +107,55 @@ body{display:flex;background:var(--bg);color:var(--text);height:100vh;overflow:h
     </div>
   </div>
 </main>
+
+<div class="modal-overlay" id="createPlanModal">
+  <div class="modal">
+    <h2><i class="fa-solid fa-layer-group"></i> Criar novo plano</h2>
+    <div class="form-row">
+      <label>Slug (único)</label>
+      <input id="create-slug" type="text" placeholder="ex: monte-santo">
+    </div>
+    <div class="form-row">
+      <label>Nome do plano</label>
+      <input id="create-nome" type="text" placeholder="Nome exibido">
+    </div>
+    <div class="form-row">
+      <label>Subtítulo</label>
+      <input id="create-subtitulo" type="text" placeholder="Ex: Igrejas em expansão">
+    </div>
+    <div class="two-col">
+      <div class="form-row">
+        <label>Preço mensal (R$)</label>
+        <input id="create-preco-mensal" type="number" min="0" step="0.01" value="0">
+      </div>
+      <div class="form-row">
+        <label>Preço anual (R$)</label>
+        <input id="create-preco-anual" type="number" min="0" step="0.01" value="0">
+      </div>
+    </div>
+    <div class="two-col">
+      <div class="form-row">
+        <label>Máx. cadastros</label>
+        <input id="create-max-cad" type="number" min="0" value="30">
+      </div>
+      <div class="form-row">
+        <label>Máx. congregações</label>
+        <input id="create-max-cong" type="number" min="0" value="1">
+      </div>
+    </div>
+    <div class="form-row">
+      <label>App do Membro</label>
+      <select id="create-app-membro">
+        <option value="0">Não incluso</option>
+        <option value="1">Incluso</option>
+      </select>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeCreateModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="createPlano()"><i class="fa-solid fa-check"></i> Criar plano</button>
+    </div>
+  </div>
+</div>
 
 <div class="toast" id="toast"></div>
 
@@ -256,6 +306,62 @@ function toast(msg, type = 'success') {
   el.className = 'toast ' + type + ' show';
   setTimeout(() => { el.className = 'toast ' + type; }, 3000);
 }
+
+function openCreateModal() {
+  const modal = document.getElementById('createPlanModal');
+  if (modal) modal.classList.add('open');
+}
+
+function closeCreateModal() {
+  const modal = document.getElementById('createPlanModal');
+  if (modal) modal.classList.remove('open');
+}
+
+async function createPlano() {
+  const slug = v('create-slug').trim().toLowerCase().replace(/\s+/g, '-');
+  const nome = v('create-nome').trim();
+
+  if (!slug || !nome) {
+    toast('Preencha pelo menos slug e nome do plano.', 'error');
+    return;
+  }
+
+  const body = {
+    slug,
+    nome,
+    subtitulo: v('create-subtitulo').trim(),
+    preco_mensal: parseFloat(v('create-preco-mensal')) || 0,
+    preco_anual: parseFloat(v('create-preco-anual')) || 0,
+    max_cadastros: parseInt(v('create-max-cad')) || 0,
+    max_congregacoes: parseInt(v('create-max-cong')) || 0,
+    modulo_app_membro: v('create-app-membro') === '1',
+    features: [],
+    ativo: true
+  };
+
+  try {
+    const r = await fetch('/api/saas/planos', {
+      method: 'POST',
+      headers: headers(),
+      body: JSON.stringify(body)
+    });
+
+    const payload = await r.json().catch(() => ({}));
+    if (!r.ok) {
+      throw new Error(payload.error || payload.message || 'Falha ao criar plano.');
+    }
+
+    closeCreateModal();
+    toast('Plano criado com sucesso!', 'success');
+    await loadPlanos();
+  } catch (e) {
+    toast('Erro ao criar plano: ' + e.message, 'error');
+  }
+}
+
+document.getElementById('createPlanModal')?.addEventListener('click', (e) => {
+  if (e.target.id === 'createPlanModal') closeCreateModal();
+});
 
 // Auth guard
 (function() {
