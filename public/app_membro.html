@@ -712,9 +712,9 @@
         mode = mode || 'login';
         const el = document.getElementById('loginScreen');
         if (!el) return;
+        hideSplash();
         el.style.display = 'flex';
         document.getElementById('app').style.display = 'none';
-        document.getElementById('splash').classList.add('hidden');
         switchLoginMode(mode);
     }
 
@@ -1128,10 +1128,20 @@
         return `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`;
     }
 
-function forceOpenApp() {
+function hideSplash() {
   const sp = document.getElementById('splash');
-  if (sp) { sp.classList.add('hidden'); sp.addEventListener('transitionend', () => sp.remove(), { once: true }); }
-  // Se não há sessão, mostra a tela de login
+  if (!sp || sp.classList.contains('hidden')) return;
+  // Para o vídeo para liberar recursos
+  const vid = document.getElementById('splashVideo');
+  if (vid) { vid.pause(); vid.src = ''; }
+  sp.classList.add('hidden');
+  sp.addEventListener('transitionend', () => { try { sp.remove(); } catch(_){} }, { once: true });
+  // Fallback caso transitionend não dispare (ex: prefers-reduced-motion)
+  setTimeout(() => { try { sp.remove(); } catch(_){} }, 700);
+}
+
+function forceOpenApp() {
+  hideSplash();
   const sess = getMembroSession();
   if (!sess || !sess.token) {
     showLoginScreen('login');
@@ -1141,7 +1151,7 @@ function forceOpenApp() {
 }
 
 async function bootstrapApp() {
-  const hardTimeout = setTimeout(forceOpenApp, 1800);
+  const hardTimeout = setTimeout(forceOpenApp, 2500);
   try {
     await init();
   } catch (error) {
@@ -1149,6 +1159,7 @@ async function bootstrapApp() {
     forceOpenApp();
   } finally {
     clearTimeout(hardTimeout);
+    hideSplash();
   }
 }
 
