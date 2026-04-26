@@ -1,6 +1,7 @@
 const express = require('express');
 
 const { authorize, requireAuth } = require('../middlewares/auth');
+const { requireModuleEnabled } = require('../middlewares/entitlements');
 const {
     agendaEventoQuerySchema,
     agendaEventoSchema,
@@ -16,9 +17,9 @@ const {
 
 const router = express.Router();
 
-router.get('/agenda/eventos', requireAuth, authorize(['admin', 'secretaria']), validateQuery(agendaEventoQuerySchema), listEventos);
-router.post('/agenda/eventos', requireAuth, authorize(['admin', 'secretaria']), validateBody(agendaEventoSchema), createEvento);
-router.put('/agenda/eventos/:id', requireAuth, authorize(['admin', 'secretaria']), validateBody(agendaEventoSchema), updateEvento);
-router.delete('/agenda/eventos/:id', requireAuth, authorize(['admin', 'secretaria']), deleteEvento);
+router.get('/agenda/eventos', requireAuth, requireModuleEnabled('agendaEventos'), authorize(['admin', 'secretaria']), validateQuery(agendaEventoQuerySchema), listEventos);
+router.post('/agenda/eventos', requireAuth, requireModuleEnabled('agendaEventos'), authorize(['admin', 'secretaria']), validateBody(agendaEventoSchema), createEvento);
+router.put('/agenda/eventos/:id', requireAuth, requireModuleEnabled('agendaEventos'), authorize(['admin', 'secretaria']), validateBody(agendaEventoSchema), updateEvento);
+router.delete('/agenda/eventos/:id', requireAuth, requireModuleEnabled('agendaEventos'), authorize(['admin', 'secretaria']), deleteEvento);
 
 module.exports = router;

@@ -70,7 +70,29 @@
             return true;
         }
 
-        return getVisibleFeatures(user).includes(feature);
+        if (!getVisibleFeatures(user).includes(feature)) {
+            return false;
+        }
+
+        const contractFeatureModule = {
+            agenda: 'agendaEventos',
+            oracoes: 'pedidosOracao',
+            midia: 'appMidia',
+            app_midia: 'appMidia',
+            telao: 'appMidia'
+        };
+
+        const requiredModule = contractFeatureModule[feature];
+        if (!requiredModule) {
+            return true;
+        }
+
+        // Compatibilidade retroativa: tokens antigos sem "modules" não perdem acesso no menu.
+        if (!user?.modules || typeof user.modules !== 'object') {
+            return true;
+        }
+
+        return !!user.modules[requiredModule];
     }
 
     function filterLinksByRole(links, user) {

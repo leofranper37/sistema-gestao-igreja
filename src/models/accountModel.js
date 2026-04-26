@@ -2,7 +2,9 @@ const { pool } = require('../config/db');
 
 async function findChurchByName(name) {
     const [rows] = await pool.query(
-        `SELECT id, nome, plano, status_assinatura, trial_starts_at, trial_ends_at, max_cadastros, max_congregacoes
+        `SELECT id, nome, plano, status_assinatura, trial_starts_at, trial_ends_at, max_cadastros, max_congregacoes,
+                modulo_app_membro, modulo_app_midia, modulo_ebd,
+                modulo_agenda_eventos, modulo_escala_culto, modulo_pedidos_oracao, modulo_mural_oracao
          FROM igrejas
          WHERE nome = ?
          LIMIT 1`,
@@ -44,7 +46,9 @@ async function createUser(payload) {
 async function findUserByEmail(email) {
     const [rows] = await pool.query(
         `SELECT u.id, u.igreja, u.igreja_id, u.role, u.nome, u.email, u.password_hash,
-                i.plano, i.status_assinatura, i.trial_starts_at, i.trial_ends_at, i.max_cadastros, i.max_congregacoes
+                i.plano, i.status_assinatura, i.trial_starts_at, i.trial_ends_at, i.max_cadastros, i.max_congregacoes,
+                i.modulo_app_membro, i.modulo_app_midia, i.modulo_ebd,
+                i.modulo_agenda_eventos, i.modulo_escala_culto, i.modulo_pedidos_oracao, i.modulo_mural_oracao
          FROM usuarios u
          LEFT JOIN igrejas i ON i.id = u.igreja_id
          WHERE u.email = ?

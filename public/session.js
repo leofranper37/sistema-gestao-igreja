@@ -141,4 +141,42 @@
     window.saveAuthSession = saveAuthSession;
     window.clearAuthSession = clearAuthSession;
     window.requireAuthSession = requireAuthSession;
+
+    (async function syncAuthProfile() {
+        const current = getStoredAuth();
+        if (!current?.token) {
+            return;
+        }
+
+        if (/\/login\.html$/i.test(window.location.pathname)) {
+            return;
+        }
+
+        try {
+            const response = await originalFetch('/auth/me', {
+                headers: {
+                    Authorization: `Bearer ${current.token}`
+                }
+            });
+
+            if (!response.ok) {
+                return;
+            }
+
+            const me = await response.json();
+            if (!me || typeof me !== 'object') {
+                return;
+            }
+
+            saveAuthSession({
+                token: current.token,
+                user: {
+                    ...(current.user || {}),
+                    ...me
+                }
+            });
+        } catch (_error) {
+            // Mantém a sessão atual em caso de falha momentânea da API.
+        }
+    })();
 })();

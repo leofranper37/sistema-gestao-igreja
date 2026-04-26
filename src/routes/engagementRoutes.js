@@ -1,6 +1,7 @@
 const express = require('express');
 
 const { authorize, requireAuth } = require('../middlewares/auth');
+const { requireModuleEnabled } = require('../middlewares/entitlements');
 const {
     autocadastroAprovarSchema,
     autocadastroPublicoSchema,
@@ -55,8 +56,8 @@ const {
 const router = express.Router();
 
 router.get('/auth/me', requireAuth, getAuthMe);
-router.get('/app-membro/context', requireAuth, getMemberAppContext);
-router.get('/app-membro/permissions', requireAuth, getMemberPermissions);
+router.get('/app-membro/context', requireAuth, requireModuleEnabled('appMembro'), getMemberAppContext);
+router.get('/app-membro/permissions', requireAuth, requireModuleEnabled('appMembro'), getMemberPermissions);
 
 router.post('/autocadastro', validateBody(autocadastroPublicoSchema), createAutocadastro);
 router.get('/autocadastro', requireAuth, authorize(['admin', 'secretaria', 'pastor']), validateQuery(autocadastroStatusQuerySchema), listAutocadastros);
@@ -79,9 +80,9 @@ router.post('/portaria/qr-sessoes', requireAuth, authorize(['admin', 'secretaria
 router.get('/portaria/qr-sessoes/:token/public', getQrSessionPublic);
 router.post('/portaria/qr-sessoes/:token/visitantes', validateBody(visitanteQrPublicoSchema), submitPublicVisitorByToken);
 
-router.get('/midia/visitantes', requireAuth, authorize(['admin', 'secretaria', 'midia', 'pastor']), validateQuery(midiaVisitanteQuerySchema), listMidiaVisitors);
-router.put('/midia/visitantes/:id/status', requireAuth, authorize(['admin', 'secretaria', 'midia']), validateBody(midiaVisitanteStatusSchema), updateMidiaVisitorStatus);
-router.get('/midia/telao/visitantes', requireAuth, authorize(['admin', 'secretaria', 'midia', 'pastor']), listTelaoVisitors);
+router.get('/midia/visitantes', requireAuth, requireModuleEnabled('appMidia'), authorize(['admin', 'secretaria', 'midia', 'pastor']), validateQuery(midiaVisitanteQuerySchema), listMidiaVisitors);
+router.put('/midia/visitantes/:id/status', requireAuth, requireModuleEnabled('appMidia'), authorize(['admin', 'secretaria', 'midia']), validateBody(midiaVisitanteStatusSchema), updateMidiaVisitorStatus);
+router.get('/midia/telao/visitantes', requireAuth, requireModuleEnabled('appMidia'), authorize(['admin', 'secretaria', 'midia', 'pastor']), listTelaoVisitors);
 
 router.get('/pagamentos/publico/:referenceCode', getPaymentLinkPublic);
 router.put('/pagamentos/publico/:referenceCode/cliente-pago', reportPaymentAsPaidByClient);

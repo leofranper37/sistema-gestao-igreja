@@ -34,7 +34,9 @@ async function requireAuth(req, res, next) {
         const payload = jwt.verify(token, config.security.jwtSecret);
         const [rows] = await pool.query(
             `SELECT u.id, u.nome, u.email, u.igreja, u.igreja_id, u.role,
-                    i.plano, i.status_assinatura, i.trial_starts_at, i.trial_ends_at, i.max_cadastros, i.max_congregacoes
+                    i.plano, i.status_assinatura, i.trial_starts_at, i.trial_ends_at, i.max_cadastros, i.max_congregacoes,
+                    i.modulo_app_membro, i.modulo_app_midia, i.modulo_ebd,
+                    i.modulo_agenda_eventos, i.modulo_escala_culto, i.modulo_pedidos_oracao, i.modulo_mural_oracao
              FROM usuarios u
              LEFT JOIN igrejas i ON i.id = u.igreja_id
              WHERE u.id = ?
@@ -61,7 +63,17 @@ async function requireAuth(req, res, next) {
             trialStartsAt: user.trial_starts_at || null,
             trialEndsAt: user.trial_ends_at || null,
             maxCadastros: user.max_cadastros || 40,
-            maxCongregacoes: user.max_congregacoes || 1
+            maxCongregacoes: user.max_congregacoes || 1,
+            modules: {
+                financeiro: true,
+                appMembro: Boolean(Number(user.modulo_app_membro || 0)),
+                appMidia: Boolean(Number(user.modulo_app_midia || 0)),
+                ebd: Boolean(Number(user.modulo_ebd || 0)),
+                agendaEventos: Boolean(Number(user.modulo_agenda_eventos ?? 1)),
+                escalaCulto: Boolean(Number(user.modulo_escala_culto || 0)),
+                pedidosOracao: Boolean(Number(user.modulo_pedidos_oracao ?? 1)),
+                muralOracao: Boolean(Number(user.modulo_mural_oracao ?? 1))
+            }
         };
 
         // ── Verificação de assinatura ──────────────────────────────────────

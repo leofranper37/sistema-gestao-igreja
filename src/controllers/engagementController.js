@@ -266,7 +266,8 @@ async function getAuthMe(req, res) {
         trialStartsAt: req.auth.trialStartsAt,
         trialEndsAt: req.auth.trialEndsAt,
         maxCadastros: req.auth.maxCadastros,
-        maxCongregacoes: req.auth.maxCongregacoes
+        maxCongregacoes: req.auth.maxCongregacoes,
+        modules: req.auth.modules || {}
     });
 }
 

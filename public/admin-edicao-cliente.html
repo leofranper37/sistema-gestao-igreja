@@ -49,6 +49,11 @@ body{display:flex;background:var(--bg);color:var(--text);height:100vh;overflow:h
 .module-toggle:hover{border-color:var(--blue);background:#eff6ff}
 .module-toggle input[type=checkbox]{width:16px;height:16px;accent-color:var(--blue);flex-shrink:0}
 .module-toggle span{font-size:13px;font-weight:500}
+.preset-bar{margin-top:14px;padding:12px;border:1px dashed var(--border);border-radius:10px;background:#f8fbff}
+.preset-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;font-weight:700;margin-bottom:8px}
+.preset-actions{display:flex;flex-wrap:wrap;gap:8px}
+.preset-btn{padding:7px 12px;border:1px solid #dbe6f3;border-radius:999px;background:#fff;color:#1e3a8a;font-size:12px;font-weight:700;cursor:pointer}
+.preset-btn:hover{background:#eff6ff;border-color:#bfdbfe}
 .footer-bar{position:sticky;bottom:0;background:var(--white);border-top:1px solid var(--border);padding:16px 28px;display:flex;justify-content:space-between;align-items:center;gap:12px;z-index:10}
 .save-hint{font-size:12px;color:var(--muted)}
 .toast{position:fixed;bottom:24px;right:24px;padding:14px 22px;border-radius:10px;font-size:14px;font-weight:600;color:#fff;z-index:2000;opacity:0;transform:translateY(16px);transition:.3s}
@@ -130,6 +135,15 @@ body{display:flex;background:var(--bg);color:var(--text);height:100vh;overflow:h
           <div class="form-row"><label>Mensalidade (R$)</label><input type="number" min="0" step="0.01" id="f-mensalidade_valor"></div>
           <div class="form-row"><label>Próximo Vencimento</label><input type="date" id="f-proximo_vencimento"></div>
         </div>
+        <div class="preset-bar">
+          <div class="preset-label">Pacotes Comerciais (aplicação rápida)</div>
+          <div class="preset-actions">
+            <button type="button" class="preset-btn" onclick="applyPlanoPreset('eden')">Éden</button>
+            <button type="button" class="preset-btn" onclick="applyPlanoPreset('hebrom')">Hebrom</button>
+            <button type="button" class="preset-btn" onclick="applyPlanoPreset('betel')">Betel</button>
+            <button type="button" class="preset-btn" onclick="applyPlanoPreset('siao')">Sião</button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -182,6 +196,64 @@ const igrejaId = parseInt(params.get('id'));
 
 const STATUS_LABELS = {ativa:'✅ Ativa',trial:'⏳ Em período de teste',suspensa:'🚫 Suspensa — acesso bloqueado',cancelada:'❌ Cancelada',inativa:'⬜ Inativa'};
 const STATUS_CLASS  = {ativa:'sb-ativa',trial:'sb-trial',suspensa:'sb-suspensa',cancelada:'sb-cancelada',inativa:'sb-inativa'};
+const PLANO_PRESETS = {
+  eden: {
+    mensalidade: 0,
+    maxCadastros: 40,
+    maxCongregacoes: 1,
+    modules: {
+      appMembro: false,
+      appMidia: false,
+      ebd: false,
+      agendaEventos: true,
+      escalaCulto: false,
+      pedidosOracao: true,
+      muralOracao: true
+    }
+  },
+  hebrom: {
+    mensalidade: 50,
+    maxCadastros: 150,
+    maxCongregacoes: 1,
+    modules: {
+      appMembro: false,
+      appMidia: true,
+      ebd: true,
+      agendaEventos: true,
+      escalaCulto: true,
+      pedidosOracao: true,
+      muralOracao: true
+    }
+  },
+  betel: {
+    mensalidade: 80,
+    maxCadastros: 300,
+    maxCongregacoes: 5,
+    modules: {
+      appMembro: true,
+      appMidia: true,
+      ebd: true,
+      agendaEventos: true,
+      escalaCulto: true,
+      pedidosOracao: true,
+      muralOracao: true
+    }
+  },
+  siao: {
+    mensalidade: 100,
+    maxCadastros: 1000,
+    maxCongregacoes: 10,
+    modules: {
+      appMembro: true,
+      appMidia: true,
+      ebd: true,
+      agendaEventos: true,
+      escalaCulto: true,
+      pedidosOracao: true,
+      muralOracao: true
+    }
+  }
+};
 
 async function loadContrato() {
   if (!igrejaId) { location.href = 'admin-igrejas.html'; return; }
@@ -235,6 +307,26 @@ function fillForm(d) {
   chk('m-mural_oracao', d.modulo_mural_oracao);
 }
 
+function applyPlanoPreset(plano) {
+  const p = PLANO_PRESETS[plano];
+  if (!p) return;
+
+  document.getElementById('f-plano').value = plano;
+  document.getElementById('f-mensalidade_valor').value = p.mensalidade;
+  document.getElementById('f-max_cadastros').value = p.maxCadastros;
+  document.getElementById('f-max_congregacoes').value = p.maxCongregacoes;
+
+  document.getElementById('m-app_membro').checked = !!p.modules.appMembro;
+  document.getElementById('m-app_midia').checked = !!p.modules.appMidia;
+  document.getElementById('m-ebd').checked = !!p.modules.ebd;
+  document.getElementById('m-agenda_eventos').checked = !!p.modules.agendaEventos;
+  document.getElementById('m-escala_culto').checked = !!p.modules.escalaCulto;
+  document.getElementById('m-pedidos_oracao').checked = !!p.modules.pedidosOracao;
+  document.getElementById('m-mural_oracao').checked = !!p.modules.muralOracao;
+
+  toast(`Preset ${plano.toUpperCase()} aplicado. Revise e clique em Salvar Alterações.`, 'success');
+}
+
 async function saveContrato() {
   const v = id => document.getElementById(id)?.value ?? '';
   const chk = id => document.getElementById(id)?.checked ?? false;
@@ -282,6 +374,13 @@ function toast(msg, type='success') {
   if (!t) { location.href = 'login.html'; return; }
   try { const p = JSON.parse(atob(t.split('.')[1])); if (!['super-admin','admin'].includes(p.role)) location.href = 'login.html'; } catch(_){}
 })();
+
+document.getElementById('f-plano').addEventListener('change', (e) => {
+  const value = e.target.value;
+  if (PLANO_PRESETS[value]) {
+    applyPlanoPreset(value);
+  }
+});
 
 loadContrato();
 </script>

@@ -8,6 +8,17 @@ const { createHttpError } = require('../utils/httpError');
 const { sendMail } = require('../utils/mailer');
 
 function buildAuthResponse(userRecord) {
+    const modules = {
+        financeiro: true,
+        appMembro: Boolean(Number(userRecord.modulo_app_membro || 0)),
+        appMidia: Boolean(Number(userRecord.modulo_app_midia || 0)),
+        ebd: Boolean(Number(userRecord.modulo_ebd || 0)),
+        agendaEventos: Boolean(Number(userRecord.modulo_agenda_eventos ?? 1)),
+        escalaCulto: Boolean(Number(userRecord.modulo_escala_culto || 0)),
+        pedidosOracao: Boolean(Number(userRecord.modulo_pedidos_oracao ?? 1)),
+        muralOracao: Boolean(Number(userRecord.modulo_mural_oracao ?? 1))
+    };
+
     const user = {
         id: userRecord.id,
         nome: userRecord.nome,
@@ -20,7 +31,8 @@ function buildAuthResponse(userRecord) {
         trialStartsAt: userRecord.trial_starts_at || null,
         trialEndsAt: userRecord.trial_ends_at || null,
         maxCadastros: userRecord.max_cadastros || 40,
-        maxCongregacoes: userRecord.max_congregacoes || 1
+        maxCongregacoes: userRecord.max_congregacoes || 1,
+        modules
     };
 
     const jwtPayload = {
@@ -81,7 +93,14 @@ async function registerAccount(payload) {
         trial_starts_at: churchMetadata?.trial_starts_at,
         trial_ends_at: churchMetadata?.trial_ends_at,
         max_cadastros: churchMetadata?.max_cadastros,
-        max_congregacoes: churchMetadata?.max_congregacoes
+        max_congregacoes: churchMetadata?.max_congregacoes,
+        modulo_app_membro: churchMetadata?.modulo_app_membro,
+        modulo_app_midia: churchMetadata?.modulo_app_midia,
+        modulo_ebd: churchMetadata?.modulo_ebd,
+        modulo_agenda_eventos: churchMetadata?.modulo_agenda_eventos,
+        modulo_escala_culto: churchMetadata?.modulo_escala_culto,
+        modulo_pedidos_oracao: churchMetadata?.modulo_pedidos_oracao,
+        modulo_mural_oracao: churchMetadata?.modulo_mural_oracao
     });
 }
 

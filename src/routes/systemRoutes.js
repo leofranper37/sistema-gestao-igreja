@@ -1,6 +1,7 @@
 const express = require('express');
 
 const { authorize, requireAuth } = require('../middlewares/auth');
+const { requireModuleEnabled } = require('../middlewares/entitlements');
 const {
     congregadoFiltroSchema,
     congregadoSchema,
@@ -60,12 +61,12 @@ router.get('/criancas', requireAuth, authorize(['admin', 'secretaria']), validat
 router.post('/criancas', requireAuth, authorize(['admin', 'secretaria']), validateBody(criancaSchema), createCrianca);
 router.put('/criancas/:id', requireAuth, authorize(['admin', 'secretaria']), validateBody(criancaSchema), updateCrianca);
 router.delete('/criancas/:id', requireAuth, authorize(['admin', 'secretaria']), deleteCrianca);
-router.get('/oracoes/meus', requireAuth, authorize(['admin', 'secretaria', 'membro', 'financeiro', 'pastor', 'oficial', 'ministerio', 'visitante']), validateQuery(oracaoFiltroSchema), listMyOracoes);
-router.get('/oracoes/mural', requireAuth, authorize(['admin', 'secretaria', 'membro', 'financeiro', 'pastor', 'oficial', 'ministerio', 'visitante']), listMuralOracoes);
-router.post('/oracoes', requireAuth, authorize(['admin', 'secretaria', 'membro', 'financeiro', 'pastor', 'oficial', 'ministerio', 'visitante']), validateBody(oracaoSchema), createOracao);
-router.put('/oracoes/:id', requireAuth, authorize(['admin', 'secretaria', 'membro', 'financeiro', 'pastor', 'oficial', 'ministerio', 'visitante']), validateBody(oracaoSchema), updateOracao);
-router.put('/oracoes/:id/resposta', requireAuth, authorize(['admin', 'secretaria', 'pastor']), validateBody(oracaoRespostaSchema), updateOracaoResposta);
-router.delete('/oracoes/:id', requireAuth, authorize(['admin', 'secretaria', 'membro', 'financeiro', 'pastor', 'oficial', 'ministerio', 'visitante']), deleteOracao);
+router.get('/oracoes/meus', requireAuth, requireModuleEnabled('pedidosOracao'), authorize(['admin', 'secretaria', 'membro', 'financeiro', 'pastor', 'oficial', 'ministerio', 'visitante']), validateQuery(oracaoFiltroSchema), listMyOracoes);
+router.get('/oracoes/mural', requireAuth, requireModuleEnabled('muralOracao'), authorize(['admin', 'secretaria', 'membro', 'financeiro', 'pastor', 'oficial', 'ministerio', 'visitante']), listMuralOracoes);
+router.post('/oracoes', requireAuth, requireModuleEnabled('pedidosOracao'), authorize(['admin', 'secretaria', 'membro', 'financeiro', 'pastor', 'oficial', 'ministerio', 'visitante']), validateBody(oracaoSchema), createOracao);
+router.put('/oracoes/:id', requireAuth, requireModuleEnabled('pedidosOracao'), authorize(['admin', 'secretaria', 'membro', 'financeiro', 'pastor', 'oficial', 'ministerio', 'visitante']), validateBody(oracaoSchema), updateOracao);
+router.put('/oracoes/:id/resposta', requireAuth, requireModuleEnabled('pedidosOracao'), authorize(['admin', 'secretaria', 'pastor']), validateBody(oracaoRespostaSchema), updateOracaoResposta);
+router.delete('/oracoes/:id', requireAuth, requireModuleEnabled('pedidosOracao'), authorize(['admin', 'secretaria', 'membro', 'financeiro', 'pastor', 'oficial', 'ministerio', 'visitante']), deleteOracao);
 router.get('/total-visitantes', requireAuth, authorize(['admin', 'secretaria', 'pastor', 'oficial']), getTotalVisitantes);
 
 module.exports = router;
