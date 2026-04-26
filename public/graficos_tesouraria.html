@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LDFP - Gráficos Tesouraria</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        .gt-wrap { padding: 24px 26px 44px; }
+        .gt-hero {
+            border-radius: 18px;
+            padding: 22px 24px 18px;
+            color: #e2e8f0;
+            background:
+                radial-gradient(circle at 80% 15%, rgba(14,165,233,.28), transparent 44%),
+                radial-gradient(circle at 15% 30%, rgba(245,158,11,.18), transparent 44%),
+                linear-gradient(135deg, #0f172a 0%, #0b3340 55%, #115e59 100%);
+            box-shadow: 0 18px 34px rgba(15,23,42,.22);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .gt-hero-icon {
+            width: 62px; height: 62px;
+            background: rgba(14,165,233,.22);
+            border-radius: 16px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 26px; color: #38bdf8; flex-shrink: 0;
+        }
+        .gt-hero h2 { margin: 0 0 5px; font-size: 26px; font-weight: 800; }
+        .gt-hero p { margin: 0; color: #bfdbfe; font-size: 13px; }
+        .gt-hero-badge {
+            margin-left: auto;
+            background: rgba(14,165,233,.15); border: 1px solid rgba(56,189,248,.3);
+            border-radius: 20px; padding: 6px 14px; gap: 7px;
+            font-size: 12px; font-weight: 700; color: #38bdf8;
+            display: flex; align-items: center;
+        }
+
+        .gt-kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .gt-kpi {
+            background: #fff;
+            border: 1px solid #d9e4f0;
+            border-radius: 14px;
+            box-shadow: 0 6px 18px rgba(15,23,42,.07);
+            padding: 16px 18px;
+            position: relative; overflow: hidden;
+        }
+        .gt-kpi::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; height: 3px;
+            border-radius: 14px 14px 0 0;
+            background: var(--kpi-accent, linear-gradient(90deg,#0ea5e9,#0f766e));
+        }
+        .gt-kpi .kpi-icon { font-size: 22px; color: var(--kpi-color, #0ea5e9); margin-bottom: 8px; }
+        .gt-kpi small { color: #64748b; font-size: 11px; text-transform: uppercase; letter-spacing: .5px; }
+        .gt-kpi b { display: block; font-size: 26px; font-weight: 800; color: #0f172a; line-height: 1.1; }
+        .gt-kpi .kpi-sub { font-size: 11px; color: #94a3b8; margin-top: 3px; }
+
+        .gt-charts-row {
+            display: grid;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        .gt-charts-row.two { grid-template-columns: 1fr 1fr; }
+        .gt-charts-row.three { grid-template-columns: 1.4fr 1fr 1fr; }
+
+        .gt-chart-card {
+            background: #fff;
+            border: 1px solid #d9e4f0;
+            border-radius: 16px;
+            box-shadow: 0 8px 22px rgba(15,23,42,.07);
+            padding: 18px 20px;
+        }
+        .gt-chart-card h3 {
+            margin: 0 0 14px;
+            font-size: 15px; font-weight: 700; color: #0f172a;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .gt-chart-card h3 i { color: #0ea5e9; }
+        .gt-chart-canvas { position: relative; height: 240px; }
+
+        .gt-period-bar {
+            display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap;
+        }
+        .gt-period-btn {
+            padding: 7px 16px; border-radius: 20px; border: 1px solid #dbe6f3;
+            background: #fff; font-size: 12px; font-weight: 600; cursor: pointer;
+            color: #64748b; transition: all .2s;
+        }
+        .gt-period-btn.active, .gt-period-btn:hover {
+            background: linear-gradient(135deg, #0ea5e9, #0f766e);
+            color: #fff; border-color: transparent;
+        }
+
+        .gt-summary-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        .gt-table-card {
+            background: #fff;
+            border: 1px solid #d9e4f0;
+            border-radius: 16px;
+            box-shadow: 0 8px 22px rgba(15,23,42,.07);
+            padding: 18px 20px;
+        }
+        .gt-table-card h3 {
+            margin: 0 0 12px; font-size: 15px; font-weight: 700; color: #0f172a;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .gt-table-card h3 i { color: #0ea5e9; }
+        .gt-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .gt-table th {
+            text-align: left; padding: 8px 10px;
+            background: #f1f5f9; color: #475569;
+            font-size: 11px; text-transform: uppercase; letter-spacing: .4px;
+        }
+        .gt-table th:first-child { border-radius: 8px 0 0 8px; }
+        .gt-table th:last-child { border-radius: 0 8px 8px 0; }
+        .gt-table td { padding: 8px 10px; border-bottom: 1px solid #f1f5f9; color: #334155; }
+        .gt-table tr:last-child td { border-bottom: 0; }
+        .badge-entrada { background: #d1fae5; color: #065f46; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 700; }
+        .badge-saida { background: #fee2e2; color: #991b1b; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 700; }
+        .badge-pendente { background: #fef3c7; color: #92400e; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 700; }
+
+        .gt-spinner { text-align: center; padding: 40px; color: #94a3b8; }
+        .gt-spinner i { font-size: 28px; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        @media (max-width: 900px) {
+            .gt-charts-row.two, .gt-charts-row.three, .gt-summary-row { grid-template-columns: 1fr; }
+            .gt-wrap { padding: 14px 12px 36px; }
+        }
+    </style>
+</head>
+<body data-shell="true" data-shell-active="graficos_tesouraria.html">
+<div class="gt-wrap" id="mainContent">
+
+    <div class="gt-hero">
+        <div class="gt-hero-icon"><i class="fa-solid fa-chart-line"></i></div>
+        <div>
+            <h2>Gráficos — Tesouraria</h2>
+            <p>Análise visual das finanças: entradas, saídas, dízimos, saldo evolutivo e links de pagamento</p>
+        </div>
+        <div class="gt-hero-badge"><i class="fa-solid fa-circle-check"></i> Dados ao vivo</div>
+    </div>
+
+    <!-- Período -->
+    <div class="gt-period-bar">
+        <button class="gt-period-btn active" onclick="setPeriod(3,this)">3 meses</button>
+        <button class="gt-period-btn" onclick="setPeriod(6,this)">6 meses</button>
+        <button class="gt-period-btn" onclick="setPeriod(12,this)">12 meses</button>
+    </div>
+
+    <!-- KPIs -->
+    <div class="gt-kpi-grid" id="kpiGrid">
+        <div class="gt-spinner"><i class="fa-solid fa-spinner"></i></div>
+    </div>
+
+    <!-- Gráfico principal: entradas x saídas mensal -->
+    <div class="gt-charts-row two">
+        <div class="gt-chart-card">
+            <h3><i class="fa-solid fa-scale-balanced"></i> Entradas × Saídas (mensal)</h3>
+            <div class="gt-chart-canvas"><canvas id="chartFluxo"></canvas></div>
+        </div>
+        <div class="gt-chart-card">
+            <h3><i class="fa-solid fa-coins"></i> Dízimos por Mês</h3>
+            <div class="gt-chart-canvas"><canvas id="chartDizimos"></canvas></div>
+        </div>
+    </div>
+
+    <!-- Linha 2 -->
+    <div class="gt-charts-row two" style="margin-top:16px;">
+        <div class="gt-chart-card">
+            <h3><i class="fa-solid fa-chart-area"></i> Evolução do Saldo Acumulado</h3>
+            <div class="gt-chart-canvas"><canvas id="chartSaldo"></canvas></div>
+        </div>
+        <div class="gt-chart-card">
+            <h3><i class="fa-solid fa-chart-pie"></i> Distribuição por Tipo de Transação</h3>
+            <div class="gt-chart-canvas"><canvas id="chartTipos"></canvas></div>
+        </div>
+    </div>
+
+    <!-- Tabelas -->
+    <div class="gt-summary-row" style="margin-top:16px;">
+        <div class="gt-table-card">
+            <h3><i class="fa-solid fa-list-check"></i> Últimas Transações</h3>
+            <table class="gt-table" id="tblTransacoes">
+                <thead><tr><th>Data</th><th>Descrição</th><th>Tipo</th><th>Valor</th></tr></thead>
+                <tbody><tr><td colspan="4" class="gt-spinner"><i class="fa-solid fa-spinner"></i></td></tr></tbody>
+            </table>
+        </div>
+        <div class="gt-table-card">
+            <h3><i class="fa-solid fa-link"></i> Status dos Links de Pagamento</h3>
+            <div class="gt-chart-canvas" style="height:200px;"><canvas id="chartLinks"></canvas></div>
+            <table class="gt-table" id="tblLinks" style="margin-top:12px;">
+                <thead><tr><th>Status</th><th>Qtd</th><th>Total R$</th></tr></thead>
+                <tbody><tr><td colspan="3" class="gt-spinner"><i class="fa-solid fa-spinner"></i></td></tr></tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<script src="session.js"></script>
+<script src="enterprise-shell.js"></script>
+<script>
+    let allTransacoes = [], allDizimos = [], allLinks = [], saldoAtual = 0;
+    let periodMonths = 3;
+    let charts = {};
+
+    const fmt = v => 'R$ ' + parseFloat(v||0).toLocaleString('pt-br', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+    async function loadAll() {
+        const token = window.sessionManager?.getToken?.() || localStorage.getItem('authToken');
+        const h = token ? { 'Authorization': 'Bearer ' + token } : {};
+        const base = window.location.origin;
+
+        document.getElementById('kpiGrid').innerHTML = '<div class="gt-spinner" style="grid-column:1/-1;"><i class="fa-solid fa-spinner"></i> Carregando...</div>';
+
+        try {
+            const [rT, rD, rS, rL] = await Promise.all([
+                fetch(base + '/transacoes', { headers: h }),
+                fetch(base + '/dizimos', { headers: h }),
+                fetch(base + '/saldo', { headers: h }),
+                fetch(base + '/pagamentos/links', { headers: h })
+            ]);
+
+            allTransacoes = rT.ok ? await rT.json() : [];
+            allDizimos    = rD.ok ? await rD.json() : [];
+            const saldoResp = rS.ok ? await rS.json() : {};
+            allLinks      = rL.ok ? await rL.json() : [];
+
+            if (Array.isArray(allTransacoes?.data)) allTransacoes = allTransacoes.data;
+            if (Array.isArray(allDizimos?.data)) allDizimos = allDizimos.data;
+            if (Array.isArray(allLinks?.data)) allLinks = allLinks.data;
+            saldoAtual = parseFloat(saldoResp.saldo || saldoResp.total || 0);
+
+            renderKpis();
+            renderChartFluxo();
+            renderChartDizimos();
+            renderChartSaldo();
+            renderChartTipos();
+            renderTabelaTransacoes();
+            renderLinksPanel();
+        } catch (e) {
+            console.error('Erro:', e);
+        }
+    }
+
+    function setPeriod(m, btn) {
+        periodMonths = m;
+        document.querySelectorAll('.gt-period-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        renderChartFluxo();
+        renderChartDizimos();
+        renderChartSaldo();
+    }
+
+    function renderKpis() {
+        const entradas = allTransacoes.filter(t => (t.tipo||'').toLowerCase() === 'entrada' || parseFloat(t.valor||0) > 0);
+        const saidas   = allTransacoes.filter(t => (t.tipo||'').toLowerCase() === 'saida' || (t.tipo||'').toLowerCase() === 'saída');
+        const totalE   = entradas.reduce((s,t) => s + parseFloat(t.valor||0), 0);
+        const totalS   = saidas.reduce((s,t) => s + Math.abs(parseFloat(t.valor||0)), 0);
+        const totalD   = allDizimos.reduce((s,d) => s + parseFloat(d.valor||0), 0);
+        const pendentes = allLinks.filter(l => l.status === 'pendente');
+        const totalPend = pendentes.reduce((s,l) => s + parseFloat(l.valor||0), 0);
+
+        const kpis = [
+            { icon:'fa-wallet', color:'#0ea5e9', accent:'linear-gradient(90deg,#0ea5e9,#0284c7)', label:'Saldo Atual', value: fmt(saldoAtual), sub: 'saldo disponível' },
+            { icon:'fa-arrow-up', color:'#10b981', accent:'linear-gradient(90deg,#10b981,#059669)', label:'Total Entradas', value: fmt(totalE), sub: `${entradas.length} lançamentos` },
+            { icon:'fa-arrow-down', color:'#ef4444', accent:'linear-gradient(90deg,#ef4444,#dc2626)', label:'Total Saídas', value: fmt(totalS), sub: `${saidas.length} lançamentos` },
+            { icon:'fa-coins', color:'#f59e0b', accent:'linear-gradient(90deg,#f59e0b,#d97706)', label:'Dízimos', value: fmt(totalD), sub: `${allDizimos.length} registros` },
+            { icon:'fa-link', color:'#8b5cf6', accent:'linear-gradient(90deg,#8b5cf6,#6d28d9)', label:'Links Pendentes', value: fmt(totalPend), sub: `${pendentes.length} aguardando` },
+            { icon:'fa-percent', color:'#06b6d4', accent:'linear-gradient(90deg,#06b6d4,#0891b2)', label:'Resultado', value: fmt(totalE - totalS), sub: totalE >= totalS ? '▲ superávit' : '▼ déficit' },
+        ];
+
+        document.getElementById('kpiGrid').innerHTML = kpis.map(k => `
+            <div class="gt-kpi" style="--kpi-color:${k.color};--kpi-accent:${k.accent};">
+                <div class="kpi-icon"><i class="fa-solid ${k.icon}"></i></div>
+                <small>${k.label}</small>
+                <b>${k.value}</b>
+                <div class="kpi-sub">${k.sub}</div>
+            </div>`).join('');
+    }
+
+    function getMonthLabels(n) {
+        const labels = [];
+        const now = new Date();
+        for (let i = n - 1; i >= 0; i--) {
+            const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+            labels.push(d.toLocaleDateString('pt-br', { month: 'short', year: '2-digit' }));
+        }
+        return labels;
+    }
+
+    function sumByMonth(arr, dateField, valueField, tipo, n) {
+        const now = new Date();
+        const sums = Array(n).fill(0);
+        arr.forEach(item => {
+            if (tipo && (item.tipo||'').toLowerCase() !== tipo.toLowerCase()) return;
+            const d = new Date(item[dateField]);
+            if (isNaN(d)) return;
+            for (let i = 0; i < n; i++) {
+                const target = new Date(now.getFullYear(), now.getMonth() - (n - 1 - i), 1);
+                const next   = new Date(target.getFullYear(), target.getMonth() + 1, 1);
+                if (d >= target && d < next) { sums[i] += Math.abs(parseFloat(item[valueField]||0)); break; }
+            }
+        });
+        return sums;
+    }
+
+    function renderChartFluxo() {
+        const n = periodMonths;
+        const labels = getMonthLabels(n);
+        const entField = allTransacoes[0]?.data_lancamento ? 'data_lancamento' : 'created_at';
+        const eData = sumByMonth(allTransacoes, entField, 'valor', 'entrada', n);
+        const sData = sumByMonth(allTransacoes, entField, 'valor', 'saida', n);
+
+        if (charts.fluxo) charts.fluxo.destroy();
+        charts.fluxo = new Chart(document.getElementById('chartFluxo'), {
+            type: 'bar',
+            data: {
+                labels,
+                datasets: [
+                    { label: 'Entradas', data: eData, backgroundColor: 'rgba(16,185,129,.8)', borderRadius: 6 },
+                    { label: 'Saídas',   data: sData, backgroundColor: 'rgba(239,68,68,.8)',  borderRadius: 6 },
+                ]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom' } },
+                scales: { x: { grid: { display: false } }, y: { beginAtZero: true, grid: { color: '#f1f5f9' } } }
+            }
+        });
+    }
+
+    function renderChartDizimos() {
+        const n = periodMonths;
+        const labels = getMonthLabels(n);
+        const df = allDizimos[0]?.data_dizimo ? 'data_dizimo' : (allDizimos[0]?.data_lancamento ? 'data_lancamento' : 'created_at');
+        const data = sumByMonth(allDizimos, df, 'valor', null, n);
+
+        if (charts.dizimos) charts.dizimos.destroy();
+        charts.dizimos = new Chart(document.getElementById('chartDizimos'), {
+            type: 'line',
+            data: {
+                labels,
+                datasets: [{
+                    label: 'Dízimos', data,
+                    borderColor: '#f59e0b', backgroundColor: 'rgba(245,158,11,.15)',
+                    borderWidth: 2, pointRadius: 4, fill: true, tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { x: { grid: { display: false } }, y: { beginAtZero: true, grid: { color: '#f1f5f9' } } }
+            }
+        });
+    }
+
+    function renderChartSaldo() {
+        const n = periodMonths;
+        const labels = getMonthLabels(n);
+        const df = allTransacoes[0]?.data_lancamento ? 'data_lancamento' : 'created_at';
+        const eData = sumByMonth(allTransacoes, df, 'valor', 'entrada', n);
+        const sData = sumByMonth(allTransacoes, df, 'valor', 'saida', n);
+        let acum = saldoAtual;
+        const reversed = labels.map((_, i) => eData[i] - sData[i]).reverse();
+        const saldoData = reversed.map(v => { acum -= v; return acum; }).reverse();
+
+        if (charts.saldo) charts.saldo.destroy();
+        charts.saldo = new Chart(document.getElementById('chartSaldo'), {
+            type: 'line',
+            data: {
+                labels,
+                datasets: [{
+                    label: 'Saldo', data: saldoData,
+                    borderColor: '#0ea5e9', backgroundColor: 'rgba(14,165,233,.1)',
+                    borderWidth: 2, pointRadius: 4, fill: true, tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { x: { grid: { display: false } }, y: { grid: { color: '#f1f5f9' } } }
+            }
+        });
+    }
+
+    function renderChartTipos() {
+        const counts = {};
+        allTransacoes.forEach(t => {
+            const tipo = t.tipo || t.categoria || 'Outro';
+            counts[tipo] = (counts[tipo] || 0) + 1;
+        });
+        const labels = Object.keys(counts).length ? Object.keys(counts) : ['Sem dados'];
+        const data   = Object.values(counts).length ? Object.values(counts) : [1];
+        const colors = ['#0ea5e9','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4','#f97316'];
+
+        if (charts.tipos) charts.tipos.destroy();
+        charts.tipos = new Chart(document.getElementById('chartTipos'), {
+            type: 'doughnut',
+            data: { labels, datasets: [{ data, backgroundColor: colors.slice(0,labels.length), borderWidth: 2, borderColor: '#fff' }] },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                cutout: '55%',
+                plugins: { legend: { position: 'bottom', labels: { font: { size: 11 }, padding: 8 } } }
+            }
+        });
+    }
+
+    function renderTabelaTransacoes() {
+        const tbody = document.querySelector('#tblTransacoes tbody');
+        const rows = [...allTransacoes].sort((a,b) => new Date(b.created_at||b.data_lancamento) - new Date(a.created_at||a.data_lancamento)).slice(0, 8);
+        if (!rows.length) {
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#94a3b8;padding:20px;">Nenhuma transação encontrada</td></tr>';
+            return;
+        }
+        tbody.innerHTML = rows.map(t => {
+            const tipo = (t.tipo||'').toLowerCase();
+            const badge = tipo === 'entrada' ? 'badge-entrada' : tipo === 'saida' || tipo === 'saída' ? 'badge-saida' : 'badge-pendente';
+            const label = tipo === 'entrada' ? 'Entrada' : tipo === 'saida' || tipo === 'saída' ? 'Saída' : t.tipo || '—';
+            const dt = t.data_lancamento || t.created_at || '';
+            const dateStr = dt ? new Date(dt).toLocaleDateString('pt-br') : '—';
+            return `<tr>
+                <td>${dateStr}</td>
+                <td>${t.descricao || t.historico || '—'}</td>
+                <td><span class="${badge}">${label}</span></td>
+                <td><b>${fmt(t.valor)}</b></td>
+            </tr>`;
+        }).join('');
+    }
+
+    function renderLinksPanel() {
+        const counts = {}, totals = {};
+        allLinks.forEach(l => {
+            const s = l.status || 'pendente';
+            counts[s] = (counts[s]||0) + 1;
+            totals[s] = (totals[s]||0) + parseFloat(l.valor||0);
+        });
+
+        const statusLabels = Object.keys(counts);
+        const statusColors = { pendente: '#f59e0b', aguardando_confirmacao: '#0ea5e9', pago: '#10b981' };
+        const bgColors = statusLabels.map(s => statusColors[s] || '#94a3b8');
+
+        if (charts.links) charts.links.destroy();
+        charts.links = new Chart(document.getElementById('chartLinks'), {
+            type: 'pie',
+            data: {
+                labels: statusLabels,
+                datasets: [{ data: statusLabels.map(s => counts[s]), backgroundColor: bgColors, borderWidth: 2, borderColor: '#fff' }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } }
+            }
+        });
+
+        const tbody = document.querySelector('#tblLinks tbody');
+        if (!statusLabels.length) {
+            tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:#94a3b8;padding:16px;">Nenhum link cadastrado</td></tr>';
+            return;
+        }
+        tbody.innerHTML = statusLabels.map(s => {
+            const badge = s === 'pago' ? 'badge-entrada' : s === 'pendente' ? 'badge-pendente' : 'badge-saida';
+            return `<tr><td><span class="${badge}">${s}</span></td><td><b>${counts[s]}</b></td><td>${fmt(totals[s])}</td></tr>`;
+        }).join('');
+    }
+
+    window.addEventListener('DOMContentLoaded', loadAll);
+</script>
+</body>
+</html>

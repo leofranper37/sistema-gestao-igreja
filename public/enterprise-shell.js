@@ -358,14 +358,14 @@
                     ], activePath, false, user)}
 
                     ${renderLegacyGroup('Gráficos', 'fa-solid fa-chart-column', [
-                        ['construcao.html?pag=Graficos Secretaria', 'fa-solid fa-chart-pie', 'Secretaria'],
-                        ['construcao.html?pag=Graficos Tesouraria', 'fa-solid fa-chart-line', 'Tesouraria']
+                        ['graficos_secretaria.html', 'fa-solid fa-chart-pie', 'Secretaria'],
+                        ['graficos_tesouraria.html', 'fa-solid fa-chart-line', 'Tesouraria']
                     ], activePath, false, user)}
 
                     ${renderLegacyGroup('Relatórios', 'fa-solid fa-print', [
                         ['relatorios_secretaria.html', 'fa-regular fa-file-lines', 'Secretaria'],
                         ['relatorios_tesouraria.html', 'fa-regular fa-file-lines', 'Tesouraria'],
-                        ['construcao.html?pag=Relatorios Contabilidade', 'fa-regular fa-file-lines', 'Contabilidade']
+                        ['relatorios_contabilidade.html', 'fa-regular fa-file-lines', 'Contabilidade']
                     ], activePath, false, user)}
                 </nav>
 
