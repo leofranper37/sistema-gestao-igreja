@@ -648,6 +648,7 @@
     let currentUser = null, currentTab = 'inicio', calDate = new Date();
     let allEvents = [], allPrayers = [], cardFlipped = false;
     let currentLoginMode = 'login';
+    let memberBackGuardActive = false;
 
     const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
     const MESES_S = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
@@ -728,6 +729,31 @@
         localStorage.removeItem('ldfp_membro_session');
     }
 
+    function isMemberOnlySession() {
+        const sess = getMembroSession();
+        const role = String(sess?.membro?.role || '').toLowerCase();
+        return !!sess?.token && (role === 'membro' || role === 'visitante' || role === '');
+    }
+
+    function setupMemberBackGuard() {
+        if (memberBackGuardActive) return;
+        if (!isMemberOnlySession()) return;
+
+        memberBackGuardActive = true;
+        try {
+            history.replaceState({ ldfpMemberApp: 1 }, '', window.location.href);
+            history.pushState({ ldfpMemberApp: 2 }, '', window.location.href);
+        } catch (_) {}
+
+        window.addEventListener('popstate', function () {
+            if (!isMemberOnlySession()) return;
+            try {
+                history.pushState({ ldfpMemberApp: 2 }, '', window.location.href);
+            } catch (_) {}
+            showToast('Por seguranca, o acesso do membro permanece no App do Membro.');
+        });
+    }
+
     // ── LOGIN SCREEN ──────────────────────────────────────────────────
     function showLoginScreen(mode) {
         mode = mode || 'login';
@@ -806,6 +832,7 @@
 
     async function startApp(user) {
         document.getElementById('app').style.display = 'flex';
+        setupMemberBackGuard();
         renderGreeting(user);
         renderVerse();
         renderQuickActions(user);
