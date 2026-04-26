@@ -437,6 +437,8 @@ async function initializeDatabase() {
 
         // Coluna de senha do App de Membros (adicionada se não existir)
         await activePgPool.query(`ALTER TABLE membros ADD COLUMN IF NOT EXISTS app_senha TEXT NULL`);
+
+        await activePgPool.query(`CREATE TABLE IF NOT EXISTS usuarios (
             id SERIAL PRIMARY KEY,
             igreja VARCHAR(255) NOT NULL,
             igreja_id INTEGER NOT NULL,
