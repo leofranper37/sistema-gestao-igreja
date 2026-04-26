@@ -836,13 +836,23 @@
 
         document.getElementById('app').style.display = 'flex';
 
-        await Promise.all([loadEvents(), loadPrayers(), loadStats(), loadFeed()]);
-
-        setTimeout(() => {
+        // Nunca bloqueia a abertura da UI por API lenta.
+        const closeSplash = () => {
             const sp = document.getElementById('splash');
+            if (!sp) return;
             sp.classList.add('hidden');
-            sp.addEventListener('transitionend', () => sp.remove(), {once:true});
-        }, 350);
+            sp.addEventListener('transitionend', () => sp.remove(), { once: true });
+        };
+
+        const dataLoad = Promise.allSettled([loadEvents(), loadPrayers(), loadStats(), loadFeed()]);
+        const maxSplashTime = new Promise((resolve) => setTimeout(resolve, 900));
+        await Promise.race([dataLoad, maxSplashTime]);
+        closeSplash();
+
+        // Se o timeout vencer, atualiza os dados assim que as APIs terminarem.
+        dataLoad.then(() => {
+            try { renderCalendar(); } catch (e) {}
+        });
 
         renderCalendar();
     }
