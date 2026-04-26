@@ -237,6 +237,17 @@
     .paction-row:active{background:var(--surface2)}
     .paction-left{display:flex;align-items:center;gap:14px}
     .paction-label{font-size:.87rem;font-weight:500}
+    /* LOGIN SCREEN */
+    #loginScreen{position:fixed;inset:0;background:var(--bg);z-index:8000;display:none;flex-direction:column;align-items:center;justify-content:center;padding:24px}
+    .login-box{width:100%;max-width:360px;background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:28px 24px;box-shadow:0 24px 60px rgba(0,0,0,.5)}
+    .login-logo{width:56px;height:56px;background:linear-gradient(135deg,var(--teal),var(--primary));border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin:0 auto 16px}
+    .login-title{font-size:1.2rem;font-weight:800;text-align:center;margin-bottom:4px}
+    .login-subtitle{font-size:.8rem;color:var(--text2);text-align:center;margin-bottom:20px}
+    .login-err{font-size:.78rem;color:var(--danger);text-align:center;min-height:18px;margin-bottom:8px}
+    .login-submit{width:100%;background:linear-gradient(135deg,var(--teal),var(--primary));color:#fff;border:none;border-radius:12px;padding:14px;font-size:.94rem;font-weight:700;cursor:pointer;transition:opacity .2s;margin-top:4px}
+    .login-submit:disabled{opacity:.6;cursor:default}
+    .login-toggle{text-align:center;margin-top:14px;font-size:.78rem;color:var(--text2);cursor:pointer}
+    .login-toggle strong{color:var(--primary)}
     </style>
     </head>
     <body>
@@ -247,6 +258,34 @@
         <div class="splash-name" id="splashChurchName">Minha Igreja</div>
         <div class="splash-sub">Bem-vindo de volta</div>
         <div class="splash-loader"></div>
+    </div>
+
+    <!-- TELA DE LOGIN CPF -->
+    <div id="loginScreen">
+        <div class="login-box">
+            <div class="login-logo"><i class="fa-solid fa-church"></i></div>
+            <div class="login-title" id="loginTitle">Entrar no App</div>
+            <div class="login-subtitle" id="loginSubtitle">Use seu CPF e senha para acessar</div>
+            <div class="login-err" id="loginErr"></div>
+            <form onsubmit="submitLogin(event)">
+                <div class="form-group">
+                    <label class="form-label">CPF</label>
+                    <input type="tel" class="form-input" id="loginCpf" placeholder="000.000.000-00" required maxlength="14" autocomplete="username">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Senha</label>
+                    <input type="password" class="form-input" id="loginSenha" placeholder="Mínimo 6 caracteres" required minlength="6" autocomplete="current-password">
+                </div>
+                <div class="form-group" id="loginConfirmRow" style="display:none">
+                    <label class="form-label">Confirmar Senha</label>
+                    <input type="password" class="form-input" id="loginSenhaConf" placeholder="Repita a senha" minlength="6" autocomplete="new-password">
+                </div>
+                <button type="submit" class="login-submit" id="loginSubmitBtn">Entrar</button>
+            </form>
+            <div class="login-toggle" id="loginToggleBtn" onclick="switchLoginMode(currentLoginMode==='login'?'first':'login')">
+                Primeiro acesso · <strong>Criar senha</strong>
+            </div>
+        </div>
     </div>
 
     <!-- APP -->
@@ -263,9 +302,6 @@
                 <div class="icon-btn" onclick="showToast('🔔 Nenhuma notificação nova.')">
                     <i class="fa-solid fa-bell"></i>
                     <span class="ibadge" id="notifDot" style="display:none"></span>
-                </div>
-                <div class="icon-btn" onclick="location.href='dashboard.html'" title="Sistema de Gestão">
-                    <i class="fa-solid fa-grid-2"></i>
                 </div>
             </div>
         </div>
@@ -436,20 +472,6 @@
                 <div class="profile-section">
                     <div class="sec-title">Atalhos</div>
                     <div class="profile-list">
-                        <div class="paction-row" onclick="location.href='dashboard.html'">
-                            <div class="paction-left">
-                                <div class="prow-icon c-blue"><i class="fa-solid fa-gauge"></i></div>
-                                <div class="paction-label">Painel de Gestão</div>
-                            </div>
-                            <i class="fa-solid fa-chevron-right" style="color:var(--text3);font-size:.75rem"></i>
-                        </div>
-                        <div class="paction-row" onclick="location.href='configuracoes.html'">
-                            <div class="paction-left">
-                                <div class="prow-icon c-teal"><i class="fa-solid fa-gear"></i></div>
-                                <div class="paction-label">Configurações</div>
-                            </div>
-                            <i class="fa-solid fa-chevron-right" style="color:var(--text3);font-size:.75rem"></i>
-                        </div>
                         <div class="paction-row" onclick="doLogout()">
                             <div class="paction-left">
                                 <div class="prow-icon" style="background:rgba(239,68,68,.13);color:var(--danger)"><i class="fa-solid fa-right-from-bracket"></i></div>
@@ -589,16 +611,13 @@
         </div>
     </div>
 
-<script src="session.js?v=20260425b"></script>
 <script src="pwa.js?v=20260425b"></script>
 <script>
-if (typeof requireAuthSession === 'function') {
-    requireAuthSession();
-}
 
     // ── DADOS ──────────────────────────────────────────────────────────
     let currentUser = null, currentTab = 'inicio', calDate = new Date();
     let allEvents = [], allPrayers = [], cardFlipped = false;
+    let currentLoginMode = 'login';
 
     const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
     const MESES_S = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
@@ -617,24 +636,24 @@ if (typeof requireAuthSession === 'function') {
 
     const ACTIONS = {
         admin:[
-            {i:'fa-gauge',l:'Dashboard',h:'dashboard.html',c:'c-blue'},
-            {i:'fa-users',l:'Membros',h:'membros.html',c:'c-teal'},
-            {i:'fa-calendar-check',l:'Portaria',h:'portaria.html',c:'c-orange'},
             {i:'fa-hands-praying',l:'Orações',a:'prayer',c:'c-purple'},
+            {i:'fa-calendar-days',l:'Agenda',a:'agenda',c:'c-blue'},
+            {i:'fa-id-card',l:'Credencial',a:'credential',c:'c-teal'},
             {i:'fa-dollar-sign',l:'Financeiro',h:'financeiro.html',c:'c-green'},
-            {i:'fa-calendar-days',l:'Agenda',a:'agenda',c:'c-yellow'},
-            {i:'fa-bullhorn',l:'WhatsApp',h:'comunicacao_whatsapp.html',c:'c-blue'},
-            {i:'fa-id-card',l:'Credencial',a:'credential',c:'c-teal'}
+            {i:'fa-calendar-check',l:'Portaria',h:'portaria.html',c:'c-orange'},
+            {i:'fa-users',l:'Membros',h:'membros.html',c:'c-blue'},
+            {i:'fa-music',l:'Escalas',h:'escalas.html',c:'c-yellow'},
+            {i:'fa-bullhorn',l:'WhatsApp',h:'comunicacao_whatsapp.html',c:'c-purple'}
         ],
         secretaria:[
-            {i:'fa-gauge',l:'Dashboard',h:'dashboard.html',c:'c-blue'},
             {i:'fa-users',l:'Membros',h:'membros.html',c:'c-teal'},
             {i:'fa-calendar-check',l:'Portaria',h:'portaria.html',c:'c-orange'},
             {i:'fa-hands-praying',l:'Orações',a:'prayer',c:'c-purple'},
             {i:'fa-calendar-days',l:'Agenda',a:'agenda',c:'c-green'},
-            {i:'fa-bullhorn',l:'WhatsApp',h:'comunicacao_whatsapp.html',c:'c-yellow'},
             {i:'fa-id-card',l:'Credencial',a:'credential',c:'c-blue'},
-            {i:'fa-child',l:'Crianças',h:'criancas.html',c:'c-orange'}
+            {i:'fa-child',l:'Crianças',h:'criancas.html',c:'c-yellow'},
+            {i:'fa-music',l:'Escalas',h:'escalas.html',c:'c-teal'},
+            {i:'fa-users-viewfinder',l:'Grupos',h:'grupos.html',c:'c-orange'}
         ],
         pastor:[
             {i:'fa-hands-praying',l:'Orações',a:'prayer',c:'c-purple'},
@@ -643,7 +662,7 @@ if (typeof requireAuthSession === 'function') {
             {i:'fa-clock-rotate-left',l:'Hist. Pastoral',h:'historico_pastoral.html',c:'c-orange'},
             {i:'fa-id-card',l:'Credencial',a:'credential',c:'c-green'},
             {i:'fa-book-open',l:'EBD',h:'ebd_turmas.html',c:'c-yellow'},
-            {i:'fa-gauge',l:'Dashboard',h:'dashboard.html',c:'c-blue'},
+            {i:'fa-music',l:'Escalas',h:'escalas.html',c:'c-blue'},
             {i:'fa-bullhorn',l:'WhatsApp',h:'comunicacao_whatsapp.html',c:'c-purple'}
         ],
         membro:[
@@ -668,39 +687,125 @@ if (typeof requireAuthSession === 'function') {
         ]
     };
 
-    // ── INIT ───────────────────────────────────────────────────────────
-    async function init() {
-        const user = getSessionUser();
-        if (!user) { location.href = 'login.html'; return; }
-        currentUser = user;
+    // ── AUTH SESSION (CPF-based) ─────────────────────────────────────
+    function getMembroSession() {
+        try { return JSON.parse(localStorage.getItem('ldfp_membro_session') || 'null'); } catch(e) { return null; }
+    }
+    function saveMembroSession(token, membro) {
+        localStorage.setItem('ldfp_membro_session', JSON.stringify({ token, membro, ts: Date.now() }));
+    }
+    function clearMembroSession() {
+        localStorage.removeItem('ldfp_membro_session');
+    }
 
+    // ── LOGIN SCREEN ──────────────────────────────────────────────────
+    function showLoginScreen(mode) {
+        mode = mode || 'login';
+        const el = document.getElementById('loginScreen');
+        if (!el) return;
+        el.style.display = 'flex';
+        document.getElementById('app').style.display = 'none';
+        document.getElementById('splash').classList.add('hidden');
+        switchLoginMode(mode);
+    }
+
+    function switchLoginMode(mode) {
+        currentLoginMode = mode;
+        const isFirst = mode === 'first';
+        document.getElementById('loginTitle').textContent = isFirst ? 'Primeiro Acesso' : 'Entrar no App';
+        document.getElementById('loginSubtitle').textContent = isFirst
+            ? 'Crie sua senha com seu CPF cadastrado na igreja'
+            : 'Use seu CPF e senha para acessar';
+        document.getElementById('loginConfirmRow').style.display = isFirst ? 'block' : 'none';
+        document.getElementById('loginSubmitBtn').textContent = isFirst ? 'Criar Senha e Entrar' : 'Entrar';
+        document.getElementById('loginToggleBtn').innerHTML = isFirst
+            ? 'Já tenho senha · <strong>Fazer login</strong>'
+            : 'Primeiro acesso · <strong>Criar senha</strong>';
+        document.getElementById('loginErr').textContent = '';
+    }
+
+    async function submitLogin(e) {
+        e.preventDefault();
+        const cpf = document.getElementById('loginCpf').value.replace(/\D/g, '');
+        const senha = document.getElementById('loginSenha').value;
+        const senhaConf = document.getElementById('loginSenhaConf').value;
+        const errEl = document.getElementById('loginErr');
+        const btn = document.getElementById('loginSubmitBtn');
+        errEl.textContent = '';
+
+        if (currentLoginMode === 'first' && senha !== senhaConf) {
+            errEl.textContent = 'As senhas não coincidem.';
+            return;
+        }
+        if (senha.length < 6) {
+            errEl.textContent = 'A senha deve ter pelo menos 6 caracteres.';
+            return;
+        }
+
+        btn.disabled = true;
+        btn.textContent = 'Aguarde...';
+        try {
+            const endpoint = currentLoginMode === 'first' ? '/app-membro/primeiro-acesso' : '/app-membro/login';
+            const r = await fetch(endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ cpf, senha })
+            });
+            const data = await r.json();
+            if (!r.ok) {
+                errEl.textContent = data.message || data.error || 'Erro ao autenticar.';
+                return;
+            }
+            saveMembroSession(data.token, data.membro);
+            document.getElementById('loginScreen').style.display = 'none';
+            currentUser = data.membro;
+            await startApp(data.membro);
+        } catch (err) {
+            errEl.textContent = 'Erro de conexão. Verifique sua internet.';
+        } finally {
+            btn.disabled = false;
+            btn.textContent = currentLoginMode === 'first' ? 'Criar Senha e Entrar' : 'Entrar';
+        }
+    }
+
+    async function startApp(user) {
         renderGreeting(user);
         renderVerse();
         renderQuickActions(user);
         populateCredential(user);
         populateProfileInfo(user);
-
         document.getElementById('app').style.display = 'flex';
-
-        // Nunca bloqueia a abertura da UI por API lenta.
-        const closeSplash = () => {
-            const sp = document.getElementById('splash');
-            if (!sp) return;
-            sp.classList.add('hidden');
-            sp.addEventListener('transitionend', () => sp.remove(), { once: true });
-        };
-
-        const dataLoad = Promise.allSettled([loadEvents(), loadPrayers(), loadStats(), loadFeed()]);
-        const maxSplashTime = new Promise((resolve) => setTimeout(resolve, 900));
-        await Promise.race([dataLoad, maxSplashTime]);
-        closeSplash();
-
-        // Se o timeout vencer, atualiza os dados assim que as APIs terminarem.
-        dataLoad.then(() => {
-            try { renderCalendar(); } catch (e) {}
-        });
-
         renderCalendar();
+        Promise.allSettled([loadEvents(), loadPrayers(), loadStats(), loadFeed()]);
+        // Busca perfil completo do servidor e atualiza
+        try {
+            const sess = getMembroSession();
+            if (sess?.token) {
+                const r = await fetch('/app-membro/meu-perfil', {
+                    headers: { 'Authorization': 'Bearer ' + sess.token }
+                });
+                if (r.ok) {
+                    const perfil = await r.json();
+                    const merged = { ...user, ...perfil };
+                    currentUser = merged;
+                    populateCredential(merged);
+                    populateProfileInfo(merged);
+                    renderGreeting(merged);
+                }
+            }
+        } catch(e) {}
+    }
+
+    // ── INIT ───────────────────────────────────────────────────────────
+    async function init() {
+        const sess = getMembroSession();
+        if (!sess || !sess.token) {
+            showLoginScreen('login');
+            return;
+        }
+        currentUser = sess.membro;
+
+        await startApp(sess.membro);
     }
 
     // ── GREETING ───────────────────────────────────────────────────────
@@ -904,13 +1009,14 @@ if (typeof requireAuthSession === 'function') {
     // ── CREDENTIAL ─────────────────────────────────────────────────────
     function populateCredential(u){
         const nome=u.nome||u.email||'Membro', ini=nome.charAt(0).toUpperCase();
-        const role=ROLES[u.role]||u.role||'Membro', id=u.id||u.membro_id||'—';
+        const role=ROLES[u.role]||'Membro', id=u.id||u.membro_id||'—';
         const church=u.nome_igreja||'Igreja';
+        const cpfMask = u.cpf ? u.cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4').replace(/^(\d{3}\.\d{3})\.\d{3}/, '$1.***') : '';
         document.getElementById('credChurch').textContent=church;
         document.getElementById('credPhoto').textContent=ini;
         document.getElementById('credName').textContent=nome;
         document.getElementById('credRole').innerHTML=`<i class="fa-solid fa-star"></i> ${role}`;
-        document.getElementById('credId').textContent=`ID: ${String(id).padStart(6,'0')}`;
+        document.getElementById('credId').textContent=`${cpfMask ? 'CPF: '+cpfMask : 'ID: '+String(id).padStart(6,'0')}`;
         document.getElementById('credBackName').textContent=nome;
         document.getElementById('credBackId').textContent=`ID #${String(id).padStart(6,'0')} · ${church}`;
         const qd=encodeURIComponent(`LDFP_MEMBRO:${id}:${nome}`);
@@ -920,14 +1026,32 @@ if (typeof requireAuthSession === 'function') {
     function flipCard(){cardFlipped=!cardFlipped;document.getElementById('credInner').classList.toggle('flipped',cardFlipped);}
 
     // ── PROFILE ────────────────────────────────────────────────────────
+    function fmtNasc(s) {
+        if (!s) return '—';
+        const d = new Date(s);
+        if (!isNaN(d)) return d.toLocaleDateString('pt-BR');
+        return s; // pode vir como dd/mm/yyyy direto
+    }
+    function fmtCpf(s) {
+        if (!s) return '—';
+        return s.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+    }
     function populateProfileInfo(u){
-        const role=ROLES[u.role]||u.role||'Membro';
-        document.getElementById('profileInfo').innerHTML=[
+        const role=ROLES[u.role]||'Membro';
+        const rows = [
             {i:'fa-user',c:'c-blue',l:'Nome completo',v:u.nome||'—'},
+            {i:'fa-id-card',c:'c-purple',l:'CPF',v:fmtCpf(u.cpf)},
             {i:'fa-envelope',c:'c-teal',l:'E-mail',v:u.email||'—'},
-            {i:'fa-shield-halved',c:'c-purple',l:'Perfil de acesso',v:role},
-            {i:'fa-church',c:'c-orange',l:'Igreja',v:u.nome_igreja||'—'}
-        ].map(r=>`<div class="profile-row"><div class="prow-icon ${r.c}"><i class="fa-solid ${r.i}"></i></div><div><div class="prow-label">${r.l}</div><div class="prow-value">${r.v}</div></div></div>`).join('');
+            {i:'fa-phone',c:'c-orange',l:'Telefone',v:u.celular||u.telefone||'—'},
+            {i:'fa-cake-candles',c:'c-yellow',l:'Data de Nascimento',v:fmtNasc(u.nascimento||u.data_nascimento)},
+            {i:'fa-venus-mars',c:'c-blue',l:'Sexo',v:u.sexo||'—'},
+            {i:'fa-heart',c:'c-teal',l:'Estado Civil',v:u.estado_civil||'—'},
+            {i:'fa-location-dot',c:'c-orange',l:'Cidade',v:u.cidade ? (u.cidade+(u.estado?'/'+u.estado:'')) : '—'},
+            {i:'fa-church',c:'c-purple',l:'Congregação',v:u.congregacao||u.nome_igreja||'—'},
+            {i:'fa-shield-halved',c:'c-blue',l:'Situação',v:u.situacao||'Ativo'}
+        ].filter(r=>r.v&&r.v!=='—'||['Nome completo','Igreja'].includes(r.l));
+        document.getElementById('profileInfo').innerHTML=rows
+            .map(r=>`<div class="profile-row"><div class="prow-icon ${r.c}"><i class="fa-solid ${r.i}"></i></div><div><div class="prow-label">${r.l}</div><div class="prow-value">${r.v}</div></div></div>`).join('');
     }
 
     // ── NAVIGATION ─────────────────────────────────────────────────────
@@ -965,17 +1089,9 @@ if (typeof requireAuthSession === 'function') {
     // ── LOGOUT ─────────────────────────────────────────────────────────
     function doLogout(){
         if(!confirm('Tem certeza que deseja sair?')) return;
-        try {
-            if (typeof clearAuthSession === 'function') {
-                clearAuthSession();
-            }
-        } catch (e) {}
-        localStorage.removeItem('ldfpAuth');
-        localStorage.removeItem('ldfpUser');
-        localStorage.removeItem('token');
-        sessionStorage.removeItem('token');
-        sessionStorage.clear();
-        location.href='login.html';
+        clearMembroSession();
+        document.getElementById('app').style.display = 'none';
+        showLoginScreen('login');
     }
 
     // ── UTILS ──────────────────────────────────────────────────────────
@@ -988,12 +1104,15 @@ if (typeof requireAuthSession === 'function') {
     }
 
 function forceOpenApp() {
-  const app = document.getElementById('app');
-  if (app) app.style.display = 'flex';
   const sp = document.getElementById('splash');
-  if (!sp) return;
-  sp.classList.add('hidden');
-  sp.addEventListener('transitionend', () => sp.remove(), { once: true });
+  if (sp) { sp.classList.add('hidden'); sp.addEventListener('transitionend', () => sp.remove(), { once: true }); }
+  // Se não há sessão, mostra a tela de login
+  const sess = getMembroSession();
+  if (!sess || !sess.token) {
+    showLoginScreen('login');
+    return;
+  }
+  document.getElementById('app').style.display = 'flex';
 }
 
 async function bootstrapApp() {

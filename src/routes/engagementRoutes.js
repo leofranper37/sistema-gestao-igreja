@@ -34,6 +34,9 @@ const {
     getMemberPermissions,
     getMemberAppContext,
     getPaymentLinkPublic,
+    loginMembroApp,
+    primeiroAcessoMembroApp,
+    getMeuPerfilApp,
     getQrSessionPublic,
     listAutocadastros,
     listMidiaVisitors,
@@ -54,6 +57,11 @@ const {
 } = require('../controllers/engagementController');
 
 const router = express.Router();
+
+// Rotas públicas do App de Membros (autenticação por CPF)
+router.post('/app-membro/login', loginMembroApp);
+router.post('/app-membro/primeiro-acesso', primeiroAcessoMembroApp);
+router.get('/app-membro/meu-perfil', getMeuPerfilApp);
 
 router.get('/auth/me', requireAuth, getAuthMe);
 router.get('/app-membro/context', requireAuth, requireModuleEnabled('appMembro'), getMemberAppContext);

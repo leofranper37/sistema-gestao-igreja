@@ -1,7 +1,156 @@
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const { createHttpError } = require('../utils/httpError');
 const { audit } = require('../services/auditService');
 const engagementService = require('../services/engagementService');
 const realtime = require('../services/realtimeService');
+const { pool } = require('../config/db');
+const config = require('../config');
+
+// ── APP DE MEMBROS: Auth por CPF ───────────────────────────────────
+
+async function loginMembroApp(req, res) {
+    const { cpf, senha, igreja_nome } = req.body || {};
+    if (!cpf || !senha) {
+        throw createHttpError(400, 'CPF e senha são obrigatórios.');
+    }
+
+    const cpfLimpo = String(cpf).replace(/\D/g, '');
+
+    // Busca o membro pelo CPF — opcionalmente filtrando por nome de igreja
+    let sql = `SELECT m.*, i.nome AS nome_igreja, i.id AS igreja_id_num
+               FROM membros m
+               INNER JOIN igrejas i ON i.id = m.igreja_id
+               WHERE REPLACE(REPLACE(REPLACE(m.cpf, '.', ''), '-', ''), '/', '') = $1`;
+    const params = [cpfLimpo];
+
+    if (igreja_nome) {
+        sql += ` AND LOWER(i.nome) = LOWER($2)`;
+        params.push(String(igreja_nome).trim());
+    }
+
+    sql += ` LIMIT 1`;
+
+    const [rows] = await pool.query(sql, params);
+    const membro = rows[0];
+
+    if (!membro) {
+        throw createHttpError(404, 'Membro não encontrado. Verifique o CPF e o nome da igreja.');
+    }
+
+    // Verifica senha (hash bcrypt armazenado no campo app_senha)
+    if (!membro.app_senha) {
+        throw createHttpError(401, 'Este membro ainda não criou uma senha para o App. Use "Primeiro Acesso" para criar.');
+    }
+
+    const ok = await bcrypt.compare(String(senha), String(membro.app_senha));
+    if (!ok) {
+        throw createHttpError(401, 'Senha incorreta.');
+    }
+
+    const payload = {
+        id: membro.id,
+        nome: membro.nome,
+        email: membro.email || '',
+        igrejaId: membro.igreja_id,
+        nome_igreja: membro.nome_igreja,
+        role: 'membro',
+        membro_id: membro.id,
+        cpf: cpfLimpo,
+        app_mode: true
+    };
+
+    const token = jwt.sign(payload, config.security.jwtSecret, { expiresIn: '30d' });
+    res.json({ token, membro: payload, message: 'Login realizado com sucesso.' });
+}
+
+async function primeiroAcessoMembroApp(req, res) {
+    const { cpf, senha, igreja_nome } = req.body || {};
+    if (!cpf || !senha) {
+        throw createHttpError(400, 'CPF e senha são obrigatórios.');
+    }
+    if (String(senha).length < 6) {
+        throw createHttpError(400, 'A senha deve ter pelo menos 6 caracteres.');
+    }
+
+    const cpfLimpo = String(cpf).replace(/\D/g, '');
+
+    let sql = `SELECT m.id, m.nome, m.cpf, m.app_senha, m.igreja_id, i.nome AS nome_igreja
+               FROM membros m
+               INNER JOIN igrejas i ON i.id = m.igreja_id
+               WHERE REPLACE(REPLACE(REPLACE(m.cpf, '.', ''), '-', ''), '/', '') = $1`;
+    const params = [cpfLimpo];
+
+    if (igreja_nome) {
+        sql += ` AND LOWER(i.nome) = LOWER($2)`;
+        params.push(String(igreja_nome).trim());
+    }
+    sql += ` LIMIT 1`;
+
+    const [rows] = await pool.query(sql, params);
+    const membro = rows[0];
+
+    if (!membro) {
+        throw createHttpError(404, 'CPF não encontrado. Entre em contato com a secretaria da sua igreja.');
+    }
+
+    if (membro.app_senha) {
+        throw createHttpError(409, 'Este CPF já possui senha cadastrada. Use a opção de login.');
+    }
+
+    const hash = await bcrypt.hash(String(senha), 10);
+    await pool.query(`UPDATE membros SET app_senha = $1 WHERE id = $2`, [hash, membro.id]);
+
+    const payload = {
+        id: membro.id,
+        nome: membro.nome,
+        email: membro.email || '',
+        igrejaId: membro.igreja_id,
+        nome_igreja: membro.nome_igreja,
+        role: 'membro',
+        membro_id: membro.id,
+        cpf: cpfLimpo,
+        app_mode: true
+    };
+
+    const token = jwt.sign(payload, config.security.jwtSecret, { expiresIn: '30d' });
+    res.json({ token, membro: payload, message: 'Senha criada com sucesso! Bem-vindo ao App da Igreja.' });
+}
+
+async function getMeuPerfilApp(req, res) {
+    // Suporta tanto membro-jwt (app_mode) quanto admin-jwt (membro_id no payload)
+    const authHeader = req.headers.authorization || '';
+    const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : null;
+    if (!token) throw createHttpError(401, 'Token não informado.');
+
+    let payload;
+    try {
+        payload = jwt.verify(token, config.security.jwtSecret);
+    } catch (err) {
+        throw createHttpError(401, 'Token inválido ou expirado.');
+    }
+
+    const membroId = payload.membro_id || payload.id;
+    const igrejaId = payload.igrejaId;
+
+    if (!payload.app_mode) throw createHttpError(403, 'Rota exclusiva do App de Membros.');
+
+    const [rows] = await pool.query(
+        `SELECT m.*, i.nome AS nome_igreja, i.plano, i.status_assinatura
+         FROM membros m
+         INNER JOIN igrejas i ON i.id = m.igreja_id
+         WHERE m.id = $1 AND m.igreja_id = $2
+         LIMIT 1`,
+        [membroId, igrejaId]
+    );
+
+    const membro = rows[0];
+    if (!membro) throw createHttpError(404, 'Perfil não encontrado.');
+
+    // Nunca retornar campos sensíveis
+    const { app_senha: _, senha: __, ...safe } = membro;
+    res.json(safe);
+}
 
 async function listWhatsAppTemplates(req, res) {
     const templates = await engagementService.listTemplates(req.auth.igrejaId);
@@ -299,5 +448,8 @@ module.exports = {
     triggerOracaoResposta,
     triggerVisitanteBoasVindas,
     updateMidiaVisitorStatus,
-    updateWhatsAppTemplate
+    updateWhatsAppTemplate,
+    loginMembroApp,
+    primeiroAcessoMembroApp,
+    getMeuPerfilApp
 };

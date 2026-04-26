@@ -435,7 +435,8 @@ async function initializeDatabase() {
 
         await activePgPool.query(`CREATE INDEX IF NOT EXISTS idx_membros_igreja ON membros (igreja_id)`);
 
-        await activePgPool.query(`CREATE TABLE IF NOT EXISTS usuarios (
+        // Coluna de senha do App de Membros (adicionada se não existir)
+        await activePgPool.query(`ALTER TABLE membros ADD COLUMN IF NOT EXISTS app_senha TEXT NULL`);
             id SERIAL PRIMARY KEY,
             igreja VARCHAR(255) NOT NULL,
             igreja_id INTEGER NOT NULL,
@@ -628,6 +629,9 @@ async function initializeDatabase() {
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             INDEX idx_membros_igreja (igreja_id)
         )`);
+
+        // Coluna de senha do App de Membros (adicionada se não existir)
+        try { await activeMysqlPool.query(`ALTER TABLE membros ADD COLUMN app_senha VARCHAR(255) NULL`); } catch (_) {}
 
         await activeMysqlPool.query(`CREATE TABLE IF NOT EXISTS usuarios (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -861,6 +865,7 @@ async function initializeDatabase() {
             safeAlter('ALTER TABLE membros ADD COLUMN nacionalidade TEXT');
             safeAlter('ALTER TABLE membros ADD COLUMN naturalidade TEXT');
             safeAlter('ALTER TABLE membros ADD COLUMN created_at TEXT DEFAULT CURRENT_TIMESTAMP');
+            safeAlter('ALTER TABLE membros ADD COLUMN app_senha TEXT');
 
             db.run(`CREATE INDEX IF NOT EXISTS idx_membros_igreja ON membros (igreja_id)`);
 
