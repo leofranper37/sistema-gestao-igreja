@@ -1,4 +1,11 @@
 const { pool } = require('../config/db');
+const fs = require('fs');
+const path = require('path');
+const { execSync } = require('child_process');
+
+const RESUME_STATE_DIR = path.resolve(__dirname, '..', '..', '.ldfp-resume');
+const RESUME_STATE_FILE = path.join(RESUME_STATE_DIR, 'state.json');
+const RESUME_TRIGGER = 'LDFP_CONTINUAR';
 
 // ── helpers ─────────────────────────────────────────────────────────────────
 
@@ -13,6 +20,96 @@ function normDate(v) {
     const s = String(v).trim();
     // accept ISO date: YYYY-MM-DD → convert to ISO datetime
     return /^\d{4}-\d{2}-\d{2}$/.test(s) ? s + 'T00:00:00.000Z' : s;
+}
+
+function ensureResumeStateDir() {
+    if (!fs.existsSync(RESUME_STATE_DIR)) {
+        fs.mkdirSync(RESUME_STATE_DIR, { recursive: true });
+    }
+}
+
+function defaultResumeState() {
+    return {
+        trigger: RESUME_TRIGGER,
+        updatedAt: new Date().toISOString(),
+        focus: {
+            currentObjective: 'Sem objetivo definido',
+            nextSteps: []
+        },
+        environment: {
+            productionUrl: 'https://www.ldfp.com.br',
+            cloudIdeUrl: 'https://improved-funicular-5xjvrqxg4q9hpv6r.github.dev/'
+        },
+        checkpoints: []
+    };
+}
+
+function readResumeState() {
+    ensureResumeStateDir();
+
+    if (!fs.existsSync(RESUME_STATE_FILE)) {
+        const state = defaultResumeState();
+        fs.writeFileSync(RESUME_STATE_FILE, JSON.stringify(state, null, 2) + '\n', 'utf8');
+        return state;
+    }
+
+    try {
+        return JSON.parse(fs.readFileSync(RESUME_STATE_FILE, 'utf8'));
+    } catch (_err) {
+        return defaultResumeState();
+    }
+}
+
+function writeResumeState(state) {
+    ensureResumeStateDir();
+    fs.writeFileSync(RESUME_STATE_FILE, JSON.stringify(state, null, 2) + '\n', 'utf8');
+}
+
+function runGit(cmd) {
+    try {
+        return execSync(cmd, {
+            cwd: path.resolve(__dirname, '..', '..'),
+            stdio: ['ignore', 'pipe', 'ignore']
+        }).toString().trim();
+    } catch (_err) {
+        return '';
+    }
+}
+
+function getGitSnapshot() {
+    const branch = runGit('git rev-parse --abbrev-ref HEAD') || 'desconhecido';
+    const head = runGit('git rev-parse HEAD') || 'desconhecido';
+    const statusShort = runGit('git status --short');
+    const changedFiles = statusShort
+        ? statusShort.split('\n').map(line => line.trim()).filter(Boolean)
+        : [];
+
+    return {
+        branch,
+        head,
+        shortHead: head !== 'desconhecido' ? head.slice(0, 7) : head,
+        dirty: changedFiles.length > 0,
+        changedFiles
+    };
+}
+
+function normalizeNextSteps(nextSteps) {
+    if (Array.isArray(nextSteps)) {
+        return nextSteps
+            .map(step => String(step || '').trim())
+            .filter(Boolean)
+            .slice(0, 20);
+    }
+
+    if (typeof nextSteps === 'string') {
+        return nextSteps
+            .split('\n')
+            .map(step => step.trim())
+            .filter(Boolean)
+            .slice(0, 20);
+    }
+
+    return [];
 }
 
 // ── Dashboard Overview ───────────────────────────────────────────────────────
@@ -316,6 +413,78 @@ async function markSaasAssinaturaPaga(req, res) {
     }
 }
 
+// ── Gatilho de Retomada (estado de continuidade) ──────────────────────────
+
+async function getSaasRetomada(req, res) {
+    try {
+        const state = readResumeState();
+        res.json({
+            ...state,
+            trigger: state.trigger || RESUME_TRIGGER,
+            git: getGitSnapshot(),
+            filePath: '.ldfp-resume/state.json'
+        });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}
+
+async function updateSaasRetomada(req, res) {
+    try {
+        const state = readResumeState();
+        const body = req.body || {};
+
+        state.trigger = RESUME_TRIGGER;
+        state.updatedAt = new Date().toISOString();
+
+        if (body.focus && typeof body.focus === 'object') {
+            const currentObjective = String(body.focus.currentObjective || '').trim();
+            const nextSteps = normalizeNextSteps(body.focus.nextSteps);
+
+            state.focus = {
+                currentObjective: currentObjective || state.focus?.currentObjective || 'Sem objetivo definido',
+                nextSteps: nextSteps.length ? nextSteps : (state.focus?.nextSteps || [])
+            };
+        }
+
+        if (body.environment && typeof body.environment === 'object') {
+            state.environment = {
+                productionUrl: String(body.environment.productionUrl || state.environment?.productionUrl || 'https://www.ldfp.com.br').trim(),
+                cloudIdeUrl: String(body.environment.cloudIdeUrl || state.environment?.cloudIdeUrl || 'https://improved-funicular-5xjvrqxg4q9hpv6r.github.dev/').trim()
+            };
+        }
+
+        writeResumeState(state);
+        res.json({ ok: true, state, git: getGitSnapshot() });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}
+
+async function createSaasRetomadaCheckpoint(req, res) {
+    try {
+        const state = readResumeState();
+        const body = req.body || {};
+        const note = String(body.note || 'Checkpoint manual').trim() || 'Checkpoint manual';
+        const now = new Date().toISOString();
+        const git = getGitSnapshot();
+
+        const checkpoints = Array.isArray(state.checkpoints) ? state.checkpoints : [];
+        const checkpoint = { at: now, note, git };
+
+        state.trigger = RESUME_TRIGGER;
+        state.updatedAt = now;
+        state.lastCheckpoint = checkpoint;
+        state.checkpoints = [checkpoint, ...checkpoints].slice(0, 50);
+        state.git = git;
+
+        writeResumeState(state);
+        res.json({ ok: true, checkpoint, state });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}
+
 module.exports = {
     getSuperAdminOverview,
     getSaasFaturamento,
@@ -327,5 +496,8 @@ module.exports = {
     getPlano,
     updatePlano,
     listSaasAssinaturas,
-    markSaasAssinaturaPaga
+    markSaasAssinaturaPaga,
+    getSaasRetomada,
+    updateSaasRetomada,
+    createSaasRetomadaCheckpoint
 };

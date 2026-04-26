@@ -11,7 +11,10 @@ const {
     getPlano,
     updatePlano,
     listSaasAssinaturas,
-    markSaasAssinaturaPaga
+    markSaasAssinaturaPaga,
+    getSaasRetomada,
+    updateSaasRetomada,
+    createSaasRetomadaCheckpoint
 } = require('../controllers/superAdminController');
 
 const router = express.Router();
@@ -37,5 +40,10 @@ router.put('/api/saas/planos/:slug', ...isSuperAdmin, updatePlano);
 // Assinaturas & Faturas
 router.get('/api/saas/assinaturas', ...isSuperAdmin, listSaasAssinaturas);
 router.put('/api/saas/assinaturas/:id/pago', ...isSuperAdmin, markSaasAssinaturaPaga);
+
+// Retomada / Continuidade
+router.get('/api/saas/retomada', ...isSuperAdmin, getSaasRetomada);
+router.put('/api/saas/retomada', ...isSuperAdmin, updateSaasRetomada);
+router.post('/api/saas/retomada/checkpoint', ...isSuperAdmin, createSaasRetomadaCheckpoint);
 
 module.exports = router;
