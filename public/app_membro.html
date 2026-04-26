@@ -724,6 +724,11 @@
     }
     function saveMembroSession(token, membro) {
         localStorage.setItem('ldfp_membro_session', JSON.stringify({ token, membro, ts: Date.now() }));
+        // Evita herdar sessão administrativa no mesmo navegador.
+        localStorage.removeItem('ldfpAuth');
+        localStorage.removeItem('ldfpUser');
+        localStorage.removeItem('token');
+        sessionStorage.removeItem('token');
     }
     function clearMembroSession() {
         localStorage.removeItem('ldfp_membro_session');

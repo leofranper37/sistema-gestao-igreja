@@ -58,6 +58,32 @@
         return getStoredAuth()?.token || '';
     }
 
+    function isMemberLikeRole(role) {
+        const normalized = String(role || '').toLowerCase();
+        return normalized === 'membro' || normalized === 'visitante';
+    }
+
+    function isPublicOrMemberPath(pathname) {
+        return /\/(index|login|planos|criar_conta|esqueci_senha|redefinir_senha|assinar|conta_bloqueada|meu_plano|app_membro)\.html$/i.test(pathname || '')
+            || /\/$/i.test(pathname || '')
+            || /\/api\//i.test(pathname || '');
+    }
+
+    function enforceMemberIsolation() {
+        const auth = getStoredAuth();
+        const role = auth?.user?.role;
+        if (!auth?.token || !isMemberLikeRole(role)) {
+            return;
+        }
+
+        const currentPath = window.location.pathname || '';
+        if (isPublicOrMemberPath(currentPath)) {
+            return;
+        }
+
+        window.location.href = 'app_membro.html';
+    }
+
     function isSameOriginRequest(resourceUrl) {
         try {
             const url = new URL(resourceUrl, window.location.origin);
@@ -163,6 +189,8 @@
     window.saveAuthSession = saveAuthSession;
     window.clearAuthSession = clearAuthSession;
     window.requireAuthSession = requireAuthSession;
+
+    enforceMemberIsolation();
 
     (async function syncAuthProfile() {
         const current = getStoredAuth();
