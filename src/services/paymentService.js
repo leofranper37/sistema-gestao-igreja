@@ -18,9 +18,9 @@ const PLANOS_FALLBACK = {
 };
 
 function getMpClient() {
-    const token = process.env.MP_ACCESS_TOKEN;
+    const token = process.env.MP_ACCESS_TOKEN || process.env.MERCADOPAGO_ACCESS_TOKEN;
     if (!token || token.startsWith('APP_USR-COLE')) {
-        throw new Error('MP_ACCESS_TOKEN não configurado. Adicione no .env ou no painel Vercel.');
+        throw new Error('Token do Mercado Pago não configurado. Defina MP_ACCESS_TOKEN (ou MERCADOPAGO_ACCESS_TOKEN) no .env/painel de deploy.');
     }
     return new MercadoPagoConfig({ accessToken: token });
 }

@@ -92,7 +92,7 @@ async function webhookMercadoPago(req, res) {
 
         // Busca detalhes do pagamento no MP para confirmar o status real
         const { MercadoPagoConfig, Payment } = require('mercadopago');
-        const token = process.env.MP_ACCESS_TOKEN;
+        const token = process.env.MP_ACCESS_TOKEN || process.env.MERCADOPAGO_ACCESS_TOKEN;
         if (!token || token.startsWith('APP_USR-COLE')) return;
 
         const client = new MercadoPagoConfig({ accessToken: token });
