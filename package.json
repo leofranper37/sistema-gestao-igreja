@@ -12,7 +12,7 @@
     "check:db": "node scripts/check-db.js",
     "migrate": "node scripts/migrar-schema.js",
     "gatilho:init": "node scripts/gatilho-retomada.js init-today",
-    "gatilho:save": "node scripts/gatilho-retomada.js save \"checkpoint manual\"",
+    "gatilho:save": "node scripts/gatilho-retomada.js save",
     "gatilho:resume": "node scripts/gatilho-retomada.js resume",
     "stop": "echo 'Use CTRL+C para parar o servidor.'",
     "test": "echo \"Error: no test specified\" && exit 1"
