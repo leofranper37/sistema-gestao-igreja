@@ -154,161 +154,973 @@
                 grid-template-columns: 1fr;
             }
         }
+    <!DOCTYPE html>
+    <html lang="pt-br">
+    <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#060d1a">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="App Igreja">
+    <title>App do Membro</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+        --bg:#060d1a;--surface:#0d1b2e;--surface2:#122035;--surface3:#162847;
+        --border:#1a2f48;--primary:#0ea5e9;--primary-dark:#0284c7;
+        --teal:#0f766e;--teal-light:#14b8a6;--accent:#f97316;--accent-dark:#ea580c;
+        --success:#22c55e;--warning:#f59e0b;--danger:#ef4444;--purple:#a855f7;
+        --text:#f1f5f9;--text2:#94a3b8;--text3:#64748b;
+        --nav-height:68px;--top-height:60px;--safe-bottom:env(safe-area-inset-bottom,0px)
+    }
+    html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text)}
+
+    /* SPLASH */
+    #splash{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;transition:opacity .4s,visibility .4s}
+    #splash.hidden{opacity:0;visibility:hidden;pointer-events:none}
+    .splash-logo{width:80px;height:80px;background:linear-gradient(135deg,var(--teal),var(--primary));border-radius:24px;display:flex;align-items:center;justify-content:center;font-size:2.2rem;color:#fff;box-shadow:0 20px 60px rgba(14,165,233,.4);animation:pulse-logo 1.5s ease-in-out infinite;margin-bottom:24px}
+    @keyframes pulse-logo{0%,100%{transform:scale(1);box-shadow:0 20px 60px rgba(14,165,233,.4)}50%{transform:scale(1.05);box-shadow:0 24px 70px rgba(14,165,233,.6)}}
+    .splash-name{font-size:1.4rem;font-weight:700}.splash-sub{font-size:.85rem;color:var(--text2);margin-top:4px}
+    .splash-loader{margin-top:40px;width:40px;height:4px;background:var(--surface3);border-radius:99px;overflow:hidden}
+    .splash-loader::after{content:'';display:block;height:100%;width:40%;background:linear-gradient(90deg,var(--teal),var(--primary));border-radius:99px;animation:loader-slide 1s ease-in-out infinite}
+    @keyframes loader-slide{0%{transform:translateX(-100%)}100%{transform:translateX(350%)}}
+
+    /* APP SHELL */
+    #app{display:flex;flex-direction:column;height:100%;height:100dvh}
+
+    /* TOP BAR */
+    .top-bar{height:var(--top-height);background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;gap:12px;flex-shrink:0;z-index:100}
+    .top-bar-logo{width:36px;height:36px;background:linear-gradient(135deg,var(--teal),var(--primary));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
+    .top-bar-info{flex:1;min-width:0}
+    .top-bar-church{font-size:.95rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .top-bar-user{font-size:.75rem;color:var(--text2)}
+    .top-bar-actions{display:flex;gap:8px}
+    .icon-btn{width:38px;height:38px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text2);font-size:.95rem;transition:all .2s;position:relative}
+    .icon-btn:hover{background:var(--surface3);color:var(--text)}
+    .icon-btn .ibadge{position:absolute;top:4px;right:4px;width:8px;height:8px;background:var(--accent);border-radius:50%;border:2px solid var(--surface)}
+
+    /* TAB AREA */
+    .tab-area{flex:1;overflow:hidden;position:relative}
+    .tab-pane{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;padding-bottom:calc(var(--nav-height) + var(--safe-bottom) + 16px);display:none;-webkit-overflow-scrolling:touch}
+    .tab-pane.active{display:block}
+    .tab-pane.slide-in{animation:slideIn .22s ease-out}
+    @keyframes slideIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+    /* BOTTOM NAV */
+    .bottom-nav{height:calc(var(--nav-height) + var(--safe-bottom));padding-bottom:var(--safe-bottom);background:var(--surface);border-top:1px solid var(--border);display:flex;align-items:stretch;flex-shrink:0;z-index:100}
+    .nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;transition:all .2s;color:var(--text3);font-size:.63rem;font-weight:600;text-transform:uppercase;letter-spacing:.03em;padding:4px 0;position:relative;-webkit-tap-highlight-color:transparent}
+    .nav-item i{font-size:1.2rem;transition:transform .2s}
+    .nav-item.active{color:var(--primary)}
+    .nav-item.active i{transform:scale(1.1)}
+    .nav-item.active::before{content:'';position:absolute;top:0;left:18%;right:18%;height:2px;background:var(--primary);border-radius:0 0 4px 4px}
+    .nav-badge{position:absolute;top:4px;right:18%;background:var(--accent);border-radius:99px;font-size:.52rem;font-weight:700;color:#fff;padding:1px 4px;min-width:14px;text-align:center}
+
+    /* UTILS */
+    .sp{padding:16px}.sp-x{padding:0 16px}.sp-b{padding-bottom:16px}
+    .sec-title{font-size:.72rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px}
+    .skeleton{background:linear-gradient(90deg,var(--surface) 25%,var(--surface2) 50%,var(--surface) 75%);background-size:200% 100%;animation:sk 1.2s ease-in-out infinite;border-radius:10px}
+    @keyframes sk{0%{background-position:200% 0}100%{background-position:-200% 0}}
+    .empty-state{text-align:center;padding:40px 20px}
+    .empty-state-icon{font-size:3rem;opacity:.25;margin-bottom:12px}
+    .empty-state-text{font-size:.88rem;color:var(--text3);line-height:1.5}
+
+    /* GREETING HERO */
+    .greeting-hero{background:linear-gradient(135deg,#0a1628 0%,#0d2545 50%,#081a30 100%);padding:20px 16px;position:relative;overflow:hidden}
+    .greeting-hero::before{content:'';position:absolute;top:-60px;right:-60px;width:200px;height:200px;background:radial-gradient(circle,rgba(14,165,233,.14) 0%,transparent 70%)}
+    .greeting-hero::after{content:'';position:absolute;bottom:-40px;left:-40px;width:180px;height:180px;background:radial-gradient(circle,rgba(15,118,110,.1) 0%,transparent 70%)}
+    .g-day{font-size:.72rem;color:var(--primary);font-weight:700;text-transform:uppercase;letter-spacing:.1em;position:relative}
+    .g-name{font-size:1.5rem;font-weight:800;margin:2px 0 4px;position:relative}
+    .g-sub{font-size:.82rem;color:var(--text2);position:relative}
+    .g-badges{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;position:relative}
+    .gbadge{background:rgba(14,165,233,.15);border:1px solid rgba(14,165,233,.3);color:var(--primary);border-radius:99px;padding:3px 10px;font-size:.7rem;font-weight:600}
+    .gbadge.teal{background:rgba(15,118,110,.15);border-color:rgba(15,118,110,.3);color:var(--teal-light)}
+
+    /* VERSE CARD */
+    .verse-card{margin:16px;background:linear-gradient(135deg,var(--teal) 0%,var(--primary-dark) 100%);border-radius:16px;padding:16px 18px;position:relative;overflow:hidden}
+    .verse-card::before{content:'\201C';position:absolute;top:-10px;left:8px;font-size:6rem;color:rgba(255,255,255,.07);font-family:Georgia,serif;line-height:1}
+    .verse-label{font-size:.66rem;color:rgba(255,255,255,.6);font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;position:relative}
+    .verse-text{font-size:.9rem;font-style:italic;color:rgba(255,255,255,.95);line-height:1.5;position:relative}
+    .verse-ref{font-size:.73rem;font-weight:700;color:rgba(255,255,255,.65);margin-top:8px;position:relative}
+
+    /* STATS ROW */
+    .stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:0 16px;margin-bottom:16px}
+    .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 12px;text-align:center}
+    .stat-num{font-size:1.6rem;font-weight:800;line-height:1}
+    .stat-lbl{font-size:.66rem;color:var(--text2);margin-top:4px;font-weight:500}
+    .stat-card.blue .stat-num{color:var(--primary)}
+    .stat-card.teal .stat-num{color:var(--teal-light)}
+    .stat-card.orange .stat-num{color:var(--accent)}
+
+    /* QUICK GRID */
+    .quick-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:0 16px;margin-bottom:20px}
+    .qi{display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;text-decoration:none;-webkit-tap-highlight-color:transparent}
+    .qi-icon{width:52px;height:52px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:1.25rem;transition:transform .2s}
+    .qi:active .qi-icon{transform:scale(.92)}
+    .qi-label{font-size:.64rem;color:var(--text2);text-align:center;font-weight:500;line-height:1.2}
+    .c-blue{background:rgba(14,165,233,.14);color:var(--primary);border:1px solid rgba(14,165,233,.22)}
+    .c-teal{background:rgba(15,118,110,.14);color:var(--teal-light);border:1px solid rgba(15,118,110,.22)}
+    .c-orange{background:rgba(249,115,22,.14);color:var(--accent);border:1px solid rgba(249,115,22,.22)}
+    .c-purple{background:rgba(168,85,247,.14);color:var(--purple);border:1px solid rgba(168,85,247,.22)}
+    .c-green{background:rgba(34,197,94,.14);color:var(--success);border:1px solid rgba(34,197,94,.22)}
+    .c-yellow{background:rgba(245,158,11,.14);color:var(--warning);border:1px solid rgba(245,158,11,.22)}
+
+    /* EVENTS STRIP */
+    .ev-strip{display:flex;gap:12px;overflow-x:auto;padding:0 16px 4px;scrollbar-width:none;margin-bottom:16px}
+    .ev-strip::-webkit-scrollbar{display:none}
+    .ev-chip{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:12px 14px;min-width:140px;flex-shrink:0;cursor:pointer}
+    .ev-chip-date{font-size:.66rem;color:var(--primary);font-weight:700;text-transform:uppercase}
+    .ev-chip-name{font-size:.84rem;font-weight:600;margin-top:2px}
+    .ev-chip-loc{font-size:.7rem;color:var(--text2);margin-top:2px}
+
+    /* MURAL FEED */
+    .feed-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin:0 16px 16px}
+    .feed-item{display:flex;flex-direction:column;padding:14px 16px;border-bottom:1px solid var(--border)}
+    .feed-item:last-child{border-bottom:none}
+    .feed-header{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+    .feed-av{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.9rem;font-weight:700;flex-shrink:0;color:#fff}
+    .feed-author{font-size:.84rem;font-weight:600}
+    .feed-time{font-size:.68rem;color:var(--text3)}
+    .feed-text{font-size:.86rem;color:var(--text2);line-height:1.5}
+
+    /* VISITOR SECTION */
+    .visitor-section{padding:16px}
+    .visitor-title{font-size:1rem;font-weight:700;margin-bottom:4px}
+    .visitor-sub{font-size:.81rem;color:var(--text2);margin-bottom:14px}
+    .visitor-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .vcard{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 12px;cursor:pointer;transition:all .2s;-webkit-tap-highlight-color:transparent}
+    .vcard:active{transform:scale(.97);border-color:var(--accent)}
+    .vcard-icon{font-size:1.6rem;margin-bottom:8px}
+    .vcard-title{font-size:.8rem;font-weight:700;color:var(--accent);margin-bottom:4px}
+    .vcard-desc{font-size:.72rem;color:var(--text2);line-height:1.4;margin-bottom:10px}
+    .vcard-btn{display:block;background:var(--accent);color:#fff;border:none;border-radius:8px;padding:7px 10px;font-size:.74rem;font-weight:600;text-align:center;cursor:pointer;width:100%}
+
+    /* CONTRIBUIÇÃO */
+    .contrib-card{margin:0 16px 16px;background:linear-gradient(135deg,rgba(249,115,22,.1),rgba(234,88,12,.05));border:1px solid rgba(249,115,22,.25);border-radius:16px;padding:16px}
+    .contrib-title{font-size:.9rem;font-weight:700;color:var(--accent);margin-bottom:4px}
+    .contrib-verse{font-size:.79rem;color:var(--text2);font-style:italic;margin-bottom:12px;line-height:1.4}
+    .contrib-btn{display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:#fff;border:none;border-radius:10px;padding:10px 20px;font-size:.84rem;font-weight:600;cursor:pointer}
+
+    /* CALENDAR */
+    .cal-header{display:flex;align-items:center;justify-content:space-between;padding:16px}
+    .cal-month{font-size:1rem;font-weight:700}
+    .cal-btn{width:36px;height:36px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text2);font-size:.85rem}
+    .cal-grid{padding:0 16px 16px}
+    .cal-days-hdr{display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:4px}
+    .cal-dlbl{text-align:center;font-size:.66rem;color:var(--text3);font-weight:600;padding:4px 0}
+    .cal-days{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+    .cal-day{aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:8px;cursor:pointer;font-size:.81rem;font-weight:500;transition:all .15s;position:relative}
+    .cal-day.empty{cursor:default}
+    .cal-day.today{background:rgba(14,165,233,.18);color:var(--primary);font-weight:700;border:1px solid rgba(14,165,233,.35)}
+    .cal-day.has-event::after{content:'';position:absolute;bottom:2px;width:4px;height:4px;background:var(--accent);border-radius:50%}
+    .cal-day.selected{background:var(--primary);color:#fff}
+    .ev-list{padding:0 16px 16px}
+    .ev-item{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:10px;display:flex;gap:14px;align-items:flex-start}
+    .ev-datebox{background:rgba(14,165,233,.13);border:1px solid rgba(14,165,233,.22);border-radius:10px;padding:8px 10px;text-align:center;min-width:44px;flex-shrink:0}
+    .ev-day{font-size:1.2rem;font-weight:800;color:var(--primary);line-height:1}
+    .ev-mon{font-size:.58rem;color:var(--primary);font-weight:600;text-transform:uppercase}
+    .ev-name{font-size:.9rem;font-weight:700}
+    .ev-time{font-size:.73rem;color:var(--text2);margin-top:2px}
+    .ev-loc{font-size:.71rem;color:var(--text3);margin-top:3px;display:flex;align-items:center;gap:4px}
+
+    /* PRAYER */
+    .prayer-fab{position:fixed;bottom:calc(var(--nav-height) + var(--safe-bottom) + 16px);right:16px;background:linear-gradient(135deg,var(--teal),var(--primary));width:56px;height:56px;border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;color:#fff;cursor:pointer;box-shadow:0 8px 24px rgba(14,165,233,.4);border:none;z-index:50;transition:transform .2s}
+    .prayer-fab:active{transform:scale(.93)}
+    .prayer-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:10px}
+    .prayer-hdr{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+    .prayer-av{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.88rem;font-weight:800;background:rgba(168,85,247,.13);color:var(--purple);border:1px solid rgba(168,85,247,.22);flex-shrink:0}
+    .prayer-name{font-size:.87rem;font-weight:600}
+    .prayer-time{font-size:.68rem;color:var(--text3)}
+    .prayer-text{font-size:.84rem;color:var(--text2);line-height:1.5;margin-bottom:12px}
+    .prayer-actions{display:flex;gap:10px;flex-wrap:wrap}
+    .p-btn{display:flex;align-items:center;gap:5px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:.73rem;color:var(--text2);cursor:pointer;font-weight:500;transition:all .2s}
+    .p-btn:hover{border-color:var(--purple);color:var(--purple)}
+    .p-btn.answered{border-color:var(--success);color:var(--success);background:rgba(34,197,94,.08)}
+
+    /* MODAL BOTTOM SHEET */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:200;display:flex;align-items:flex-end;padding-bottom:var(--safe-bottom);opacity:0;visibility:hidden;transition:all .25s}
+    .modal-overlay.open{opacity:1;visibility:visible}
+    .modal-sheet{width:100%;background:var(--surface);border-radius:24px 24px 0 0;padding:12px 20px 28px;transform:translateY(100%);transition:transform .3s cubic-bezier(.32,.72,0,1)}
+    .modal-overlay.open .modal-sheet{transform:translateY(0)}
+    .modal-handle{width:40px;height:4px;background:var(--surface3);border-radius:99px;margin:0 auto 16px}
+    .modal-title{font-size:1.05rem;font-weight:700;margin-bottom:16px}
+    .form-group{margin-bottom:14px}
+    .form-label{font-size:.76rem;color:var(--text2);font-weight:600;margin-bottom:6px;display:block}
+    .form-input,.form-textarea{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;color:var(--text);font-size:.87rem;font-family:inherit;outline:none;transition:border-color .2s;resize:none}
+    .form-input:focus,.form-textarea:focus{border-color:var(--primary)}
+    .form-submit{width:100%;background:linear-gradient(135deg,var(--teal),var(--primary));color:#fff;border:none;border-radius:12px;padding:14px;font-size:.94rem;font-weight:700;cursor:pointer;margin-top:6px;transition:opacity .2s}
+    .form-submit:active{opacity:.85}
+
+    /* CREDENCIAL DIGITAL */
+    .credential-wrap{padding:20px 16px;display:flex;flex-direction:column;align-items:center}
+    .cred-hint{font-size:.76rem;color:var(--text2);margin-bottom:12px;text-align:center}
+    .cred-container{width:100%;max-width:340px;aspect-ratio:1.586;perspective:1000px;cursor:pointer;margin-bottom:16px}
+    .cred-inner{width:100%;height:100%;position:relative;transform-style:preserve-3d;transition:transform .7s cubic-bezier(.4,.2,.2,1)}
+    .cred-inner.flipped{transform:rotateY(180deg)}
+    .cred-front,.cred-back{position:absolute;inset:0;border-radius:20px;backface-visibility:hidden;-webkit-backface-visibility:hidden;overflow:hidden}
+    .cred-front{background:linear-gradient(135deg,#0a1e2e 0%,#0d2d47 40%,#0a1e35 100%);border:1px solid rgba(14,165,233,.3);padding:20px;display:flex;flex-direction:column}
+    .cred-stripe{height:4px;background:linear-gradient(90deg,var(--teal),var(--primary));border-radius:99px;margin-bottom:14px}
+    .cred-logo-row{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+    .cred-logo{width:32px;height:32px;background:linear-gradient(135deg,var(--teal),var(--primary));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.9rem}
+    .cred-church{font-size:.78rem;font-weight:700;color:rgba(255,255,255,.9)}
+    .cred-sys{font-size:.6rem;color:rgba(255,255,255,.38);margin-top:1px}
+    .cred-photo{width:48px;height:48px;border-radius:50%;border:2px solid var(--primary);background:var(--surface3);display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:700;color:var(--primary);margin-left:auto}
+    .cred-name{font-size:1rem;font-weight:800}
+    .cred-role{display:inline-flex;align-items:center;gap:4px;background:rgba(14,165,233,.13);border:1px solid rgba(14,165,233,.28);color:var(--primary);border-radius:99px;padding:2px 10px;font-size:.66rem;font-weight:700;margin-top:4px;margin-bottom:12px}
+    .cred-id{font-size:.63rem;color:var(--text3);font-family:'Courier New',monospace}
+    .cred-flip-tip{font-size:.62rem;color:rgba(255,255,255,.2);text-align:center;margin-top:auto;padding-top:10px}
+    .cred-back{background:linear-gradient(135deg,#0a1e2e 0%,#0d2d47 100%);border:1px solid rgba(14,165,233,.3);transform:rotateY(180deg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:20px}
+    .cred-back-title{font-size:.73rem;color:var(--text2);font-weight:600}
+    .cred-qr-wrap{background:#fff;border-radius:12px;padding:8px}
+    .cred-qr-wrap img{width:120px;height:120px;display:block}
+    .cred-back-name{font-size:.77rem;font-weight:600;color:var(--text)}
+    .cred-back-id{font-size:.63rem;color:var(--text3);font-family:monospace}
+    .cred-back-tip{font-size:.58rem;color:var(--text3)}
+
+    /* PROFILE */
+    .profile-section{padding:0 16px 16px}
+    .profile-list{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden}
+    .profile-row{display:flex;align-items:center;padding:14px 16px;gap:14px;border-bottom:1px solid var(--border)}
+    .profile-row:last-child{border-bottom:none}
+    .prow-icon{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:.88rem;flex-shrink:0}
+    .prow-label{font-size:.7rem;color:var(--text3)}
+    .prow-value{font-size:.87rem;font-weight:500}
+    .paction-row{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;cursor:pointer;border-bottom:1px solid var(--border);transition:background .15s;-webkit-tap-highlight-color:transparent}
+    .paction-row:last-child{border-bottom:none}
+    .paction-row:active{background:var(--surface2)}
+    .paction-left{display:flex;align-items:center;gap:14px}
+    .paction-label{font-size:.87rem;font-weight:500}
     </style>
-</head>
-<body>
-    <div class="app-shell">
-        <section class="hero">
-            <h1><i class="fa-solid fa-mobile-screen-button"></i> App do Membro por Perfil</h1>
-            <p id="userLabel">Carregando seu perfil...</p>
-            <div class="chips" id="roleChips"></div>
-        </section>
+    </head>
+    <body>
 
-        <section class="stats" id="statsWrap"></section>
+    <!-- SPLASH -->
+    <div id="splash">
+        <div class="splash-logo"><i class="fa-solid fa-church"></i></div>
+        <div class="splash-name" id="splashChurchName">Minha Igreja</div>
+        <div class="splash-sub">Bem-vindo de volta</div>
+        <div class="splash-loader"></div>
+    </div>
 
-        <section class="quick-actions" id="actionsWrap"></section>
+    <!-- APP -->
+    <div id="app" style="display:none">
 
-        <section class="panels">
-            <article class="panel">
-                <h2><i class="fa-solid fa-bullhorn"></i> Comunicacao recente</h2>
-                <div id="listWhatsapp"></div>
-            </article>
-            <article class="panel">
-                <h2><i class="fa-solid fa-list-check"></i> Portaria e pagamentos</h2>
-                <div id="listPortaria"></div>
-                <hr style="border:none;border-top:1px solid #e2e8f0;margin:8px 0;">
-                <div id="listPayments"></div>
-            </article>
-        </section>
+        <!-- TOP BAR -->
+        <div class="top-bar">
+            <div class="top-bar-logo"><i class="fa-solid fa-church"></i></div>
+            <div class="top-bar-info">
+                <div class="top-bar-church" id="topChurch">Carregando...</div>
+                <div class="top-bar-user" id="topUser">...</div>
+            </div>
+            <div class="top-bar-actions">
+                <div class="icon-btn" onclick="showToast('🔔 Nenhuma notificação nova.')">
+                    <i class="fa-solid fa-bell"></i>
+                    <span class="ibadge" id="notifDot" style="display:none"></span>
+                </div>
+                <div class="icon-btn" onclick="location.href='dashboard.html'" title="Sistema de Gestão">
+                    <i class="fa-solid fa-grid-2"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- TABS -->
+        <div class="tab-area">
+
+            <!-- ===== INÍCIO ===== -->
+            <div class="tab-pane active" id="tab-inicio">
+                <div class="greeting-hero">
+                    <div class="g-day" id="gDay">—</div>
+                    <div class="g-name" id="gName">Olá!</div>
+                    <div class="g-sub">Que Deus abençoe sua caminhada hoje</div>
+                    <div class="g-badges" id="gBadges"></div>
+                </div>
+
+                <div class="verse-card">
+                    <div class="verse-label"><i class="fa-solid fa-book-open"></i> Versículo do Dia</div>
+                    <div class="verse-text" id="verseText">Carregando...</div>
+                    <div class="verse-ref" id="verseRef">—</div>
+                </div>
+
+                <div class="sp" style="padding-bottom:0"><div class="sec-title">Acesso Rápido</div></div>
+                <div class="quick-grid" id="quickGrid"></div>
+
+                <div class="sp" style="padding-bottom:8px"><div class="sec-title">Próximos Eventos</div></div>
+                <div class="ev-strip" id="evStrip">
+                    <div class="ev-chip skeleton" style="height:68px"></div>
+                    <div class="ev-chip skeleton" style="height:68px"></div>
+                    <div class="ev-chip skeleton" style="height:68px"></div>
+                </div>
+
+                <div class="sp" style="padding-bottom:8px"><div class="sec-title">Resumo</div></div>
+                <div class="stats-row" id="statsRow">
+                    <div class="stat-card skeleton" style="height:72px"></div>
+                    <div class="stat-card skeleton" style="height:72px"></div>
+                    <div class="stat-card skeleton" style="height:72px"></div>
+                </div>
+            </div>
+
+            <!-- ===== MURAL ===== -->
+            <div class="tab-pane" id="tab-mural">
+                <div class="sp" style="padding-bottom:0"><div class="sec-title">Mural da Igreja</div></div>
+                <div class="feed-card" id="feedCard">
+                    <div class="feed-item" style="padding:20px">
+                        <div class="skeleton" style="height:12px;width:55%;margin-bottom:8px"></div>
+                        <div class="skeleton" style="height:12px;width:80%"></div>
+                    </div>
+                </div>
+
+                <div class="visitor-section">
+                    <div class="visitor-title">Visitante, seja muito bem-vindo!</div>
+                    <div class="visitor-sub">Como posso ajudá-lo hoje?</div>
+                    <div class="visitor-grid">
+                        <div class="vcard" onclick="showModal('modal-conectar')">
+                            <div class="vcard-icon">🤝</div>
+                            <div class="vcard-title">Quero me conectar</div>
+                            <div class="vcard-desc">Adoraríamos conhecê-lo melhor</div>
+                            <button class="vcard-btn">Conecte-se</button>
+                        </div>
+                        <div class="vcard" onclick="showModal('modal-oracao')">
+                            <div class="vcard-icon">🙏</div>
+                            <div class="vcard-title">Podemos orar por você?</div>
+                            <div class="vcard-desc">Clama a mim e te responderei</div>
+                            <button class="vcard-btn">Envie um pedido</button>
+                        </div>
+                        <div class="vcard" onclick="showModal('modal-ajuda')">
+                            <div class="vcard-icon">💙</div>
+                            <div class="vcard-title">Precisa de ajuda?</div>
+                            <div class="vcard-desc">Estamos aqui para ajudá-lo</div>
+                            <button class="vcard-btn">Envie um pedido</button>
+                        </div>
+                        <div class="vcard" onclick="showModal('modal-jesus')">
+                            <div class="vcard-icon">✝️</div>
+                            <div class="vcard-title">Decidi caminhar com Jesus</div>
+                            <div class="vcard-desc">Estamos felizes com sua decisão!</div>
+                            <button class="vcard-btn">Iniciar caminhada</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="contrib-card">
+                    <div class="contrib-title"><i class="fa-solid fa-heart"></i> Contribuições</div>
+                    <div class="contrib-verse">"Trazei todos os dízimos à casa do tesouro..." — Mal. 3:10</div>
+                    <button class="contrib-btn" onclick="openContribuir()">
+                        <i class="fa-solid fa-hand-holding-heart"></i> Contribuir
+                    </button>
+                </div>
+            </div>
+
+            <!-- ===== AGENDA ===== -->
+            <div class="tab-pane" id="tab-agenda">
+                <div class="cal-header">
+                    <div class="cal-btn" onclick="changeMonth(-1)"><i class="fa-solid fa-chevron-left"></i></div>
+                    <div class="cal-month" id="calLabel">—</div>
+                    <div class="cal-btn" onclick="changeMonth(1)"><i class="fa-solid fa-chevron-right"></i></div>
+                </div>
+                <div class="cal-grid">
+                    <div class="cal-days-hdr">
+                        <div class="cal-dlbl">D</div><div class="cal-dlbl">S</div><div class="cal-dlbl">T</div>
+                        <div class="cal-dlbl">Q</div><div class="cal-dlbl">Q</div><div class="cal-dlbl">S</div><div class="cal-dlbl">S</div>
+                    </div>
+                    <div class="cal-days" id="calDays"></div>
+                </div>
+                <div class="sp" style="padding-top:0;padding-bottom:8px"><div class="sec-title" id="evListTitle">Todos os eventos</div></div>
+                <div class="ev-list" id="evList">
+                    <div class="skeleton" style="height:70px;border-radius:14px;margin-bottom:10px"></div>
+                    <div class="skeleton" style="height:70px;border-radius:14px;margin-bottom:10px"></div>
+                </div>
+            </div>
+
+            <!-- ===== ORAÇÃO ===== -->
+            <div class="tab-pane" id="tab-oracao">
+                <div class="sp" style="padding-bottom:8px"><div class="sec-title">Mural de Oração</div></div>
+                <div style="padding:0 16px" id="prayerList">
+                    <div class="skeleton" style="height:100px;border-radius:16px;margin-bottom:10px"></div>
+                    <div class="skeleton" style="height:100px;border-radius:16px;margin-bottom:10px"></div>
+                </div>
+            </div>
+
+            <!-- ===== PERFIL ===== -->
+            <div class="tab-pane" id="tab-perfil">
+                <div class="credential-wrap">
+                    <div class="cred-hint"><i class="fa-solid fa-id-card"></i> Credencial Digital — toque para ver QR Code</div>
+                    <div class="cred-container" onclick="flipCard()">
+                        <div class="cred-inner" id="credInner">
+                            <!-- FRENTE -->
+                            <div class="cred-front">
+                                <div class="cred-stripe"></div>
+                                <div class="cred-logo-row">
+                                    <div class="cred-logo"><i class="fa-solid fa-church"></i></div>
+                                    <div>
+                                        <div class="cred-church" id="credChurch">Igreja</div>
+                                        <div class="cred-sys">LDFP · Sistema de Gestão</div>
+                                    </div>
+                                    <div class="cred-photo" id="credPhoto">?</div>
+                                </div>
+                                <div class="cred-name" id="credName">—</div>
+                                <div class="cred-role" id="credRole"><i class="fa-solid fa-star"></i> Membro</div>
+                                <div class="cred-id" id="credId">ID: —</div>
+                                <div class="cred-flip-tip">Toque para ver QR Code ↻</div>
+                            </div>
+                            <!-- VERSO -->
+                            <div class="cred-back">
+                                <div class="cred-back-title"><i class="fa-solid fa-qrcode"></i> QR Code de Check-in</div>
+                                <div class="cred-qr-wrap"><img id="credQR" src="" alt="QR" /></div>
+                                <div class="cred-back-name" id="credBackName">—</div>
+                                <div class="cred-back-id" id="credBackId">—</div>
+                                <div class="cred-back-tip">Mostre este código na entrada da igreja</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="profile-section">
+                    <div class="sec-title">Informações</div>
+                    <div class="profile-list" id="profileInfo">
+                        <div class="profile-row">
+                            <div class="skeleton" style="height:34px;width:34px;border-radius:10px;flex-shrink:0"></div>
+                            <div style="flex:1">
+                                <div class="skeleton" style="height:10px;width:40%;margin-bottom:6px"></div>
+                                <div class="skeleton" style="height:14px;width:70%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="profile-section">
+                    <div class="sec-title">Atalhos</div>
+                    <div class="profile-list">
+                        <div class="paction-row" onclick="location.href='dashboard.html'">
+                            <div class="paction-left">
+                                <div class="prow-icon c-blue"><i class="fa-solid fa-gauge"></i></div>
+                                <div class="paction-label">Painel de Gestão</div>
+                            </div>
+                            <i class="fa-solid fa-chevron-right" style="color:var(--text3);font-size:.75rem"></i>
+                        </div>
+                        <div class="paction-row" onclick="location.href='configuracoes.html'">
+                            <div class="paction-left">
+                                <div class="prow-icon c-teal"><i class="fa-solid fa-gear"></i></div>
+                                <div class="paction-label">Configurações</div>
+                            </div>
+                            <i class="fa-solid fa-chevron-right" style="color:var(--text3);font-size:.75rem"></i>
+                        </div>
+                        <div class="paction-row" onclick="doLogout()">
+                            <div class="paction-left">
+                                <div class="prow-icon" style="background:rgba(239,68,68,.13);color:var(--danger)"><i class="fa-solid fa-right-from-bracket"></i></div>
+                                <div class="paction-label" style="color:var(--danger)">Sair</div>
+                            </div>
+                            <i class="fa-solid fa-chevron-right" style="color:var(--text3);font-size:.75rem"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- /tab-area -->
+
+        <!-- BOTTOM NAV -->
+        <div class="bottom-nav">
+            <div class="nav-item active" id="nav-inicio" onclick="switchTab('inicio')">
+                <i class="fa-solid fa-house"></i><span>Início</span>
+            </div>
+            <div class="nav-item" id="nav-mural" onclick="switchTab('mural')">
+                <i class="fa-solid fa-bullhorn"></i><span>Mural</span>
+            </div>
+            <div class="nav-item" id="nav-agenda" onclick="switchTab('agenda')">
+                <i class="fa-solid fa-calendar-days"></i><span>Agenda</span>
+                <span class="nav-badge" id="agBadge" style="display:none">0</span>
+            </div>
+            <div class="nav-item" id="nav-oracao" onclick="switchTab('oracao')">
+                <i class="fa-solid fa-hands-praying"></i><span>Oração</span>
+            </div>
+            <div class="nav-item" id="nav-perfil" onclick="switchTab('perfil')">
+                <i class="fa-solid fa-circle-user"></i><span>Perfil</span>
+            </div>
+        </div>
+
+    </div><!-- /app -->
+
+    <!-- FAB ORAÇÃO -->
+    <button class="prayer-fab" id="prayerFab" style="display:none" onclick="showModal('modal-oracao')">
+        <i class="fa-solid fa-hands-praying"></i>
+    </button>
+
+    <!-- MODAL: ORAÇÃO -->
+    <div class="modal-overlay" id="modal-oracao" onclick="handleOvClick(event,'modal-oracao')">
+        <div class="modal-sheet">
+            <div class="modal-handle"></div>
+            <div class="modal-title"><i class="fa-solid fa-hands-praying"></i> Pedido de Oração</div>
+            <form onsubmit="submitPrayer(event)">
+                <div class="form-group">
+                    <label class="form-label">Seu nome (opcional)</label>
+                    <input type="text" class="form-input" id="prayerName" placeholder="Anônimo">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Seu pedido *</label>
+                    <textarea class="form-textarea" id="prayerText" rows="4" placeholder="Descreva seu pedido de oração..." required></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Visibilidade</label>
+                    <select class="form-input" id="prayerVis">
+                        <option value="mural">Mural público</option>
+                        <option value="pastor">Apenas para o pastor</option>
+                    </select>
+                </div>
+                <button type="submit" class="form-submit"><i class="fa-solid fa-paper-plane"></i> Enviar Pedido</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: CONECTAR -->
+    <div class="modal-overlay" id="modal-conectar" onclick="handleOvClick(event,'modal-conectar')">
+        <div class="modal-sheet">
+            <div class="modal-handle"></div>
+            <div class="modal-title">🤝 Quero me conectar</div>
+            <form onsubmit="submitConectar(event)">
+                <div class="form-group">
+                    <label class="form-label">Seu nome *</label>
+                    <input type="text" class="form-input" id="conNome" placeholder="Como te chamamos?" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">WhatsApp</label>
+                    <input type="tel" class="form-input" id="conWpp" placeholder="(11) 99999-9999">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Mensagem</label>
+                    <textarea class="form-textarea" id="conMsg" rows="3" placeholder="Opcional..."></textarea>
+                </div>
+                <button type="submit" class="form-submit"><i class="fa-solid fa-handshake"></i> Enviar</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: JESUS -->
+    <div class="modal-overlay" id="modal-jesus" onclick="handleOvClick(event,'modal-jesus')">
+        <div class="modal-sheet">
+            <div class="modal-handle"></div>
+            <div class="modal-title">✝️ Decidi caminhar com Jesus</div>
+            <p style="font-size:.87rem;color:var(--text2);margin-bottom:16px;line-height:1.5">Que alegria! Sua decisão é a mais importante da sua vida. Gostaríamos de acompanhar você nessa jornada.</p>
+            <form onsubmit="submitJesus(event)">
+                <div class="form-group">
+                    <label class="form-label">Seu nome *</label>
+                    <input type="text" class="form-input" id="jesNome" required placeholder="Nome completo">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Contato (WhatsApp)</label>
+                    <input type="tel" class="form-input" id="jesContato" placeholder="Para acompanhamento">
+                </div>
+                <button type="submit" class="form-submit">🎉 Confirmar minha decisão</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: AJUDA -->
+    <div class="modal-overlay" id="modal-ajuda" onclick="handleOvClick(event,'modal-ajuda')">
+        <div class="modal-sheet">
+            <div class="modal-handle"></div>
+            <div class="modal-title">💙 Precisa de Ajuda?</div>
+            <p style="font-size:.87rem;color:var(--text2);margin-bottom:16px;line-height:1.5">Estamos aqui para você. Conte-nos como podemos ajudar.</p>
+            <form onsubmit="submitAjuda(event)">
+                <div class="form-group">
+                    <label class="form-label">Tipo de ajuda</label>
+                    <select class="form-input" id="ajudaTipo">
+                        <option>Aconselhamento pastoral</option>
+                        <option>Apoio emocional</option>
+                        <option>Ajuda financeira</option>
+                        <option>Visita ao lar</option>
+                        <option>Outro</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Conte-nos mais</label>
+                    <textarea class="form-textarea" id="ajudaMsg" rows="3" placeholder="Como podemos ajudar?"></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Seu contato</label>
+                    <input type="tel" class="form-input" id="ajudaContato" placeholder="(11) 99999-9999">
+                </div>
+                <button type="submit" class="form-submit"><i class="fa-solid fa-heart"></i> Enviar Solicitação</button>
+            </form>
+        </div>
     </div>
 
     <script src="session.js"></script>
     <script src="pwa.js"></script>
     <script>
-        requireAuthSession();
+    requireAuthSession();
 
-        const ROLE_ACTIONS = {
-            admin: [
-                { href: 'dashboard.html', label: 'Painel geral' },
-                { href: 'oracoes.html', label: 'Orações' },
-                { href: 'agenda.html', label: 'Agenda' },
-                { href: 'portaria.html', label: 'Portaria' }
-            ],
-            secretaria: [
-                { href: 'dashboard.html', label: 'Visao geral' },
-                { href: 'oracoes.html', label: 'Orações' },
-                { href: 'agenda.html', label: 'Agenda' },
-                { href: 'portaria.html', label: 'Portaria' }
-            ],
-            pastor: [
-                { href: 'oracoes.html', label: 'Orações' },
-                { href: 'agenda.html', label: 'Agenda' },
-                { href: 'membros.html', label: 'Membros' }
-            ],
-            oficial: [
-                { href: 'portaria.html', label: 'Portaria' },
-                { href: 'agenda.html', label: 'Agenda' },
-                { href: 'oracoes.html', label: 'Orações' }
-            ],
-            membro: [
-                { href: 'oracoes.html', label: 'Minhas orações' },
-                { href: 'agenda.html', label: 'Agenda' }
-            ],
-            visitante: [
-                { href: 'oracoes.html', label: 'Pedidos de oração' },
-                { href: 'agenda.html', label: 'Agenda' }
-            ]
-        };
+    // ── DADOS ──────────────────────────────────────────────────────────
+    let currentUser = null, currentTab = 'inicio', calDate = new Date();
+    let allEvents = [], allPrayers = [], cardFlipped = false;
 
-        const FEATURE_TO_ACTION = {
-            dashboard: { href: 'dashboard.html', label: 'Painel geral' },
-            membros: { href: 'membros.html', label: 'Membros' },
-            visitantes: { href: 'visitantes.html', label: 'Visitantes' },
-            agenda: { href: 'agenda.html', label: 'Agenda' },
-            oracoes: { href: 'oracoes.html', label: 'Orações' },
-            financeiro: { href: 'financeiro.html', label: 'Financeiro' },
-            midia: { href: 'app_midia.html', label: 'App Midia' }
-        };
+    const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+    const MESES_S = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+    const DIAS = ['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'];
+    const ROLES = {admin:'Administrador',secretaria:'Secretaria',pastor:'Pastor',oficial:'Oficial',membro:'Membro',visitante:'Visitante',tesoureiro:'Tesoureiro',diacono:'Diácono',presbitero:'Presbítero'};
 
-        function renderStats(stats) {
-            const node = document.getElementById('statsWrap');
-            node.innerHTML = `
-                <div class="stat"><small>Templates ativos</small><strong>${stats.templatesAtivos}</strong></div>
-                <div class="stat"><small>Envios hoje</small><strong>${stats.enviosHoje}</strong></div>
-                <div class="stat"><small>Check-ins hoje</small><strong>${stats.checkinsHoje}</strong></div>
-                <div class="stat"><small>Pagamentos pendentes</small><strong>${stats.pagamentosPendentes}</strong></div>
-            `;
+    const VERSICULOS = [
+        {r:'Salmos 23:1',t:'O SENHOR é o meu pastor; nada me faltará.'},
+        {r:'João 3:16',t:'Porque Deus amou o mundo de tal maneira que deu o seu Filho unigênito, para que todo aquele que nele crê não pereça, mas tenha a vida eterna.'},
+        {r:'Filipenses 4:13',t:'Tudo posso naquele que me fortalece.'},
+        {r:'Jeremias 29:11',t:'Porque sou eu que conheço os planos que tenho para vocês, diz o SENHOR, planos de fazê-los prosperar e não de causar dano, planos de dar-lhes esperança e um futuro.'},
+        {r:'Isaías 41:10',t:'Não tema, pois estou com você; não se apavore, pois sou o seu Deus. Eu o fortalecerei e o ajudarei; eu o sustentarei com minha justa destra.'},
+        {r:'Mateus 11:28',t:'Venham a mim, todos os que estão cansados e sobrecarregados, e eu lhes darei descanso.'},
+        {r:'Romanos 8:28',t:'Sabemos que Deus age em todas as coisas para o bem daqueles que o amam, dos que foram chamados de acordo com o seu propósito.'}
+    ];
+
+    const ACTIONS = {
+        admin:[
+            {i:'fa-gauge',l:'Dashboard',h:'dashboard.html',c:'c-blue'},
+            {i:'fa-users',l:'Membros',h:'membros.html',c:'c-teal'},
+            {i:'fa-calendar-check',l:'Portaria',h:'portaria.html',c:'c-orange'},
+            {i:'fa-hands-praying',l:'Orações',a:'prayer',c:'c-purple'},
+            {i:'fa-dollar-sign',l:'Financeiro',h:'financeiro.html',c:'c-green'},
+            {i:'fa-calendar-days',l:'Agenda',a:'agenda',c:'c-yellow'},
+            {i:'fa-bullhorn',l:'WhatsApp',h:'comunicacao_whatsapp.html',c:'c-blue'},
+            {i:'fa-id-card',l:'Credencial',a:'credential',c:'c-teal'}
+        ],
+        secretaria:[
+            {i:'fa-gauge',l:'Dashboard',h:'dashboard.html',c:'c-blue'},
+            {i:'fa-users',l:'Membros',h:'membros.html',c:'c-teal'},
+            {i:'fa-calendar-check',l:'Portaria',h:'portaria.html',c:'c-orange'},
+            {i:'fa-hands-praying',l:'Orações',a:'prayer',c:'c-purple'},
+            {i:'fa-calendar-days',l:'Agenda',a:'agenda',c:'c-green'},
+            {i:'fa-bullhorn',l:'WhatsApp',h:'comunicacao_whatsapp.html',c:'c-yellow'},
+            {i:'fa-id-card',l:'Credencial',a:'credential',c:'c-blue'},
+            {i:'fa-child',l:'Crianças',h:'criancas.html',c:'c-orange'}
+        ],
+        pastor:[
+            {i:'fa-hands-praying',l:'Orações',a:'prayer',c:'c-purple'},
+            {i:'fa-users',l:'Membros',h:'membros.html',c:'c-blue'},
+            {i:'fa-calendar-days',l:'Agenda',a:'agenda',c:'c-teal'},
+            {i:'fa-clock-rotate-left',l:'Hist. Pastoral',h:'historico_pastoral.html',c:'c-orange'},
+            {i:'fa-id-card',l:'Credencial',a:'credential',c:'c-green'},
+            {i:'fa-book-open',l:'EBD',h:'ebd_turmas.html',c:'c-yellow'},
+            {i:'fa-gauge',l:'Dashboard',h:'dashboard.html',c:'c-blue'},
+            {i:'fa-bullhorn',l:'WhatsApp',h:'comunicacao_whatsapp.html',c:'c-purple'}
+        ],
+        membro:[
+            {i:'fa-hands-praying',l:'Pedir Oração',a:'prayer',c:'c-purple'},
+            {i:'fa-calendar-days',l:'Agenda',a:'agenda',c:'c-blue'},
+            {i:'fa-id-card',l:'Credencial',a:'credential',c:'c-teal'},
+            {i:'fa-location-dot',l:'Congregações',a:'mural',c:'c-orange'},
+            {i:'fa-heart',l:'Contribuir',a:'contribuir',c:'c-green'},
+            {i:'fa-book-open',l:'EBD',h:'ebd_turmas.html',c:'c-yellow'},
+            {i:'fa-music',l:'Escalas',h:'escalas.html',c:'c-purple'},
+            {i:'fa-users-viewfinder',l:'Grupos',h:'grupos.html',c:'c-blue'}
+        ],
+        visitante:[
+            {i:'fa-hands-praying',l:'Pedir Oração',a:'prayer',c:'c-purple'},
+            {i:'fa-calendar-days',l:'Eventos',a:'agenda',c:'c-blue'},
+            {i:'fa-location-dot',l:'Encontre-nos',a:'mural',c:'c-teal'},
+            {i:'fa-heart',l:'Contribuir',a:'contribuir',c:'c-orange'},
+            {i:'fa-handshake',l:'Conectar',a:'conectar',c:'c-green'},
+            {i:'fa-cross',l:'Decisão de Fé',a:'jesus',c:'c-yellow'},
+            {i:'fa-id-card',l:'Credencial',a:'credential',c:'c-purple'},
+            {i:'fa-user-plus',l:'Cadastrar',h:'autocadastro.html',c:'c-blue'}
+        ]
+    };
+
+    // ── INIT ───────────────────────────────────────────────────────────
+    async function init() {
+        const user = getSessionUser();
+        if (!user) { location.href = 'login.html'; return; }
+        currentUser = user;
+
+        renderGreeting(user);
+        renderVerse();
+        renderQuickActions(user);
+        populateCredential(user);
+        populateProfileInfo(user);
+
+        document.getElementById('app').style.display = 'flex';
+
+        await Promise.all([loadEvents(), loadPrayers(), loadStats(), loadFeed()]);
+
+        setTimeout(() => {
+            const sp = document.getElementById('splash');
+            sp.classList.add('hidden');
+            sp.addEventListener('transitionend', () => sp.remove(), {once:true});
+        }, 350);
+
+        renderCalendar();
+    }
+
+    // ── GREETING ───────────────────────────────────────────────────────
+    function renderGreeting(u) {
+        const now = new Date(), h = now.getHours();
+        const s = h<12 ? 'Bom dia' : h<18 ? 'Boa tarde' : 'Boa noite';
+        const nome = u.nome?.split(' ')[0] || 'Membro';
+        document.getElementById('gDay').textContent = `${DIAS[now.getDay()]}, ${now.getDate()} de ${MESES[now.getMonth()]}`;
+        document.getElementById('gName').textContent = `${s}, ${nome}! 👋`;
+        document.getElementById('gBadges').innerHTML =
+            `<span class="gbadge">${ROLES[u.role]||u.role||'Membro'}</span>`+
+            (u.nome_igreja ? `<span class="gbadge teal"><i class="fa-solid fa-church"></i> ${u.nome_igreja}</span>` : '');
+        document.getElementById('topChurch').textContent = u.nome_igreja || 'Minha Igreja';
+        document.getElementById('topUser').textContent = u.nome || u.email || '';
+        document.getElementById('splashChurchName').textContent = u.nome_igreja || 'Minha Igreja';
+    }
+
+    function renderVerse() {
+        const v = VERSICULOS[new Date().getDay()];
+        document.getElementById('verseText').textContent = v.t;
+        document.getElementById('verseRef').textContent = '— ' + v.r;
+    }
+
+    // ── QUICK ACTIONS ──────────────────────────────────────────────────
+    function renderQuickActions(u) {
+        const role = u.role || 'membro';
+        const list = ACTIONS[role] || ACTIONS.membro;
+        document.getElementById('quickGrid').innerHTML = list.map(a => {
+            if (a.h) return `<a class="qi" href="${a.h}"><div class="qi-icon ${a.c}"><i class="fa-solid ${a.i}"></i></div><span class="qi-label">${a.l}</span></a>`;
+            return `<div class="qi" onclick="qa('${a.a}')"><div class="qi-icon ${a.c}"><i class="fa-solid ${a.i}"></i></div><span class="qi-label">${a.l}</span></div>`;
+        }).join('');
+    }
+
+    function qa(a) {
+        ({prayer:()=>{switchTab('oracao');setTimeout(()=>showModal('modal-oracao'),180)},
+            agenda:()=>switchTab('agenda'),credential:()=>switchTab('perfil'),
+            mural:()=>switchTab('mural'),contribuir:openContribuir,
+            conectar:()=>showModal('modal-conectar'),jesus:()=>showModal('modal-jesus')
+        }[a]||(() => {}))();
+    }
+
+    // ── LOAD DATA ──────────────────────────────────────────────────────
+    async function loadEvents() {
+        try {
+            const r = await fetch('/agenda/eventos');
+            if (!r.ok) { allEvents=[]; renderEvStrip([]); renderEvList([]); return; }
+            allEvents = await r.json().then(d => d.eventos || d || []);
+            renderEvStrip(allEvents); renderCalendar(); renderEvList(allEvents);
+            const hoje = new Date(), fut = allEvents.filter(e => new Date(e.data_inicio||e.data) >= hoje);
+            if (fut.length) { const b=document.getElementById('agBadge'); b.style.display='block'; b.textContent=fut.length>9?'9+':fut.length; }
+        } catch(e) { allEvents=[]; renderEvStrip([]); renderEvList([]); }
+    }
+
+    async function loadPrayers() {
+        try {
+            const r = await fetch('/oracoes/mural');
+            allPrayers = r.ok ? await r.json().then(d => d.pedidos||d||[]) : [];
+            renderPrayers(allPrayers);
+        } catch(e) { allPrayers=[]; renderPrayers([]); }
+    }
+
+    async function loadStats() {
+        try {
+            const r = await fetch('/app-membro/context');
+            const d = r.ok ? await r.json() : null;
+            renderStats(d?.quickStats);
+        } catch(e) { renderStats(null); }
+    }
+
+    async function loadFeed() {
+        try {
+            const r = await fetch('/comunicacao/historico?limit=5');
+            renderFeed(r.ok ? await r.json().then(d=>d.historico||d||[]) : []);
+        } catch(e) { renderFeed([]); }
+    }
+
+    // ── RENDER STATS ───────────────────────────────────────────────────
+    function renderStats(s) {
+        document.getElementById('statsRow').innerHTML = `
+            <div class="stat-card blue"><div class="stat-num">${s?.checkinsHoje??0}</div><div class="stat-lbl">Check-ins hoje</div></div>
+            <div class="stat-card teal"><div class="stat-num">${allEvents.length}</div><div class="stat-lbl">Eventos</div></div>
+            <div class="stat-card orange"><div class="stat-num">${allPrayers.length}</div><div class="stat-lbl">Pedidos oração</div></div>`;
+    }
+
+    // ── EVENTS STRIP ───────────────────────────────────────────────────
+    function renderEvStrip(evs) {
+        const strip = document.getElementById('evStrip');
+        const hoje = new Date();
+        const fut = evs.filter(e=>new Date(e.data_inicio||e.data)>=hoje)
+            .sort((a,b)=>new Date(a.data_inicio||a.data)-new Date(b.data_inicio||b.data)).slice(0,10);
+        if (!fut.length) { strip.innerHTML=`<div class="ev-chip" style="min-width:200px;color:var(--text3);font-size:.82rem;display:flex;align-items:center">Nenhum evento próximo</div>`; return; }
+        strip.innerHTML = fut.map(e=>{
+            const d=new Date(e.data_inicio||e.data);
+            return `<div class="ev-chip" onclick="switchTab('agenda')"><div class="ev-chip-date">${d.getDate()} ${MESES_S[d.getMonth()]}</div><div class="ev-chip-name">${e.titulo||e.nome||'Evento'}</div><div class="ev-chip-loc"><i class="fa-solid fa-location-dot" style="font-size:.64rem"></i> ${e.local||'Igreja'}</div></div>`;
+        }).join('');
+    }
+
+    // ── CALENDAR ───────────────────────────────────────────────────────
+    function renderCalendar() {
+        const y=calDate.getFullYear(), m=calDate.getMonth();
+        document.getElementById('calLabel').textContent = `${MESES[m]} ${y}`;
+        const first=new Date(y,m,1).getDay(), days=new Date(y,m+1,0).getDate();
+        const hoje=new Date(), isCur=hoje.getFullYear()===y&&hoje.getMonth()===m;
+        const evDays=new Set(allEvents.map(e=>new Date(e.data_inicio||e.data)).filter(d=>d.getFullYear()===y&&d.getMonth()===m).map(d=>d.getDate()));
+        let h='';
+        for(let i=0;i<first;i++) h+=`<div class="cal-day empty"></div>`;
+        for(let d=1;d<=days;d++){
+            const cls=['cal-day',isCur&&hoje.getDate()===d?'today':'',evDays.has(d)?'has-event':''].filter(Boolean).join(' ');
+            h+=`<div class="${cls}" onclick="selectDay(${d},${m},${y})">${d}</div>`;
         }
+        document.getElementById('calDays').innerHTML=h;
+    }
 
-        function renderActions(role, features) {
-            const node = document.getElementById('actionsWrap');
-            const mapped = (features || []).map((feature) => FEATURE_TO_ACTION[feature]).filter(Boolean);
-            const actions = mapped.length ? mapped : (ROLE_ACTIONS[role] || ROLE_ACTIONS.membro);
-            node.innerHTML = actions.map((item) => `<a class="action" href="${item.href}">${item.label}</a>`).join('');
+    function changeMonth(d) {
+        calDate.setMonth(calDate.getMonth()+d); renderCalendar();
+        const y=calDate.getFullYear(),m=calDate.getMonth();
+        const f=allEvents.filter(e=>{const dd=new Date(e.data_inicio||e.data);return dd.getFullYear()===y&&dd.getMonth()===m;});
+        document.getElementById('evListTitle').textContent=`Eventos em ${MESES[m]}`;
+        renderEvList(f);
+    }
+
+    function selectDay(day,m,y) {
+        document.querySelectorAll('.cal-day.selected').forEach(el=>el.classList.remove('selected'));
+        const cells=document.querySelectorAll('#calDays .cal-day:not(.empty)');
+        if(cells[day-1]) cells[day-1].classList.add('selected');
+        const f=allEvents.filter(e=>{const d=new Date(e.data_inicio||e.data);return d.getFullYear()===y&&d.getMonth()===m&&d.getDate()===day;});
+        document.getElementById('evListTitle').textContent=f.length?`Eventos em ${day} de ${MESES[m]}`:`Sem eventos em ${day} de ${MESES[m]}`;
+        renderEvList(f);
+    }
+
+    function renderEvList(evs) {
+        const el=document.getElementById('evList');
+        if(!evs.length){el.innerHTML=`<div class="empty-state"><div class="empty-state-icon">📅</div><div class="empty-state-text">Nenhum evento encontrado</div></div>`;return;}
+        el.innerHTML=evs.map(e=>{
+            const d=new Date(e.data_inicio||e.data), hr=e.hora_inicio?e.hora_inicio.substring(0,5):'';
+            return `<div class="ev-item"><div class="ev-datebox"><div class="ev-day">${d.getDate()}</div><div class="ev-mon">${MESES_S[d.getMonth()]}</div></div><div><div class="ev-name">${e.titulo||e.nome||'Evento'}</div>${hr?`<div class="ev-time"><i class="fa-regular fa-clock"></i> ${hr}</div>`:''}<div class="ev-loc"><i class="fa-solid fa-location-dot"></i> ${e.local||e.descricao_local||'Igreja'}</div></div></div>`;
+        }).join('');
+    }
+
+    // ── FEED ───────────────────────────────────────────────────────────
+    function renderFeed(items) {
+        const card=document.getElementById('feedCard');
+        if(!items.length){
+            card.innerHTML=`<div class="feed-item"><div class="feed-header"><div class="feed-av" style="background:linear-gradient(135deg,var(--teal),var(--primary))"><i class="fa-solid fa-church"></i></div><div><div class="feed-author">Bem-vindo ao App da Igreja!</div><div class="feed-time">hoje</div></div></div><div class="feed-text">Use o mural para acompanhar as novidades da sua comunidade. Fique conectado com os irmãos e receba comunicados importantes.</div></div>`;
+            return;
         }
+        const cores=['#0ea5e9','#0f766e','#a855f7','#f97316','#22c55e'];
+        card.innerHTML=items.slice(0,5).map((it,i)=>{
+            const ini=(it.destino||it.nome||'?').charAt(0).toUpperCase(),c=cores[i%cores.length];
+            return `<div class="feed-item"><div class="feed-header"><div class="feed-av" style="background:${c}22;color:${c};border:1px solid ${c}44">${ini}</div><div><div class="feed-author">${it.gatilho||it.tipo||'Comunicado'}</div><div class="feed-time">${fmtDate(it.created_at||it.data)}</div></div></div><div class="feed-text">${it.destino||it.mensagem||'Mensagem da igreja'}</div></div>`;
+        }).join('');
+    }
 
-        function renderList(nodeId, items, renderer, emptyText) {
-            const node = document.getElementById(nodeId);
-            if (!items.length) {
-                node.innerHTML = `<div class="muted">${emptyText}</div>`;
-                return;
-            }
-            node.innerHTML = items.map(renderer).join('');
-        }
+    // ── PRAYERS ────────────────────────────────────────────────────────
+    function renderPrayers(ps) {
+        const el=document.getElementById('prayerList');
+        document.getElementById('prayerFab').style.display='flex';
+        if(!ps.length){el.innerHTML=`<div class="empty-state"><div class="empty-state-icon">🙏</div><div class="empty-state-text">Nenhum pedido no mural ainda.<br>Seja o primeiro a compartilhar!</div></div>`;return;}
+        const cors=['#a855f7','#ec4899','#8b5cf6','#6366f1'];
+        el.innerHTML=ps.slice(0,20).map((p,i)=>{
+            const ini=(p.nome||p.solicitante||'A').charAt(0).toUpperCase(),c=cors[i%cors.length];
+            return `<div class="prayer-card" id="pr-${p.id||i}"><div class="prayer-hdr"><div class="prayer-av" style="background:${c}20;color:${c};border:1px solid ${c}40">${ini}</div><div><div class="prayer-name">${p.nome||p.solicitante||'Anônimo'}</div><div class="prayer-time">${fmtDate(p.created_at||p.data)}</div></div>${p.respondido?`<span style="margin-left:auto;font-size:.65rem;background:rgba(34,197,94,.13);color:var(--success);border:1px solid rgba(34,197,94,.25);border-radius:99px;padding:2px 8px;font-weight:700">✓ Respondida</span>`:''}</div><div class="prayer-text">${p.pedido||p.descricao||''}</div><div class="prayer-actions"><button class="p-btn" onclick="prayFor('${ini}')"><i class="fa-solid fa-hands-praying"></i> Orando por você</button>${!p.respondido?`<button class="p-btn answered" onclick="markAnswered(${p.id||i})"><i class="fa-solid fa-check"></i> Respondida!</button>`:''}</div></div>`;
+        }).join('');
+    }
 
-        async function loadContext() {
-            const [contextResp, permsResp] = await Promise.all([
-                fetch('/app-membro/context'),
-                fetch('/app-membro/permissions')
-            ]);
+    function prayFor(n){showToast(`🙏 Você está orando por ${n}!`);}
+    async function markAnswered(id){
+        try{await fetch(`/oracoes/${id}/respondida`,{method:'PATCH'});}catch(e){}
+        showToast('✓ Glória a Deus! Oração respondida!'); loadPrayers();
+    }
 
-            if (!contextResp.ok) {
-                throw new Error('Nao foi possivel carregar o contexto do app membro.');
-            }
+    // ── FORMS ──────────────────────────────────────────────────────────
+    async function submitPrayer(e){
+        e.preventDefault();
+        const payload={nome:document.getElementById('prayerName').value||'Anônimo',pedido:document.getElementById('prayerText').value,visibilidade:document.getElementById('prayerVis').value};
+        try{
+            const r=await fetch('/oracoes',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+            if(r.ok){closeModal('modal-oracao');document.getElementById('prayerText').value='';showToast('🙏 Pedido enviado! Estamos orando por você.');setTimeout(loadPrayers,500);}
+            else showToast('Erro ao enviar. Tente novamente.');
+        }catch(err){showToast('Erro de conexão.');}
+    }
 
-            const response = contextResp;
-            if (!response.ok) {
-                throw new Error('Nao foi possivel carregar o contexto do app membro.');
-            }
+    async function submitConectar(e){
+        e.preventDefault();
+        try{await fetch('/visitantes/contato',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nome:document.getElementById('conNome').value,whatsapp:document.getElementById('conWpp').value,mensagem:document.getElementById('conMsg').value,tipo:'conectar'})});}catch(e){}
+        closeModal('modal-conectar'); showToast('🤝 Ótimo! Em breve entraremos em contato!');
+    }
 
-            const data = await response.json();
-            const permsData = permsResp.ok ? await permsResp.json() : { features: [] };
+    async function submitJesus(e){
+        e.preventDefault();
+        try{await fetch('/visitantes/decisao',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nome:document.getElementById('jesNome').value,contato:document.getElementById('jesContato').value,tipo:'decisao_fe'})});}catch(e){}
+        closeModal('modal-jesus'); showToast('🎉 Glória a Deus! Bem-vindo à família!');
+    }
 
-            document.getElementById('userLabel').textContent = `${data.user.nome} • Perfil: ${data.user.role}`;
-            document.getElementById('roleChips').innerHTML = `
-                <span class="chip">Igreja ${data.user.igrejaId}</span>
-                <span class="chip">${data.user.role}</span>
-                <span class="chip">${data.user.email}</span>
-            `;
+    async function submitAjuda(e){
+        e.preventDefault();
+        try{await fetch('/visitantes/contato',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tipo_ajuda:document.getElementById('ajudaTipo').value,mensagem:document.getElementById('ajudaMsg').value,contato:document.getElementById('ajudaContato').value,tipo:'ajuda'})});}catch(e){}
+        closeModal('modal-ajuda'); showToast('💙 Pedido recebido! Em breve entraremos em contato.');
+    }
 
-            renderStats(data.quickStats);
-            renderActions(data.user.role, permsData.features);
+    // ── CREDENTIAL ─────────────────────────────────────────────────────
+    function populateCredential(u){
+        const nome=u.nome||u.email||'Membro', ini=nome.charAt(0).toUpperCase();
+        const role=ROLES[u.role]||u.role||'Membro', id=u.id||u.membro_id||'—';
+        const church=u.nome_igreja||'Igreja';
+        document.getElementById('credChurch').textContent=church;
+        document.getElementById('credPhoto').textContent=ini;
+        document.getElementById('credName').textContent=nome;
+        document.getElementById('credRole').innerHTML=`<i class="fa-solid fa-star"></i> ${role}`;
+        document.getElementById('credId').textContent=`ID: ${String(id).padStart(6,'0')}`;
+        document.getElementById('credBackName').textContent=nome;
+        document.getElementById('credBackId').textContent=`ID #${String(id).padStart(6,'0')} · ${church}`;
+        const qd=encodeURIComponent(`LDFP_MEMBRO:${id}:${nome}`);
+        document.getElementById('credQR').src=`https://api.qrserver.com/v1/create-qr-code/?size=120x120&bgcolor=ffffff&color=000000&data=${qd}`;
+    }
 
-            renderList(
-                'listWhatsapp',
-                data.recent.whatsapp || [],
-                (item) => `<div class="item"><strong>${item.gatilho}</strong><br><span class="muted">${item.destino} • ${item.status}</span></div>`,
-                'Nenhum envio recente.'
-            );
+    function flipCard(){cardFlipped=!cardFlipped;document.getElementById('credInner').classList.toggle('flipped',cardFlipped);}
 
-            renderList(
-                'listPortaria',
-                data.recent.checkins || [],
-                (item) => `<div class="item"><strong>${item.nome_visitante}</strong><br><span class="muted">${item.evento || 'Sem evento'} • ${item.status}</span></div>`,
-                'Nenhum check-in recente.'
-            );
+    // ── PROFILE ────────────────────────────────────────────────────────
+    function populateProfileInfo(u){
+        const role=ROLES[u.role]||u.role||'Membro';
+        document.getElementById('profileInfo').innerHTML=[
+            {i:'fa-user',c:'c-blue',l:'Nome completo',v:u.nome||'—'},
+            {i:'fa-envelope',c:'c-teal',l:'E-mail',v:u.email||'—'},
+            {i:'fa-shield-halved',c:'c-purple',l:'Perfil de acesso',v:role},
+            {i:'fa-church',c:'c-orange',l:'Igreja',v:u.nome_igreja||'—'}
+        ].map(r=>`<div class="profile-row"><div class="prow-icon ${r.c}"><i class="fa-solid ${r.i}"></i></div><div><div class="prow-label">${r.l}</div><div class="prow-value">${r.v}</div></div></div>`).join('');
+    }
 
-            renderList(
-                'listPayments',
-                data.recent.payments || [],
-                (item) => `<div class="item"><strong>${item.descricao}</strong><br><span class="muted">R$ ${Number(item.valor).toFixed(2)} • ${item.status}</span></div>`,
-                'Nenhum pagamento recente.'
-            );
-        }
+    // ── NAVIGATION ─────────────────────────────────────────────────────
+    function switchTab(tab){
+        if(currentTab===tab) return;
+        document.getElementById(`tab-${currentTab}`)?.classList.remove('active');
+        document.getElementById(`nav-${currentTab}`)?.classList.remove('active');
+        const pane=document.getElementById(`tab-${tab}`);
+        if(pane){pane.classList.add('active','slide-in');pane.addEventListener('animationend',()=>pane.classList.remove('slide-in'),{once:true});}
+        document.getElementById(`nav-${tab}`)?.classList.add('active');
+        currentTab=tab;
+        document.getElementById('prayerFab').style.display=tab==='oracao'?'flex':'none';
+    }
 
-        loadContext().catch((error) => {
-            document.getElementById('userLabel').textContent = error.message;
-        });
+    // ── MODALS ─────────────────────────────────────────────────────────
+    function showModal(id){document.getElementById(id)?.classList.add('open');document.body.style.overflow='hidden';}
+    function closeModal(id){document.getElementById(id)?.classList.remove('open');document.body.style.overflow='';}
+    function handleOvClick(ev,id){if(ev.target===document.getElementById(id))closeModal(id);}
+
+    // ── CONTRIBUIR ─────────────────────────────────────────────────────
+    async function openContribuir(){
+        try{const r=await fetch('/pagamentos/links');if(r.ok){const d=await r.json();const l=d.links||[];if(l.length){window.open(l[0].url,'_blank');return;}}}catch(e){}
+        showToast('💛 Em breve nossa área de contribuição estará disponível!');
+    }
+
+    // ── TOAST ──────────────────────────────────────────────────────────
+    function showToast(msg){
+        let t=document.getElementById('_toast');
+        if(!t){t=document.createElement('div');t.id='_toast';t.style.cssText='position:fixed;bottom:calc(var(--nav-height) + 20px);left:50%;transform:translateX(-50%) translateY(20px);background:#1e293b;border:1px solid #334155;color:#f1f5f9;padding:12px 20px;border-radius:12px;font-size:.84rem;font-weight:500;z-index:9999;max-width:90vw;text-align:center;box-shadow:0 8px 24px rgba(0,0,0,.45);transition:opacity .3s,transform .3s;opacity:0';document.body.appendChild(t);}
+        t.textContent=msg;t.style.opacity='0';t.style.transform='translateX(-50%) translateY(20px)';
+        requestAnimationFrame(()=>{t.style.opacity='1';t.style.transform='translateX(-50%) translateY(0)';});
+        clearTimeout(t._t);t._t=setTimeout(()=>{t.style.opacity='0';t.style.transform='translateX(-50%) translateY(20px)';},3200);
+    }
+
+    // ── LOGOUT ─────────────────────────────────────────────────────────
+    function doLogout(){
+        if(confirm('Tem certeza que deseja sair?')){localStorage.removeItem('ldfp_session');sessionStorage.clear();location.href='login.html';}
+    }
+
+    // ── UTILS ──────────────────────────────────────────────────────────
+    function fmtDate(s){
+        if(!s) return '';const d=new Date(s);if(isNaN(d)) return s;
+        const diff=Date.now()-d.getTime();
+        if(diff<60000) return 'agora';if(diff<3600000) return `${Math.floor(diff/60000)}min atrás`;
+        if(diff<86400000) return `${Math.floor(diff/3600000)}h atrás`;if(diff<604800000) return `${Math.floor(diff/86400000)}d atrás`;
+        return `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`;
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
     </script>
-</body>
-</html>
+    </body>
+    </html>
