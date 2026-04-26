@@ -288,11 +288,11 @@
                     <a href="criar_conta.html" class="btn-cta">
                         Começar Agora
                     </a>
-                    <button class="btn-outline" id="btnConhecaPlanos" style="cursor:pointer;">
+                    <a href="planos.html" class="btn-outline" style="cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:8px;">
                         <i class="fa-regular fa-circle-play"></i> Conheça nossos planos
-                    </button>
-                    <!-- Modal de Planos Mensais -->
-                    <div id="modalPlanos" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.85);z-index:1000;align-items:center;justify-content:center;">
+                    </a>
+                    <!-- Modal removido: planos agora em planos.html -->
+                    <div id="modalPlanos" style="display:none">
                         <div style="background:#fff;padding:40px 20px 30px 20px;border-radius:16px;max-width:1200px;width:98vw;box-shadow:0 8px 40px #000;position:relative;">
                             <button onclick="document.getElementById('modalPlanos').style.display='none'" style="position:absolute;top:18px;right:18px;background:none;border:none;color:#222;font-size:22px;cursor:pointer;">&times;</button>
                             <h2 style="color:#f59e0b;text-align:center;margin-bottom:10px;">Conheça nossos planos</h2>
@@ -473,20 +473,7 @@
         </div>
     </footer>
 
-    <script>
-        const modalPlanos = document.getElementById('modalPlanos');
-        const btnConhecaPlanos = document.getElementById('btnConhecaPlanos');
 
-        btnConhecaPlanos.onclick = function() {
-            modalPlanos.style.display = 'flex';
-        };
-
-        modalPlanos.addEventListener('click', function(event) {
-            if (event.target === modalPlanos) {
-                modalPlanos.style.display = 'none';
-            }
-        });
-    </script>
 
     <script src="speed-insights.js" defer></script>
 
