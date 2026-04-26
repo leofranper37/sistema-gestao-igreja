@@ -272,8 +272,8 @@
         const otherLinks = [
             ['pagamentos.html', 'fa-solid fa-link', 'Links de Pagamento', 'pagamentos'],
             ['contas_pagar.html', 'fa-solid fa-file-invoice-dollar', 'Contas a Pagar', 'financeiro'],
-            ['construcao.html?pag=Recibo', 'fa-solid fa-receipt', 'Recibo'],
-            ['construcao.html?pag=Transferencias', 'fa-solid fa-right-left', 'Transferências']
+            ['recibo.html', 'fa-solid fa-receipt', 'Recibo'],
+            ['transferencias.html', 'fa-solid fa-right-left', 'Transferências']
         ];
 
         const allowedDizimosLinks = filterLinksByRole(dizimosLinks, user);

@@ -1,6 +1,33 @@
 const { pool } = require('../config/db');
 
+let tableReadyPromise = null;
+
+async function ensureContasPagarTable() {
+    if (!tableReadyPromise) {
+        tableReadyPromise = pool.query(
+            `CREATE TABLE IF NOT EXISTS contas_pagar (
+                id SERIAL PRIMARY KEY,
+                igreja_id INTEGER NOT NULL,
+                descricao VARCHAR(255) NOT NULL,
+                fornecedor VARCHAR(255) NULL,
+                valor DECIMAL(12,2) NOT NULL,
+                vencimento DATE NOT NULL,
+                categoria VARCHAR(120) NULL,
+                observacao TEXT NULL,
+                status VARCHAR(20) NOT NULL DEFAULT 'pendente',
+                data_pagamento DATE NULL,
+                created_by INTEGER NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )`
+        );
+    }
+
+    await tableReadyPromise;
+}
+
 async function listContasPagar(igrejaId, filters = {}) {
+    await ensureContasPagarTable();
     const conditions = ['cp.igreja_id = ?'];
     const params = [igrejaId];
 
@@ -50,6 +77,7 @@ async function listContasPagar(igrejaId, filters = {}) {
 }
 
 async function createContaPagar(payload) {
+    await ensureContasPagarTable();
     const { igrejaId, descricao, fornecedor, valor, vencimento, categoria, observacao, createdBy } = payload;
     const [result] = await pool.query(
         `INSERT INTO contas_pagar (igreja_id, descricao, fornecedor, valor, vencimento, categoria, observacao, created_by)
@@ -61,6 +89,7 @@ async function createContaPagar(payload) {
 }
 
 async function patchContaPagar(id, igrejaId, fields) {
+    await ensureContasPagarTable();
     const allowed = ['status', 'data_pagamento', 'descricao', 'fornecedor', 'valor', 'vencimento', 'categoria', 'observacao'];
     const sets = [];
     const params = [];
@@ -75,23 +104,26 @@ async function patchContaPagar(id, igrejaId, fields) {
     if (!sets.length) return;
     params.push(id, igrejaId);
     await pool.query(
-        `UPDATE contas_pagar SET ${sets.join(', ')}, updated_at=NOW() WHERE id=? AND igreja_id=?`,
+        `UPDATE contas_pagar SET ${sets.join(', ')}, updated_at=CURRENT_TIMESTAMP WHERE id=? AND igreja_id=?`,
         params
     );
 }
 
 async function deleteContaPagar(id, igrejaId) {
+    await ensureContasPagarTable();
     await pool.query(`DELETE FROM contas_pagar WHERE id=? AND igreja_id=?`, [id, igrejaId]);
 }
 
 async function markVencidas(igrejaId) {
+    await ensureContasPagarTable();
     await pool.query(
-        `UPDATE contas_pagar SET status='vencido' WHERE igreja_id=? AND status='pendente' AND vencimento < CURDATE()`,
+        `UPDATE contas_pagar SET status='vencido' WHERE igreja_id=? AND status='pendente' AND vencimento < CURRENT_DATE`,
         [igrejaId]
     );
 }
 
 async function getTotaisContasPagar(igrejaId) {
+    await ensureContasPagarTable();
     const [[row]] = await pool.query(`
         SELECT
             SUM(CASE WHEN status='pendente' THEN valor ELSE 0 END) AS total_pendente,

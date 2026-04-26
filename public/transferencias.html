@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LDFP - Transferencias</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .tf-wrap { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 16px; }
+        .tf-card { background: #fff; border: 1px solid #dbe3ef; border-radius: 14px; box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08); padding: 16px; }
+        .tf-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+        .tf-grid .full { grid-column: 1 / -1; }
+        .tf-grid label { display: block; margin-bottom: 6px; font-size: 12px; font-weight: 700; text-transform: uppercase; color: #475569; }
+        .tf-grid input, .tf-grid select, .tf-grid textarea { width: 100%; border: 1px solid #dbe3ef; border-radius: 8px; padding: 9px 11px; font-size: 14px; }
+        .tf-grid textarea { min-height: 68px; resize: vertical; }
+        .tf-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+        .tf-msg { min-height: 18px; margin-top: 10px; font-size: 12px; color: #0f766e; }
+        .tf-msg.error { color: #b91c1c; }
+        .tf-list { border: 1px solid #e2e8f0; border-radius: 10px; max-height: 380px; overflow: auto; }
+        .tf-item { padding: 10px; border-bottom: 1px solid #f1f5f9; }
+        .tf-item:last-child { border-bottom: 0; }
+        .tf-item h4 { margin: 0 0 4px; font-size: 14px; }
+        .tf-item p { margin: 0; color: #64748b; font-size: 12px; }
+        .tf-badge { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 700; background: #dcfce7; color: #166534; }
+        @media (max-width: 1000px) { .tf-wrap { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body class="theme-petroleo enterprise-shell-page" data-shell-title="Transferencias" data-shell-breadcrumb="LDFP / Tesouraria / Transferencias" data-shell-active="transferencias.html" data-shell-chip="Tesouraria" data-shell-role="Admin">
+<main class="main-content enterprise-main">
+    <div class="enterprise-page-shell">
+        <div class="enterprise-page-hero">
+            <div>
+                <h2>Transferencias Internas</h2>
+                <p>Controle transferencias entre caixa, bancos e fundos com historico local de apoio.</p>
+            </div>
+            <div class="enterprise-page-badge"><i class="fa-solid fa-right-left"></i> Movimento Interno</div>
+        </div>
+
+        <div class="tf-wrap">
+            <section class="tf-card">
+                <h3 style="margin-top:0;"><i class="fa-solid fa-shuffle"></i> Nova transferencia</h3>
+                <form id="formTf" class="tf-grid">
+                    <div>
+                        <label for="origem">Origem</label>
+                        <select id="origem" required>
+                            <option value="">Selecione</option>
+                            <option value="Caixa Geral">Caixa Geral</option>
+                            <option value="Banco Principal">Banco Principal</option>
+                            <option value="Fundo de Reserva">Fundo de Reserva</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="destino">Destino</label>
+                        <select id="destino" required>
+                            <option value="">Selecione</option>
+                            <option value="Caixa Geral">Caixa Geral</option>
+                            <option value="Banco Principal">Banco Principal</option>
+                            <option value="Fundo de Reserva">Fundo de Reserva</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="valor">Valor</label>
+                        <input id="valor" required placeholder="0,00">
+                    </div>
+                    <div>
+                        <label for="data">Data</label>
+                        <input id="data" type="date" required>
+                    </div>
+                    <div class="full">
+                        <label for="motivo">Motivo</label>
+                        <textarea id="motivo" placeholder="Ex: ajuste de fluxo semanal" required></textarea>
+                    </div>
+                    <div class="full tf-actions">
+                        <button class="btn-primario" type="submit"><i class="fa-solid fa-floppy-disk"></i> Salvar transferencia</button>
+                        <button class="btn-linha" type="button" onclick="window.history.back()"><i class="fa-solid fa-arrow-left"></i> Voltar</button>
+                    </div>
+                </form>
+                <div class="tf-msg" id="tfMsg"></div>
+            </section>
+
+            <section class="tf-card">
+                <h3 style="margin-top:0;"><i class="fa-solid fa-clock-rotate-left"></i> Historico recente</h3>
+                <div class="tf-list" id="tfList"></div>
+            </section>
+        </div>
+    </div>
+</main>
+
+<script src="session.js"></script>
+<script src="enterprise-shell.js"></script>
+<script>
+    requireAuthSession();
+
+    const KEY = 'ldfp_transferencias';
+
+    function toNumber(v) {
+        const n = Number(String(v || '').replace(/\./g, '').replace(',', '.').replace(/[^\d.-]/g, ''));
+        return Number.isFinite(n) ? n : 0;
+    }
+
+    function toMoney(v) {
+        return Number(v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function readItems() {
+        try {
+            const raw = localStorage.getItem(KEY);
+            const items = raw ? JSON.parse(raw) : [];
+            return Array.isArray(items) ? items : [];
+        } catch (_) {
+            return [];
+        }
+    }
+
+    function saveItems(items) {
+        localStorage.setItem(KEY, JSON.stringify(items));
+    }
+
+    function render() {
+        const list = document.getElementById('tfList');
+        const items = readItems();
+        if (!items.length) {
+            list.innerHTML = '<div class="tf-item"><p>Nenhuma transferencia registrada.</p></div>';
+            return;
+        }
+
+        list.innerHTML = items.slice(0, 30).map((i) => `
+            <div class="tf-item">
+                <h4><span class="tf-badge">${i.origem} -> ${i.destino}</span></h4>
+                <p><strong>R$ ${toMoney(i.valor)}</strong> | ${i.data}</p>
+                <p>${i.motivo}</p>
+            </div>
+        `).join('');
+    }
+
+    document.getElementById('data').value = new Date().toISOString().slice(0, 10);
+
+    document.getElementById('formTf').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const origem = document.getElementById('origem').value;
+        const destino = document.getElementById('destino').value;
+        const valor = toNumber(document.getElementById('valor').value);
+        const dataRaw = document.getElementById('data').value;
+        const motivo = document.getElementById('motivo').value.trim();
+        const msg = document.getElementById('tfMsg');
+
+        if (!origem || !destino || origem === destino || valor <= 0 || !dataRaw || !motivo) {
+            msg.className = 'tf-msg error';
+            msg.textContent = 'Preencha corretamente os campos. Origem e destino devem ser diferentes.';
+            return;
+        }
+
+        const item = {
+            origem,
+            destino,
+            valor,
+            data: new Date(dataRaw + 'T12:00:00').toLocaleDateString('pt-BR'),
+            motivo,
+            createdAt: new Date().toISOString()
+        };
+
+        const items = readItems();
+        items.unshift(item);
+        saveItems(items);
+        render();
+
+        msg.className = 'tf-msg';
+        msg.textContent = 'Transferencia registrada com sucesso.';
+        document.getElementById('motivo').value = '';
+        document.getElementById('valor').value = '';
+        document.getElementById('origem').value = '';
+        document.getElementById('destino').value = '';
+    });
+
+    render();
+</script>
+</body>
+</html>

@@ -147,7 +147,8 @@
         }
     </style>
 </head>
-<body data-shell="true" data-shell-active="relatorios_contabilidade.html">
+<body class="theme-petroleo enterprise-shell-page" data-shell-title="Relatorios Contabilidade" data-shell-breadcrumb="LDFP / Relatorios / Contabilidade" data-shell-active="relatorios_contabilidade.html" data-shell-chip="Relatorios" data-shell-role="Admin">
+<main class="main-content enterprise-main">
 <div class="rc-wrap" id="mainContent">
 
     <div class="rc-hero">
@@ -162,6 +163,7 @@
     <!-- Toolbar -->
     <div class="rc-toolbar">
         <a href="dashboard.html" class="rc-print-btn" style="text-decoration:none;"><i class="fa-solid fa-house"></i> Dashboard</a>
+        <button class="rc-print-btn" onclick="window.history.back()"><i class="fa-solid fa-arrow-left"></i> Voltar ao menu anterior</button>
         <select id="selAno" onchange="loadAll()"></select>
         <select id="selMes" onchange="loadAll()">
             <option value="">Todos os meses</option>
@@ -239,6 +241,7 @@
     </div>
 
 </div>
+</main>
 
 <script src="session.js"></script>
 <script src="enterprise-shell.js"></script>

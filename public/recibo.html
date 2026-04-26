@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LDFP - Recibo</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .rb-wrap { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 16px; }
+        .rb-card { background: #fff; border: 1px solid #dbe3ef; border-radius: 14px; box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08); padding: 16px; }
+        .rb-card h3 { margin: 0 0 12px; color: #0f172a; }
+        .rb-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .rb-grid .full { grid-column: 1 / -1; }
+        .rb-grid label { display: block; font-size: 12px; font-weight: 700; color: #475569; margin-bottom: 6px; text-transform: uppercase; }
+        .rb-grid input, .rb-grid textarea { width: 100%; border: 1px solid #dbe3ef; border-radius: 8px; padding: 9px 11px; font-size: 14px; }
+        .rb-grid textarea { min-height: 72px; resize: vertical; }
+        .rb-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+        .rb-msg { min-height: 18px; margin-top: 10px; font-size: 12px; color: #0f766e; }
+        .rb-msg.error { color: #b91c1c; }
+        .rb-preview { border: 2px dashed #cbd5e1; border-radius: 12px; padding: 14px; background: #f8fafc; }
+        .rb-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .rb-num { font-family: monospace; font-weight: 700; color: #334155; }
+        .rb-line { margin: 5px 0; color: #334155; line-height: 1.45; }
+        .rb-history { margin-top: 10px; max-height: 260px; overflow: auto; border: 1px solid #e2e8f0; border-radius: 10px; }
+        .rb-item { padding: 9px 10px; border-bottom: 1px solid #f1f5f9; font-size: 13px; }
+        .rb-item:last-child { border-bottom: 0; }
+        @media (max-width: 1000px) { .rb-wrap { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body class="theme-petroleo enterprise-shell-page" data-shell-title="Recibo" data-shell-breadcrumb="LDFP / Tesouraria / Recibo" data-shell-active="recibo.html" data-shell-chip="Tesouraria" data-shell-role="Admin">
+<main class="main-content enterprise-main">
+    <div class="enterprise-page-shell">
+        <div class="enterprise-page-hero">
+            <div>
+                <h2>Recibo</h2>
+                <p>Emissao de recibo com numero unico, visual de impressao e historico rapido.</p>
+            </div>
+            <div class="enterprise-page-badge"><i class="fa-solid fa-receipt"></i> Tesouraria</div>
+        </div>
+
+        <div class="rb-wrap">
+            <section class="rb-card">
+                <h3><i class="fa-solid fa-pen"></i> Emitir Recibo</h3>
+                <form id="formRecibo" class="rb-grid">
+                    <div class="full">
+                        <label for="rbNome">Recebido de</label>
+                        <input id="rbNome" required placeholder="Nome da pessoa ou instituicao">
+                    </div>
+                    <div>
+                        <label for="rbValor">Valor</label>
+                        <input id="rbValor" required placeholder="0,00">
+                    </div>
+                    <div>
+                        <label for="rbData">Data</label>
+                        <input id="rbData" type="date" required>
+                    </div>
+                    <div class="full">
+                        <label for="rbRef">Referencia</label>
+                        <input id="rbRef" required placeholder="Ex: Oferta missionaria de abril">
+                    </div>
+                    <div class="full">
+                        <label for="rbObs">Observacao</label>
+                        <textarea id="rbObs" placeholder="Opcional"></textarea>
+                    </div>
+                    <div class="full rb-actions">
+                        <button type="submit" class="btn-primario"><i class="fa-solid fa-file-circle-plus"></i> Gerar recibo</button>
+                        <button type="button" class="btn-secundario" id="btnImprimir"><i class="fa-solid fa-print"></i> Imprimir</button>
+                        <button type="button" class="btn-linha" onclick="window.history.back()"><i class="fa-solid fa-arrow-left"></i> Voltar</button>
+                    </div>
+                </form>
+                <div class="rb-msg" id="rbMsg"></div>
+            </section>
+
+            <section class="rb-card">
+                <h3><i class="fa-solid fa-file-lines"></i> Preview</h3>
+                <div class="rb-preview" id="rbPreview">
+                    <div class="rb-head">
+                        <strong>LDFP - RECIBO</strong>
+                        <span class="rb-num" id="rbNumero">#---</span>
+                    </div>
+                    <div class="rb-line" id="pvNome">Recebido de: -</div>
+                    <div class="rb-line" id="pvValor">Valor: R$ 0,00</div>
+                    <div class="rb-line" id="pvData">Data: -</div>
+                    <div class="rb-line" id="pvRef">Referencia: -</div>
+                    <div class="rb-line" id="pvObs">Observacao: -</div>
+                </div>
+
+                <h3 style="margin-top: 14px;"><i class="fa-solid fa-clock-rotate-left"></i> Ultimos recibos</h3>
+                <div class="rb-history" id="rbHistory"></div>
+            </section>
+        </div>
+    </div>
+</main>
+
+<script src="session.js"></script>
+<script src="enterprise-shell.js"></script>
+<script>
+    requireAuthSession();
+
+    const KEY = 'ldfp_recibos';
+
+    function toNumber(v) {
+        const n = Number(String(v || '').replace(/\./g, '').replace(',', '.').replace(/[^\d.-]/g, ''));
+        return Number.isFinite(n) ? n : 0;
+    }
+
+    function toMoney(v) {
+        return Number(v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function readItems() {
+        try {
+            const raw = localStorage.getItem(KEY);
+            const items = raw ? JSON.parse(raw) : [];
+            return Array.isArray(items) ? items : [];
+        } catch (_) {
+            return [];
+        }
+    }
+
+    function saveItems(items) {
+        localStorage.setItem(KEY, JSON.stringify(items));
+    }
+
+    function buildCode() {
+        const now = new Date();
+        return `RB-${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}-${Math.floor(Math.random()*9000)+1000}`;
+    }
+
+    function renderHistory() {
+        const wrap = document.getElementById('rbHistory');
+        const items = readItems();
+        if (!items.length) {
+            wrap.innerHTML = '<div class="rb-item">Nenhum recibo emitido.</div>';
+            return;
+        }
+
+        wrap.innerHTML = items.slice(0, 15).map((i) => `<div class="rb-item"><strong>${i.numero}</strong> - ${i.nome} - R$ ${toMoney(i.valor)} <span style="color:#64748b;">(${i.data})</span></div>`).join('');
+    }
+
+    function updatePreview(data) {
+        document.getElementById('rbNumero').textContent = data.numero || '#---';
+        document.getElementById('pvNome').textContent = `Recebido de: ${data.nome || '-'}`;
+        document.getElementById('pvValor').textContent = `Valor: R$ ${toMoney(data.valor || 0)}`;
+        document.getElementById('pvData').textContent = `Data: ${data.data || '-'}`;
+        document.getElementById('pvRef').textContent = `Referencia: ${data.referencia || '-'}`;
+        document.getElementById('pvObs').textContent = `Observacao: ${data.observacao || '-'}`;
+    }
+
+    document.getElementById('rbData').value = new Date().toISOString().slice(0, 10);
+
+    document.getElementById('formRecibo').addEventListener('submit', (event) => {
+        event.preventDefault();
+        const nome = document.getElementById('rbNome').value.trim();
+        const valor = toNumber(document.getElementById('rbValor').value.trim());
+        const dataRaw = document.getElementById('rbData').value;
+        const referencia = document.getElementById('rbRef').value.trim();
+        const observacao = document.getElementById('rbObs').value.trim();
+        const msg = document.getElementById('rbMsg');
+
+        if (!nome || !referencia || valor <= 0 || !dataRaw) {
+            msg.className = 'rb-msg error';
+            msg.textContent = 'Preencha os campos obrigatorios e informe valor valido.';
+            return;
+        }
+
+        const item = {
+            numero: buildCode(),
+            nome,
+            valor,
+            data: new Date(dataRaw + 'T12:00:00').toLocaleDateString('pt-BR'),
+            referencia,
+            observacao,
+            createdAt: new Date().toISOString()
+        };
+
+        const items = readItems();
+        items.unshift(item);
+        saveItems(items);
+        updatePreview(item);
+        renderHistory();
+
+        msg.className = 'rb-msg';
+        msg.textContent = 'Recibo gerado com sucesso.';
+    });
+
+    document.getElementById('btnImprimir').addEventListener('click', () => {
+        window.print();
+    });
+
+    renderHistory();
+</script>
+</body>
+</html>
