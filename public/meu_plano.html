@@ -1178,10 +1178,22 @@
         async function loadData() {
             const plansReq = apiJson('/api/pagamentos/planos').catch(() => []);
             const statusReq = token ? apiJson('/api/pagamentos/status') : Promise.resolve({ status: 'inativa', plano: 'gratis' });
+            const configReq = apiJson('/api/pagamentos/config-check').catch(() => ({}));
 
-            const result = await Promise.all([plansReq, statusReq]);
+            const result = await Promise.all([plansReq, statusReq, configReq]);
             planos = Array.isArray(result[0]) ? result[0] : [];
             status = result[1] || { status: 'inativa', plano: 'gratis' };
+            const cfg = result[2] || {};
+
+            // Ocultar aba Cartão quando não há token MP configurado
+            const hasMp = cfg.MP_ACCESS_TOKEN || cfg.MERCADOPAGO_ACCESS_TOKEN;
+            if (!hasMp) {
+                byId('tabCartao').style.display = 'none';
+                byId('paneCartao').style.display = 'none';
+                // Remover opção cartão do select de forma de pagamento
+                const optCartao = document.querySelector('#metodoPagamento option[value="cartao"]');
+                if (optCartao) optCartao.remove();
+            }
 
             const backendPlan = findPlanBySlug(status.plano);
             currentPlan = backendPlan || FREE_PLAN;
