@@ -124,9 +124,9 @@ async function gerarPix({ igrejaId, nomeIgreja, emailPagador, planoSlug, ciclo }
 
         await pool.query(
             `INSERT INTO payment_links
-                (igreja_id, reference_code, descricao, valor, payment_method, status,
-                 mp_payment_id, plano_destino, plano_duracao_dias, created_at)
-             VALUES (?, ?, ?, ?, 'pix', 'pendente', ?, ?, ?, NOW())`,
+                (igreja_id, reference_code, descricao, valor, provider, payment_method, status,
+                 provider_external_id, plano_destino, plano_duracao_dias, created_at)
+             VALUES (?, ?, ?, ?, 'manual_pix', 'pix', 'pendente', ?, ?, ?, NOW())`,
             [igrejaId, referenceCode, descricao, valor, null, planoSlug, diasDuracao]
         );
 
@@ -169,9 +169,9 @@ async function gerarPix({ igrejaId, nomeIgreja, emailPagador, planoSlug, ciclo }
     // Salva o link de pagamento
     await pool.query(
         `INSERT INTO payment_links
-            (igreja_id, reference_code, descricao, valor, payment_method, status,
-             mp_payment_id, plano_destino, plano_duracao_dias, created_at)
-         VALUES (?, ?, ?, ?, 'pix', 'pendente', ?, ?, ?, NOW())`,
+            (igreja_id, reference_code, descricao, valor, provider, payment_method, status,
+             provider_external_id, plano_destino, plano_duracao_dias, created_at)
+         VALUES (?, ?, ?, ?, 'mercadopago', 'pix', 'pendente', ?, ?, ?, NOW())`,
         [igrejaId, referenceCode, descricao, valor, String(mpResponse.id), planoSlug, diasDuracao]
     );
 
