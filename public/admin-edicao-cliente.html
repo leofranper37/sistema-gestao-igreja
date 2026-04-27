@@ -76,7 +76,8 @@ body{display:flex;background:var(--bg);color:var(--text);height:100vh;overflow:h
     <a href="admin-retomada.html" class="menu-item"><i class="fa-solid fa-rocket"></i> Retomada Inteligente</a>
     <div class="menu-label">Configurações SaaS</div>
     <a href="admin-planos.html" class="menu-item"><i class="fa-solid fa-tags"></i> Planos e Preços</a>
-    <a href="#" class="menu-item"><i class="fa-solid fa-server"></i> Logs e Sistema</a>
+    <a href="admin-inovacoes.html" class="menu-item"><i class="fa-solid fa-lightbulb"></i> Fábrica de Inovações</a>
+    <a href="admin-sistema.html" class="menu-item"><i class="fa-solid fa-server"></i> Logs e Sistema</a>
     <div class="menu-label">Sessão</div>
     <a href="login.html" class="menu-item"><i class="fa-solid fa-right-from-bracket"></i> Sair</a>
   </div>
@@ -172,6 +173,28 @@ body{display:flex;background:var(--bg);color:var(--text);height:100vh;overflow:h
           <label class="module-toggle"><input type="checkbox" id="m-pedidos_oracao"><span><i class="fa-solid fa-hands-praying" style="margin-right:6px;color:var(--blue)"></i>Pedidos de Oração</span></label>
           <label class="module-toggle"><input type="checkbox" id="m-mural_oracao"><span><i class="fa-solid fa-bullhorn" style="margin-right:6px;color:var(--blue)"></i>Mural de Oração</span></label>
         </div>
+      </div>
+    </div>
+
+    <!-- SIÃO PERSONALIZADO -->
+    <div class="section" id="siaoSection">
+      <div class="section-header"><i class="fa-solid fa-crown"></i><h2>Plano Sião - Perfil Personalizado</h2></div>
+      <div class="section-body">
+        <div style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:14px">
+          Aqui você cria a experiência premium do cliente Sião: identidade própria, mensagem operacional e inovações que tornam a gestão mais prazerosa.
+        </div>
+        <div class="form-grid">
+          <div class="form-row"><label>Ativar perfil personalizado</label>
+            <select id="c-perfil_ativo">
+              <option value="0">Desativado</option>
+              <option value="1">Ativado</option>
+            </select>
+          </div>
+          <div class="form-row"><label>Nome do workspace do cliente</label><input type="text" id="c-nome_workspace" placeholder="Ex: Sião Prime | Catedral Central"></div>
+          <div class="form-row"><label>Cor destaque</label><input type="text" id="c-cor_destaque" placeholder="#0f766e ou #f59e0b"></div>
+        </div>
+        <div class="form-row" style="margin-top:16px"><label>Mensagem de boas-vindas do cliente</label><input type="text" id="c-mensagem_boas_vindas" placeholder="Ex: Bem-vindos ao ambiente exclusivo da sua igreja."></div>
+        <div class="form-row" style="margin-top:16px"><label>Inovações habilitadas (uma por linha)</label><textarea id="c-inovacoes" placeholder="Dashboard executivo da igreja&#10;Painel pastoral premium&#10;Comunicação visual personalizada"></textarea></div>
       </div>
     </div>
   </div>
@@ -306,6 +329,15 @@ function fillForm(d) {
   chk('m-escala_culto', d.modulo_escala_culto);
   chk('m-pedidos_oracao', d.modulo_pedidos_oracao);
   chk('m-mural_oracao', d.modulo_mural_oracao);
+
+  const config = d.config_personalizada || {};
+  set('c-perfil_ativo', config.perfilPersonalizadoAtivo ? '1' : '0');
+  set('c-nome_workspace', config.nomeWorkspace || '');
+  set('c-mensagem_boas_vindas', config.mensagemBoasVindas || '');
+  set('c-cor_destaque', config.corDestaque || '');
+  set('c-inovacoes', Array.isArray(config.inovacoesHabilitadas) ? config.inovacoesHabilitadas.join('\n') : '');
+
+  toggleSiaoSectionVisibility();
 }
 
 function applyPlanoPreset(plano) {
@@ -350,7 +382,14 @@ async function saveContrato() {
     modulo_agenda_eventos: chk('m-agenda_eventos'),
     modulo_escala_culto: chk('m-escala_culto'),
     modulo_pedidos_oracao: chk('m-pedidos_oracao'),
-    modulo_mural_oracao: chk('m-mural_oracao')
+    modulo_mural_oracao: chk('m-mural_oracao'),
+    config_personalizada: {
+      perfilPersonalizadoAtivo: v('c-perfil_ativo') === '1',
+      nomeWorkspace: v('c-nome_workspace').trim(),
+      mensagemBoasVindas: v('c-mensagem_boas_vindas').trim(),
+      corDestaque: v('c-cor_destaque').trim(),
+      inovacoesHabilitadas: v('c-inovacoes').split('\n').map(item => item.trim()).filter(Boolean)
+    }
   };
 
   try {
@@ -376,8 +415,16 @@ function toast(msg, type='success') {
   try { const p = JSON.parse(atob(t.split('.')[1])); if (!['super-admin','admin'].includes(p.role)) location.href = 'login.html'; } catch(_){}
 })();
 
+function toggleSiaoSectionVisibility() {
+  const plano = document.getElementById('f-plano')?.value || '';
+  const section = document.getElementById('siaoSection');
+  if (!section) return;
+  section.style.display = plano === 'siao' || plano === 'personalizado' ? '' : 'none';
+}
+
 document.getElementById('f-plano').addEventListener('change', (e) => {
   const value = e.target.value;
+  toggleSiaoSectionVisibility();
   if (PLANO_PRESETS[value]) {
     applyPlanoPreset(value);
   }

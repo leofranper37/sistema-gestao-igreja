@@ -5,6 +5,7 @@ const { execSync } = require('child_process');
 
 const RESUME_STATE_DIR = path.resolve(__dirname, '..', '..', '.ldfp-resume');
 const RESUME_STATE_FILE = path.join(RESUME_STATE_DIR, 'state.json');
+const SYSTEM_CONFIG_FILE = path.join(RESUME_STATE_DIR, 'system-config.json');
 const RESUME_TRIGGER = 'LDFP_CONTINUAR';
 
 // ── helpers ─────────────────────────────────────────────────────────────────
@@ -20,6 +21,19 @@ function normDate(v) {
     const s = String(v).trim();
     // accept ISO date: YYYY-MM-DD → convert to ISO datetime
     return /^\d{4}-\d{2}-\d{2}$/.test(s) ? s + 'T00:00:00.000Z' : s;
+}
+
+function normalizeChurchCustomConfig(input) {
+    const source = input && typeof input === 'object' ? input : {};
+    return {
+        perfilPersonalizadoAtivo: Boolean(source.perfilPersonalizadoAtivo),
+        nomeWorkspace: String(source.nomeWorkspace || '').trim(),
+        mensagemBoasVindas: String(source.mensagemBoasVindas || '').trim(),
+        corDestaque: String(source.corDestaque || '').trim(),
+        inovacoesHabilitadas: Array.isArray(source.inovacoesHabilitadas)
+            ? source.inovacoesHabilitadas.map((item) => String(item || '').trim()).filter(Boolean).slice(0, 12)
+            : []
+    };
 }
 
 let saasPlanSchemaEnsured = false;
@@ -79,6 +93,169 @@ function readResumeState() {
 function writeResumeState(state) {
     ensureResumeStateDir();
     fs.writeFileSync(RESUME_STATE_FILE, JSON.stringify(state, null, 2) + '\n', 'utf8');
+}
+
+function defaultSystemConfig() {
+    return {
+        updatedAt: new Date().toISOString(),
+        branding: {
+            brandName: 'LDFP',
+            masterTitle: 'LDFP Master',
+            globalAnnouncementEnabled: false,
+            globalAnnouncementText: '',
+            globalAnnouncementTone: 'info'
+        },
+        plans: {
+            siaoCustomProfileEnabled: true,
+            siaoCustomProfileLabel: 'Perfil Personalizado Sião',
+            siaoInnovationNotes: 'Recursos premium para personalização avançada e inovações exclusivas.'
+        },
+        operations: {
+            autoBackupEnabled: true,
+            backupRetentionDays: Number.parseInt(process.env.BACKUP_RETENTION_DAYS || '30', 10)
+        },
+        factory: {
+            title: 'Fabrica de Inovacoes LDFP',
+            description: 'Criacao central de menus e modulos para evolucao continua do produto.',
+            modules: [
+                {
+                    id: 'fin-conciliacao-extrato',
+                    name: 'Importacao de Extrato',
+                    description: 'Concilia arquivos bancarios em lote com rastreabilidade.',
+                    route: 'construcao.html?pag=Importacao%20de%20Extrato',
+                    enabled: true,
+                    status: 'lab',
+                    targetPlans: ['siao'],
+                    updatedAt: new Date().toISOString()
+                },
+                {
+                    id: 'contab-lancamentos',
+                    name: 'Lancamentos Contabeis',
+                    description: 'Modulo operacional para debito e credito com consistencia.',
+                    route: 'construcao.html?pag=Lancamentos%20Contabeis',
+                    enabled: true,
+                    status: 'idea',
+                    targetPlans: ['siao'],
+                    updatedAt: new Date().toISOString()
+                }
+            ]
+        }
+    };
+}
+
+function readSystemConfig() {
+    ensureResumeStateDir();
+
+    if (!fs.existsSync(SYSTEM_CONFIG_FILE)) {
+        const state = defaultSystemConfig();
+        fs.writeFileSync(SYSTEM_CONFIG_FILE, JSON.stringify(state, null, 2) + '\n', 'utf8');
+        return state;
+    }
+
+    try {
+        const parsed = JSON.parse(fs.readFileSync(SYSTEM_CONFIG_FILE, 'utf8'));
+        return {
+            ...defaultSystemConfig(),
+            ...parsed,
+            branding: {
+                ...defaultSystemConfig().branding,
+                ...(parsed.branding || {})
+            },
+            plans: {
+                ...defaultSystemConfig().plans,
+                ...(parsed.plans || {})
+            },
+            operations: {
+                ...defaultSystemConfig().operations,
+                ...(parsed.operations || {})
+            },
+            factory: {
+                ...defaultSystemConfig().factory,
+                ...(parsed.factory || {}),
+                modules: Array.isArray(parsed?.factory?.modules)
+                    ? parsed.factory.modules.map(normalizeFactoryModule).filter(Boolean)
+                    : defaultSystemConfig().factory.modules
+            }
+        };
+    } catch (_err) {
+        return defaultSystemConfig();
+    }
+}
+
+function writeSystemConfig(config) {
+    ensureResumeStateDir();
+    fs.writeFileSync(SYSTEM_CONFIG_FILE, JSON.stringify(config, null, 2) + '\n', 'utf8');
+}
+
+function normalizeTone(value) {
+    const normalized = String(value || '').trim().toLowerCase();
+    const allowed = new Set(['info', 'warning', 'success', 'danger']);
+    return allowed.has(normalized) ? normalized : 'info';
+}
+
+function normalizeFactoryModule(input) {
+    const source = input && typeof input === 'object' ? input : {};
+    const name = String(source.name || '').trim();
+    if (!name) {
+        return null;
+    }
+
+    const allowedStatus = new Set(['idea', 'lab', 'beta', 'published']);
+    const rawStatus = String(source.status || 'lab').trim().toLowerCase();
+    const status = allowedStatus.has(rawStatus) ? rawStatus : 'lab';
+
+    const plans = Array.isArray(source.targetPlans)
+        ? source.targetPlans.map((item) => String(item || '').trim().toLowerCase()).filter(Boolean)
+        : [];
+
+    return {
+        id: String(source.id || `mod-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`).trim(),
+        name,
+        description: String(source.description || '').trim(),
+        route: String(source.route || '').trim(),
+        enabled: source.enabled === undefined ? true : Boolean(source.enabled),
+        status,
+        targetPlans: plans.length ? plans.slice(0, 6) : ['siao'],
+        updatedAt: new Date().toISOString()
+    };
+}
+
+function getPublishedFactoryModules(factoryConfig) {
+    const list = Array.isArray(factoryConfig?.modules) ? factoryConfig.modules : [];
+    return list
+        .filter((item) => item && item.enabled && item.status === 'published')
+        .slice(0, 12)
+        .map((item) => ({
+            id: item.id,
+            name: item.name,
+            description: item.description,
+            route: item.route,
+            targetPlans: Array.isArray(item.targetPlans) ? item.targetPlans : ['siao']
+        }));
+}
+
+function getBackupSnapshot(limit = 20) {
+    const backupsDir = path.resolve(__dirname, '..', '..', 'backups');
+    if (!fs.existsSync(backupsDir)) {
+        return [];
+    }
+
+    const files = fs.readdirSync(backupsDir)
+        .map((name) => {
+            const fullPath = path.join(backupsDir, name);
+            const stat = fs.statSync(fullPath);
+            return {
+                name,
+                isFile: stat.isFile(),
+                size: stat.size,
+                updatedAt: stat.mtime.toISOString()
+            };
+        })
+        .filter((entry) => entry.isFile)
+        .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+        .slice(0, limit);
+
+    return files;
 }
 
 function runGit(cmd) {
@@ -243,6 +420,7 @@ async function getSaasIgrejaContrato(req, res) {
         if (!rows.length) return res.status(404).json({ error: 'Igreja não encontrada.' });
         const ig = rows[0];
         if (ig.modulos_ativos) ig.modulos_ativos = safeJson(ig.modulos_ativos, []);
+        ig.config_personalizada = normalizeChurchCustomConfig(safeJson(ig.config_personalizada_json, {}));
         res.json(ig);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -276,6 +454,7 @@ async function updateSaasIgrejaContrato(req, res) {
         responsavel, email_admin, telefone, cnpj,
         mensalidade_valor, proximo_vencimento,
         max_cadastros, max_congregacoes,
+        config_personalizada,
         modulo_app_membro, modulo_app_midia, modulo_ebd,
         modulo_agenda_eventos, modulo_escala_culto,
         modulo_pedidos_oracao, modulo_mural_oracao
@@ -297,6 +476,10 @@ async function updateSaasIgrejaContrato(req, res) {
     set('proximo_vencimento', normDate(proximo_vencimento));
     set('max_cadastros', max_cadastros !== undefined ? Number(max_cadastros) : undefined);
     set('max_congregacoes', max_congregacoes !== undefined ? Number(max_congregacoes) : undefined);
+    if (config_personalizada !== undefined) {
+        fields.push('config_personalizada_json = ?');
+        vals.push(JSON.stringify(normalizeChurchCustomConfig(config_personalizada)));
+    }
     set('modulo_app_membro', modulo_app_membro !== undefined ? (modulo_app_membro ? 1 : 0) : undefined);
     set('modulo_app_midia', modulo_app_midia !== undefined ? (modulo_app_midia ? 1 : 0) : undefined);
     set('modulo_ebd', modulo_ebd !== undefined ? (modulo_ebd ? 1 : 0) : undefined);
@@ -311,7 +494,9 @@ async function updateSaasIgrejaContrato(req, res) {
         vals.push(id);
         await pool.query(`UPDATE igrejas SET ${fields.join(', ')} WHERE id = ?`, vals);
         const [updated] = await pool.query(`SELECT * FROM igrejas WHERE id = ? LIMIT 1`, [id]);
-        res.json(updated[0] || {});
+        const result = updated[0] || {};
+        result.config_personalizada = normalizeChurchCustomConfig(safeJson(result.config_personalizada_json, {}));
+        res.json(result);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -595,6 +780,122 @@ async function createSaasRetomadaCheckpoint(req, res) {
     }
 }
 
+// ── Logs e Sistema (Fábrica LDFP Master) ──────────────────────────────────
+
+async function getSaasSistemaConfig(req, res) {
+    try {
+        const config = readSystemConfig();
+        res.json(config);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}
+
+async function getPublicSystemConfig(req, res) {
+    try {
+        const config = readSystemConfig();
+        res.json({
+            branding: config.branding,
+            plans: {
+                siaoCustomProfileEnabled: config?.plans?.siaoCustomProfileEnabled,
+                siaoCustomProfileLabel: config?.plans?.siaoCustomProfileLabel,
+                siaoInnovationNotes: config?.plans?.siaoInnovationNotes
+            },
+            factory: {
+                title: config?.factory?.title,
+                description: config?.factory?.description,
+                publishedModules: getPublishedFactoryModules(config?.factory)
+            }
+        });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}
+
+async function updateSaasSistemaConfig(req, res) {
+    try {
+        const current = readSystemConfig();
+        const body = req.body || {};
+
+        const next = {
+            ...current,
+            updatedAt: new Date().toISOString(),
+            branding: {
+                ...current.branding,
+                ...(body.branding || {})
+            },
+            plans: {
+                ...current.plans,
+                ...(body.plans || {})
+            },
+            operations: {
+                ...current.operations,
+                ...(body.operations || {})
+            },
+            factory: {
+                ...current.factory,
+                ...(body.factory || {}),
+                modules: Array.isArray(body?.factory?.modules)
+                    ? body.factory.modules.map(normalizeFactoryModule).filter(Boolean)
+                    : current.factory.modules
+            }
+        };
+
+        next.branding.brandName = String(next.branding.brandName || 'LDFP').trim() || 'LDFP';
+        next.branding.masterTitle = String(next.branding.masterTitle || 'LDFP Master').trim() || 'LDFP Master';
+        next.branding.globalAnnouncementEnabled = Boolean(next.branding.globalAnnouncementEnabled);
+        next.branding.globalAnnouncementText = String(next.branding.globalAnnouncementText || '').trim();
+        next.branding.globalAnnouncementTone = normalizeTone(next.branding.globalAnnouncementTone);
+
+        next.plans.siaoCustomProfileEnabled = Boolean(next.plans.siaoCustomProfileEnabled);
+        next.plans.siaoCustomProfileLabel = String(next.plans.siaoCustomProfileLabel || 'Perfil Personalizado Sião').trim() || 'Perfil Personalizado Sião';
+        next.plans.siaoInnovationNotes = String(next.plans.siaoInnovationNotes || '').trim();
+
+        next.operations.autoBackupEnabled = Boolean(next.operations.autoBackupEnabled);
+        next.operations.backupRetentionDays = Math.max(1, Number.parseInt(next.operations.backupRetentionDays || current.operations.backupRetentionDays || 30, 10));
+
+        next.factory.title = String(next.factory.title || 'Fabrica de Inovacoes LDFP').trim() || 'Fabrica de Inovacoes LDFP';
+        next.factory.description = String(next.factory.description || '').trim();
+        next.factory.modules = Array.isArray(next.factory.modules)
+            ? next.factory.modules.map(normalizeFactoryModule).filter(Boolean).slice(0, 120)
+            : [];
+
+        writeSystemConfig(next);
+        res.json({ ok: true, config: next });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}
+
+async function getSaasSistemaDiagnostico(req, res) {
+    try {
+        const git = getGitSnapshot();
+        const retomada = readResumeState();
+        const config = readSystemConfig();
+        const backups = getBackupSnapshot(25);
+
+        res.json({
+            now: new Date().toISOString(),
+            runtime: {
+                nodeVersion: process.version,
+                platform: process.platform,
+                uptimeSec: Math.floor(process.uptime())
+            },
+            git,
+            retomada: {
+                trigger: retomada.trigger,
+                updatedAt: retomada.updatedAt,
+                lastCheckpoint: retomada.lastCheckpoint || null,
+                focus: retomada.focus || {}
+            },
+            config,
+            backups
+        });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}
+
 module.exports = {
     getSuperAdminOverview,
     getSaasFaturamento,
@@ -611,5 +912,9 @@ module.exports = {
     deleteSaasAssinatura,
     getSaasRetomada,
     updateSaasRetomada,
-    createSaasRetomadaCheckpoint
+    createSaasRetomadaCheckpoint,
+    getPublicSystemConfig,
+    getSaasSistemaConfig,
+    updateSaasSistemaConfig,
+    getSaasSistemaDiagnostico
 };

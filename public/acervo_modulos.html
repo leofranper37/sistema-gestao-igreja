@@ -82,8 +82,8 @@
     <main class="main-content enterprise-main">
         <section class="am-wrap">
             <article class="am-hero">
-                <h2>Acervo Premium de Modulos LDFP</h2>
-                <p>Base unica de aceleracao para evoluir todos os menus com acabamento enterprise, UX de alto nivel e operacao profissional.</p>
+                <h2>Fabrica de Inovacoes LDFP</h2>
+                <p>Este acervo foi movido para o painel super-admin, onde apenas o LDFP Master cria e publica novos menus e modulos para os clientes.</p>
             </article>
 
             <div class="am-grid" id="amGrid"></div>
@@ -94,6 +94,25 @@
     <script src="enterprise-shell.js"></script>
     <script>
         requireAuthSession();
+
+        function roleAllowed(user){
+            const role = String(user?.role || '').toLowerCase();
+            const igreja = String(user?.igreja || '').toLowerCase();
+            const superRoles = new Set(['super-admin','super_admin','superadmin','master','owner','root','super admin']);
+            return superRoles.has(role) || (role === 'admin' && igreja === 'ldfp master');
+        }
+
+        (function guard(){
+            const user = window.getStoredAuth?.()?.user || null;
+            if (roleAllowed(user)) {
+                window.location.href = 'admin-inovacoes.html';
+                return;
+            }
+            const gridRef = document.getElementById('amGrid');
+            if (gridRef) {
+                gridRef.innerHTML = '<article class="am-card"><h3>Acesso restrito</h3><p>A criacao e publicacao de inovacoes agora e exclusiva do painel super-admin.</p><div class="am-links"><a class="am-btn secondary" href="dashboard.html">Voltar ao painel</a></div></article>';
+            }
+        })();
 
         const modules = [
             ['Importacao de Extrato', 'Concilia arquivos bancarios em lote com seguranca e rastreabilidade.'],
@@ -111,7 +130,8 @@
         ];
 
         const grid = document.getElementById('amGrid');
-        grid.innerHTML = modules.map((mod) => {
+        if (grid && !grid.children.length) {
+            grid.innerHTML = modules.map((mod) => {
             const page = encodeURIComponent(mod[0]);
             return `
                 <article class="am-card">
@@ -126,7 +146,8 @@
                     </div>
                 </article>
             `;
-        }).join('');
+            }).join('');
+        }
     </script>
 </body>
 </html>

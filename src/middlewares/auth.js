@@ -4,6 +4,14 @@ const config = require('../config');
 const { pool } = require('../config/db');
 const { createHttpError } = require('../utils/httpError');
 
+function parseJsonSafe(value, fallback = null) {
+    try {
+        return value ? JSON.parse(value) : fallback;
+    } catch (_error) {
+        return fallback;
+    }
+}
+
 // Rotas que nunca são bloqueadas por assinatura expirada
 const ROTAS_LIVRES_ASSINATURA = [
     '/login',
@@ -88,6 +96,7 @@ async function requireAuth(req, res, next) {
         const [rows] = await pool.query(
             `SELECT u.id, u.nome, u.email, u.igreja, u.igreja_id, u.role,
                     i.plano, i.status_assinatura, i.trial_starts_at, i.trial_ends_at, i.max_cadastros, i.max_congregacoes,
+                    i.config_personalizada_json,
                     i.modulo_app_membro, i.modulo_app_midia, i.modulo_ebd,
                     i.modulo_agenda_eventos, i.modulo_escala_culto, i.modulo_pedidos_oracao, i.modulo_mural_oracao
              FROM usuarios u
@@ -117,6 +126,7 @@ async function requireAuth(req, res, next) {
             trialEndsAt: user.trial_ends_at || null,
             maxCadastros: user.max_cadastros || 40,
             maxCongregacoes: user.max_congregacoes || 1,
+            customConfig: parseJsonSafe(user.config_personalizada_json, {}),
             modules: {
                 financeiro: true,
                 appMembro: Boolean(Number(user.modulo_app_membro || 0)),

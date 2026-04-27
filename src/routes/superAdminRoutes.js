@@ -17,7 +17,11 @@ const {
     deleteSaasAssinatura,
     getSaasRetomada,
     updateSaasRetomada,
-    createSaasRetomadaCheckpoint
+    createSaasRetomadaCheckpoint,
+    getPublicSystemConfig,
+    getSaasSistemaConfig,
+    updateSaasSistemaConfig,
+    getSaasSistemaDiagnostico
 } = require('../controllers/superAdminController');
 
 const router = express.Router();
@@ -40,6 +44,8 @@ function requireMasterWorkspace(req, res, next) {
 }
 
 const isSuperAdmin = [requireAuth, requireMasterWorkspace];
+
+router.get('/api/public/system-config', getPublicSystemConfig);
 
 // Dashboard
 router.get('/super-admin/overview', ...isSuperAdmin, getSuperAdminOverview);
@@ -68,5 +74,10 @@ router.delete('/api/saas/assinaturas/:id', ...isSuperAdmin, deleteSaasAssinatura
 router.get('/api/saas/retomada', ...isSuperAdmin, getSaasRetomada);
 router.put('/api/saas/retomada', ...isSuperAdmin, updateSaasRetomada);
 router.post('/api/saas/retomada/checkpoint', ...isSuperAdmin, createSaasRetomadaCheckpoint);
+
+// Logs e Sistema
+router.get('/api/saas/sistema/config', ...isSuperAdmin, getSaasSistemaConfig);
+router.put('/api/saas/sistema/config', ...isSuperAdmin, updateSaasSistemaConfig);
+router.get('/api/saas/sistema/diagnostico', ...isSuperAdmin, getSaasSistemaDiagnostico);
 
 module.exports = router;

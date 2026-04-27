@@ -7,6 +7,14 @@ const accountModel = require('../models/accountModel');
 const { createHttpError } = require('../utils/httpError');
 const { sendMail } = require('../utils/mailer');
 
+function parseJsonSafe(value, fallback = {}) {
+    try {
+        return value ? JSON.parse(value) : fallback;
+    } catch (_error) {
+        return fallback;
+    }
+}
+
 function buildAuthResponse(userRecord) {
     const modules = {
         financeiro: true,
@@ -32,6 +40,7 @@ function buildAuthResponse(userRecord) {
         trialEndsAt: userRecord.trial_ends_at || null,
         maxCadastros: userRecord.max_cadastros || 40,
         maxCongregacoes: userRecord.max_congregacoes || 1,
+        customConfig: parseJsonSafe(userRecord.config_personalizada_json, {}),
         modules
     };
 
@@ -94,6 +103,7 @@ async function registerAccount(payload) {
         trial_ends_at: churchMetadata?.trial_ends_at,
         max_cadastros: churchMetadata?.max_cadastros,
         max_congregacoes: churchMetadata?.max_congregacoes,
+        config_personalizada_json: churchMetadata?.config_personalizada_json,
         modulo_app_membro: churchMetadata?.modulo_app_membro,
         modulo_app_midia: churchMetadata?.modulo_app_midia,
         modulo_ebd: churchMetadata?.modulo_ebd,

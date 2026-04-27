@@ -597,6 +597,179 @@
         });
     }
 
+    let globalSystemConfigCache = null;
+
+    async function loadGlobalSystemConfig() {
+        if (globalSystemConfigCache) {
+            return globalSystemConfigCache;
+        }
+
+        const response = await fetch('/api/public/system-config');
+        if (!response.ok) {
+            throw new Error('Falha ao carregar configuração global.');
+        }
+
+        const payload = await response.json();
+        globalSystemConfigCache = payload;
+        return payload;
+    }
+
+    function getAnnouncementColors(tone) {
+        const normalized = String(tone || 'info').toLowerCase();
+        if (normalized === 'success') {
+            return { bg: '#ecfdf5', border: '#86efac', text: '#14532d', icon: 'fa-circle-check' };
+        }
+        if (normalized === 'warning') {
+            return { bg: '#fffbeb', border: '#fcd34d', text: '#92400e', icon: 'fa-triangle-exclamation' };
+        }
+        if (normalized === 'danger') {
+            return { bg: '#fef2f2', border: '#fca5a5', text: '#7f1d1d', icon: 'fa-triangle-exclamation' };
+        }
+        return { bg: '#eff6ff', border: '#93c5fd', text: '#1e3a8a', icon: 'fa-circle-info' };
+    }
+
+    function renderSiaoWorkspaceSpotlight(user, config) {
+        const customConfig = user?.customConfig || {};
+        const isSiao = getPlanSlug(user) === 'siao';
+        const isActive = Boolean(customConfig?.perfilPersonalizadoAtivo);
+        if (!isSiao || !isActive) {
+            return null;
+        }
+
+        const workspaceTitle = String(customConfig?.nomeWorkspace || '').trim() || 'Sião Personalizado';
+        const welcomeMessage = String(customConfig?.mensagemBoasVindas || '').trim() || 'Ambiente premium liberado para sua igreja.';
+        const accent = String(customConfig?.corDestaque || '').trim() || '#2563eb';
+        const planSlug = getPlanSlug(user);
+        const publishedFactoryModules = Array.isArray(config?.factory?.publishedModules)
+            ? config.factory.publishedModules.filter((item) => {
+                const plans = Array.isArray(item?.targetPlans) ? item.targetPlans : ['siao'];
+                return plans.includes(planSlug);
+            }).slice(0, 6)
+            : [];
+
+        const innovations = Array.isArray(customConfig?.inovacoesHabilitadas)
+            ? customConfig.inovacoesHabilitadas.filter(Boolean).slice(0, 6)
+            : [];
+
+        const wrapper = document.createElement('section');
+        wrapper.id = 'ldfpSiaoWorkspaceSpotlight';
+        wrapper.style.cssText = `margin:16px 20px 10px;border-radius:18px;padding:18px 20px;border:1px solid ${accent}33;background:linear-gradient(135deg, ${accent}1f 0%, #ffffff 52%, #e2e8f0 100%);box-shadow:0 18px 40px rgba(15,23,42,.08);`;
+
+        const innovationHtml = innovations.length
+            ? `<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;">${innovations.map((item) => `<span style="display:inline-flex;align-items:center;gap:6px;padding:7px 10px;border-radius:999px;background:#ffffff;border:1px solid ${accent}2f;color:#0f172a;font-size:12px;font-weight:700;"><i class=\"fa-solid fa-sparkles\" style=\"color:${accent}\"></i>${item}</span>`).join('')}</div>`
+            : '';
+
+        const publishedHtml = publishedFactoryModules.length
+            ? `<div style="margin-top:14px;display:grid;gap:8px;">${publishedFactoryModules.map((mod) => {
+                const target = String(mod?.route || '').trim() || '#';
+                return `<a href="${target}" style="display:block;padding:10px 12px;border-radius:10px;background:#ffffff;border:1px solid ${accent}2f;color:#0f172a;text-decoration:none;font-size:12px;font-weight:700;"><i class=\"fa-solid fa-flask-vial\" style=\"color:${accent};margin-right:6px\"></i>${String(mod?.name || 'Inovacao')}</a>`;
+            }).join('')}</div>`
+            : '';
+
+        wrapper.innerHTML = `
+            <div style="display:flex;justify-content:space-between;gap:14px;align-items:flex-start;flex-wrap:wrap;">
+                <div style="max-width:720px;">
+                    <div style="display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;background:#ffffff;color:${accent};font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;">
+                        <i class="fa-solid fa-crown"></i>
+                        Workspace Premium Sião
+                    </div>
+                    <h2 style="margin:12px 0 6px;font-size:24px;line-height:1.15;color:#0f172a;">${workspaceTitle}</h2>
+                    <p style="margin:0;color:#334155;font-size:14px;line-height:1.7;">${welcomeMessage}</p>
+                    ${innovationHtml}
+                    ${publishedHtml}
+                </div>
+                <div style="min-width:220px;display:grid;gap:10px;">
+                    <div style="padding:12px 14px;border-radius:14px;background:#ffffff;border:1px solid ${accent}24;">
+                        <div style="font-size:11px;color:#64748b;text-transform:uppercase;font-weight:800;letter-spacing:.04em;">Plano ativo</div>
+                        <div style="margin-top:6px;font-size:15px;font-weight:800;color:#0f172a;">Sião com identidade própria</div>
+                    </div>
+                    <div style="padding:12px 14px;border-radius:14px;background:#ffffff;border:1px solid ${accent}24;">
+                        <div style="font-size:11px;color:#64748b;text-transform:uppercase;font-weight:800;letter-spacing:.04em;">Cor destaque</div>
+                        <div style="margin-top:8px;display:flex;align-items:center;gap:10px;font-size:13px;color:#0f172a;font-weight:700;">
+                            <span style="width:18px;height:18px;border-radius:999px;background:${accent};border:1px solid rgba(15,23,42,.12);"></span>
+                            ${accent}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        return wrapper;
+    }
+
+    function applyGlobalSystemConfig(config, user) {
+        if (!config || typeof config !== 'object') {
+            return;
+        }
+
+        const customConfig = user?.customConfig || {};
+        const brandName = String(config?.branding?.brandName || '').trim();
+        const workspaceTitle = customConfig?.perfilPersonalizadoAtivo
+            ? String(customConfig?.nomeWorkspace || '').trim()
+            : '';
+        if (workspaceTitle) {
+            document.documentElement.style.setProperty('--ldfp-custom-accent', String(customConfig?.corDestaque || '').trim() || '#2563eb');
+            const normalizedTitle = document.title.replace(/\bLDFP\b/gi, workspaceTitle);
+            document.title = normalizedTitle;
+        } else if (brandName) {
+            const normalizedTitle = document.title.replace(/\bLDFP\b/gi, brandName);
+            document.title = normalizedTitle;
+        }
+
+        const headerChip = document.querySelector('.enterprise-header-chip span');
+        const headerChipContainer = document.querySelector('.enterprise-header-chip');
+        const isSiao = getPlanSlug(user) === 'siao';
+        if (headerChip && config?.plans?.siaoCustomProfileEnabled && isSiao) {
+            headerChip.textContent = workspaceTitle
+                || String(config?.plans?.siaoCustomProfileLabel || 'Perfil Personalizado Sião');
+        }
+
+        if (headerChipContainer && workspaceTitle) {
+            const accent = String(customConfig?.corDestaque || '').trim() || '#2563eb';
+            headerChipContainer.style.borderColor = `${accent}55`;
+            headerChipContainer.style.background = `${accent}14`;
+            headerChipContainer.style.color = accent;
+        }
+
+        const bannerEnabled = Boolean(config?.branding?.globalAnnouncementEnabled) || Boolean(customConfig?.perfilPersonalizadoAtivo && customConfig?.mensagemBoasVindas);
+        const bannerText = String(customConfig?.perfilPersonalizadoAtivo ? (customConfig?.mensagemBoasVindas || '') : (config?.branding?.globalAnnouncementText || '')).trim();
+        const existingBanner = document.getElementById('ldfpGlobalAnnouncement');
+        const existingSpotlight = document.getElementById('ldfpSiaoWorkspaceSpotlight');
+        if (existingBanner) {
+            existingBanner.remove();
+        }
+        if (existingSpotlight) {
+            existingSpotlight.remove();
+        }
+
+        const main = document.querySelector('main.enterprise-main') || document.querySelector('main.main-content');
+        if (!main) {
+            return;
+        }
+
+        const spotlight = renderSiaoWorkspaceSpotlight(user, config);
+        if (spotlight) {
+            const header = main.querySelector('.enterprise-top-header');
+            if (header) {
+                header.insertAdjacentElement('afterend', spotlight);
+            } else {
+                main.insertAdjacentElement('afterbegin', spotlight);
+            }
+        }
+
+        if (!bannerEnabled || !bannerText) {
+            return;
+        }
+
+        const palette = getAnnouncementColors(config?.branding?.globalAnnouncementTone);
+
+        const banner = document.createElement('div');
+        banner.id = 'ldfpGlobalAnnouncement';
+        banner.style.cssText = `margin:12px 20px 6px;padding:10px 12px;border-radius:10px;border:1px solid ${palette.border};background:${palette.bg};color:${palette.text};font-size:12px;font-weight:700;display:flex;align-items:center;gap:8px;`;
+        banner.innerHTML = `<i class="fa-solid ${palette.icon}"></i><span>${bannerText}</span>`;
+        main.insertAdjacentElement('afterbegin', banner);
+    }
+
     function bindMenuToggle() {
         const menuToggle = document.getElementById('menuToggle');
         const sidebar = document.getElementById('enterpriseSidebar');
@@ -708,6 +881,14 @@
         applyUserLabels();
         bindMenuToggle();
         bindPlanUpgradeGuards(getAuthUser(), activePath);
+
+        loadGlobalSystemConfig()
+            .then((configPayload) => {
+                applyGlobalSystemConfig(configPayload, getAuthUser());
+            })
+            .catch(() => {
+                // O shell continua funcional mesmo sem config global.
+            });
     }
 
     if (document.readyState === 'loading') {

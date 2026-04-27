@@ -570,6 +570,7 @@ async function initializeDatabase() {
         try { await activePgPool.query(`ALTER TABLE igrejas ADD COLUMN mensalidade_valor DECIMAL(10,2) NOT NULL DEFAULT 0`); } catch(_){}
         try { await activePgPool.query(`ALTER TABLE igrejas ADD COLUMN ultimo_pagamento TIMESTAMP`); } catch(_){}
         try { await activePgPool.query(`ALTER TABLE igrejas ADD COLUMN proximo_vencimento TIMESTAMP`); } catch(_){}
+        try { await activePgPool.query(`ALTER TABLE igrejas ADD COLUMN config_personalizada_json TEXT`); } catch(_){ }
 
         await activePgPool.query(`CREATE TABLE IF NOT EXISTS password_reset_tokens (
             id SERIAL PRIMARY KEY,
@@ -768,6 +769,7 @@ async function initializeDatabase() {
         try { await activeMysqlPool.query(`ALTER TABLE igrejas ADD COLUMN mensalidade_valor DECIMAL(10,2) NOT NULL DEFAULT 0`); } catch(_){}
         try { await activeMysqlPool.query(`ALTER TABLE igrejas ADD COLUMN ultimo_pagamento DATETIME`); } catch(_){}
         try { await activeMysqlPool.query(`ALTER TABLE igrejas ADD COLUMN proximo_vencimento DATETIME`); } catch(_){}
+        try { await activeMysqlPool.query(`ALTER TABLE igrejas ADD COLUMN config_personalizada_json LONGTEXT`); } catch(_){ }
 
         await activeMysqlPool.query(`CREATE TABLE IF NOT EXISTS password_reset_tokens (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -1018,6 +1020,7 @@ async function initializeDatabase() {
             safeAlter('ALTER TABLE igrejas ADD COLUMN mensalidade_valor REAL NOT NULL DEFAULT 0');
             safeAlter('ALTER TABLE igrejas ADD COLUMN ultimo_pagamento TEXT');
             safeAlter('ALTER TABLE igrejas ADD COLUMN proximo_vencimento TEXT');
+            safeAlter('ALTER TABLE igrejas ADD COLUMN config_personalizada_json TEXT');
 
             db.run(`CREATE TABLE IF NOT EXISTS password_reset_tokens (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
