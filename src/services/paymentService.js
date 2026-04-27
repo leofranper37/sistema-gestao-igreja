@@ -71,11 +71,17 @@ function crc16(payload) {
     return crc.toString(16).toUpperCase().padStart(4, '0');
 }
 
-function buildManualPixPayload({ key, name, city, amount, txid, description }) {
+function buildManualPixPayload({ key, name, city, amount, txid }) {
+    // BACEN spec: campo 26 sem descrição para máxima compatibilidade
     const gui = pixField('00', 'br.gov.bcb.pix');
     const pixKey = pixField('01', key);
-    const desc = description ? pixField('02', normalizePixText(description, 30)) : '';
-    const merchantInfo = pixField('26', `${gui}${pixKey}${desc}`);
+    const merchantInfo = pixField('26', `${gui}${pixKey}`);
+
+    // BACEN spec: txid campo 62.05 deve ser estritamente [a-zA-Z0-9]{1,25}
+    const cleanTxid = String(txid || '')
+        .replace(/[^a-zA-Z0-9]/g, '')
+        .slice(0, 25) || 'LDFP';
+
     const payloadSemCrc = [
         pixField('00', '01'),
         merchantInfo,
@@ -85,7 +91,7 @@ function buildManualPixPayload({ key, name, city, amount, txid, description }) {
         pixField('58', 'BR'),
         pixField('59', normalizePixText(name, 25) || 'RECEBEDOR'),
         pixField('60', normalizePixText(city, 15) || 'SAO PAULO'),
-        pixField('62', pixField('05', normalizePixText(txid, 25) || 'LDFP')),
+        pixField('62', pixField('05', cleanTxid)),
         '6304',
     ].join('');
 
@@ -119,7 +125,6 @@ async function gerarPix({ igrejaId, nomeIgreja, emailPagador, planoSlug, ciclo }
             city: process.env.PIX_RECEIVER_CITY || 'SAO PAULO',
             amount: valor,
             txid: referenceCode,
-            description: `${plano.nome} ${ciclo}`,
         });
 
         await pool.query(
