@@ -117,6 +117,7 @@ function defaultSystemConfig() {
         factory: {
             title: 'Fabrica de Inovacoes LDFP',
             description: 'Criacao central de menus e modulos para evolucao continua do produto.',
+            menuOverrides: [],
             modules: [
                 {
                     id: 'fin-conciliacao-extrato',
@@ -172,6 +173,9 @@ function readSystemConfig() {
             factory: {
                 ...defaultSystemConfig().factory,
                 ...(parsed.factory || {}),
+                menuOverrides: Array.isArray(parsed?.factory?.menuOverrides)
+                    ? parsed.factory.menuOverrides.map(normalizeFactoryMenuOverride).filter(Boolean)
+                    : [],
                 modules: Array.isArray(parsed?.factory?.modules)
                     ? parsed.factory.modules.map(normalizeFactoryModule).filter(Boolean)
                     : defaultSystemConfig().factory.modules
@@ -232,6 +236,23 @@ function getPublishedFactoryModules(factoryConfig) {
             route: item.route,
             targetPlans: Array.isArray(item.targetPlans) ? item.targetPlans : ['siao']
         }));
+}
+
+function normalizeFactoryMenuOverride(input) {
+    const source = input && typeof input === 'object' ? input : {};
+    const key = String(source.key || '').trim().toLowerCase();
+    if (!key) {
+        return null;
+    }
+
+    return {
+        key,
+        customLabel: String(source.customLabel || '').trim(),
+        customRoute: String(source.customRoute || '').trim(),
+        hidden: Boolean(source.hidden),
+        featured: Boolean(source.featured),
+        updatedAt: new Date().toISOString()
+    };
 }
 
 function getBackupSnapshot(limit = 20) {
@@ -804,6 +825,7 @@ async function getPublicSystemConfig(req, res) {
             factory: {
                 title: config?.factory?.title,
                 description: config?.factory?.description,
+                menuOverrides: Array.isArray(config?.factory?.menuOverrides) ? config.factory.menuOverrides : [],
                 publishedModules: getPublishedFactoryModules(config?.factory)
             }
         });
@@ -835,6 +857,9 @@ async function updateSaasSistemaConfig(req, res) {
             factory: {
                 ...current.factory,
                 ...(body.factory || {}),
+                menuOverrides: Array.isArray(body?.factory?.menuOverrides)
+                    ? body.factory.menuOverrides.map(normalizeFactoryMenuOverride).filter(Boolean)
+                    : current.factory.menuOverrides,
                 modules: Array.isArray(body?.factory?.modules)
                     ? body.factory.modules.map(normalizeFactoryModule).filter(Boolean)
                     : current.factory.modules
@@ -856,6 +881,9 @@ async function updateSaasSistemaConfig(req, res) {
 
         next.factory.title = String(next.factory.title || 'Fabrica de Inovacoes LDFP').trim() || 'Fabrica de Inovacoes LDFP';
         next.factory.description = String(next.factory.description || '').trim();
+        next.factory.menuOverrides = Array.isArray(next.factory.menuOverrides)
+            ? next.factory.menuOverrides.map(normalizeFactoryMenuOverride).filter(Boolean).slice(0, 400)
+            : [];
         next.factory.modules = Array.isArray(next.factory.modules)
             ? next.factory.modules.map(normalizeFactoryModule).filter(Boolean).slice(0, 120)
             : [];

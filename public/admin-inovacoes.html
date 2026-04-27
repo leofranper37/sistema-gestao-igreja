@@ -151,6 +151,47 @@ th{position:sticky;top:0;background:#f8fafc;color:var(--muted);text-transform:up
             <tbody id="modsBody"><tr><td colspan="4">Carregando...</td></tr></tbody>
           </table>
         </div>
+
+        <hr style="border:0;border-top:1px solid var(--border);margin:14px 0 12px">
+
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
+          <h3 style="font-size:14px;color:var(--dark)">Menus Existentes (Sistema LDFP)</h3>
+          <span id="menuCountLabel" style="font-size:11px;color:var(--muted)">0 overrides</span>
+        </div>
+
+        <div class="row">
+          <div class="form-row">
+            <label>Menu base</label>
+            <select id="menuKeySelect"></select>
+          </div>
+          <div class="form-row">
+            <label>Nome personalizado</label>
+            <input id="menuCustomLabel" type="text" placeholder="Ex: Painel Executivo da Igreja">
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="form-row">
+            <label>Rota personalizada</label>
+            <input id="menuCustomRoute" type="text" placeholder="Ex: dashboard.html ou construcao.html?pag=...">
+          </div>
+          <div class="form-row" style="display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap;">
+            <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text);text-transform:none;letter-spacing:0"><input id="menuHidden" type="checkbox"> Ocultar no cliente</label>
+            <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text);text-transform:none;letter-spacing:0"><input id="menuFeatured" type="checkbox"> Destacar como premium</label>
+          </div>
+        </div>
+
+        <div class="actions" style="margin-bottom:10px;">
+          <button class="btn secondary" id="menuClearBtn"><i class="fa-solid fa-eraser"></i> Limpar override</button>
+          <button class="btn primary" id="menuApplyBtn"><i class="fa-solid fa-wand-magic-sparkles"></i> Aplicar override</button>
+        </div>
+
+        <div class="table-wrap" style="max-height:240px;">
+          <table>
+            <thead><tr><th>Menu</th><th>Nome</th><th>Rota</th><th>Oculto</th></tr></thead>
+            <tbody id="menuOverridesBody"><tr><td colspan="4">Nenhum override aplicado.</td></tr></tbody>
+          </table>
+        </div>
       </div>
     </article>
   </section>
@@ -166,8 +207,41 @@ const headers = () => ({ 'Content-Type': 'application/json', Authorization: 'Bea
 const state = {
   config: null,
   modules: [],
-  selectedId: null
+  selectedId: null,
+  menuOverrides: [],
+  selectedMenuKey: ''
 };
+
+const MENU_CATALOG = [
+  { key: 'dashboard.html', label: 'Visao Geral', group: 'Menu LDFP' },
+  { key: 'app_membro.html', label: 'App do Membro', group: 'Menu LDFP' },
+  { key: 'acervo_modulos.html', label: 'Acervo de Modulos', group: 'Menu LDFP' },
+  { key: 'novidades.html', label: 'Novidades', group: 'Menu LDFP' },
+  { key: 'meu_plano.html', label: 'Meu Plano', group: 'Menu LDFP' },
+  { key: 'configuracoes.html', label: 'Configuracoes', group: 'Menu LDFP' },
+  { key: 'lista_membros.html', label: 'Membros', group: 'Secretaria/Pessoas' },
+  { key: 'membros.html', label: 'Ficha Cadastral', group: 'Secretaria/Pessoas' },
+  { key: 'visitantes.html', label: 'Visitantes', group: 'Secretaria/Pessoas' },
+  { key: 'criancas.html', label: 'Criancas', group: 'Secretaria/Pessoas' },
+  { key: 'cargos.html', label: 'Cargos', group: 'Secretaria/Pessoas' },
+  { key: 'congregacoes.html', label: 'Congregacoes', group: 'Secretaria/Pessoas' },
+  { key: 'grupos.html', label: 'Grupos/Celulas', group: 'Secretaria/Organizacao' },
+  { key: 'escalas.html', label: 'Escalas', group: 'Secretaria/Organizacao' },
+  { key: 'agenda.html', label: 'Agenda', group: 'Secretaria/Organizacao' },
+  { key: 'oracoes.html', label: 'Oracoes', group: 'Secretaria/Espiritualidade' },
+  { key: 'missionarios.html', label: 'Missionarios', group: 'Secretaria/Espiritualidade' },
+  { key: 'financeiro.html', label: 'Visao Geral do Caixa', group: 'Tesouraria' },
+  { key: 'caixa_lancamentos.html', label: 'Lancamentos do Caixa', group: 'Tesouraria' },
+  { key: 'bancos_lancamentos.html', label: 'Lancamentos Bancarios', group: 'Tesouraria' },
+  { key: 'importacao_extrato.html', label: 'Importacao de Extrato', group: 'Tesouraria' },
+  { key: 'pagamentos.html', label: 'Links de Pagamento', group: 'Tesouraria' },
+  { key: 'plano_contas.html', label: 'Plano de Contas', group: 'Contabilidade' },
+  { key: 'lancamentos_contabeis.html', label: 'Lancamentos Contabeis', group: 'Contabilidade' },
+  { key: 'graficos_secretaria.html', label: 'Graficos Secretaria', group: 'Graficos' },
+  { key: 'graficos_tesouraria.html', label: 'Graficos Tesouraria', group: 'Graficos' },
+  { key: 'relatorios_secretaria.html', label: 'Relatorios Secretaria', group: 'Relatorios' },
+  { key: 'relatorios_tesouraria.html', label: 'Relatorios Tesouraria', group: 'Relatorios' }
+];
 
 function toast(msg){
   const el = document.getElementById('toast');
@@ -214,10 +288,10 @@ function clearModuleEditor(){
   fillForm(null);
 }
 
-function saveModuleInState(){
+function saveModuleInState(showToast = true){
   const mod = getFormModule();
   if (!mod.name) {
-    toast('Informe o nome do modulo.');
+    if (showToast) toast('Informe o nome do modulo.');
     return;
   }
 
@@ -225,7 +299,7 @@ function saveModuleInState(){
   if (idx >= 0) state.modules[idx] = mod; else state.modules.unshift(mod);
   state.selectedId = mod.id;
   renderModules();
-  toast('Modulo atualizado na fabrica. Clique em Publicar mudancas.');
+  if (showToast) toast('Modulo atualizado na fabrica. Clique em Publicar mudancas.');
 }
 
 function deleteSelectedModule(){
@@ -270,6 +344,114 @@ function renderModules(){
   });
 }
 
+function normalizeMenuKey(value){
+  return String(value || '').trim().toLowerCase();
+}
+
+function getMenuOverrideFromForm(){
+  return {
+    key: normalizeMenuKey(document.getElementById('menuKeySelect').value),
+    customLabel: document.getElementById('menuCustomLabel').value.trim(),
+    customRoute: document.getElementById('menuCustomRoute').value.trim(),
+    hidden: document.getElementById('menuHidden').checked,
+    featured: document.getElementById('menuFeatured').checked
+  };
+}
+
+function renderMenuCatalog(){
+  const select = document.getElementById('menuKeySelect');
+  if (!select) return;
+  const grouped = MENU_CATALOG.reduce((acc, item) => {
+    const g = item.group || 'Outros';
+    if (!acc[g]) acc[g] = [];
+    acc[g].push(item);
+    return acc;
+  }, {});
+
+  select.innerHTML = Object.keys(grouped).map((group) => {
+    return `<optgroup label="${esc(group)}">${grouped[group].map((item) => `<option value="${esc(item.key)}">${esc(item.label)} (${esc(item.key)})</option>`).join('')}</optgroup>`;
+  }).join('');
+}
+
+function fillMenuOverrideForm(override){
+  const key = normalizeMenuKey(override?.key || state.selectedMenuKey || MENU_CATALOG[0]?.key || 'dashboard.html');
+  document.getElementById('menuKeySelect').value = key;
+  document.getElementById('menuCustomLabel').value = override?.customLabel || '';
+  document.getElementById('menuCustomRoute').value = override?.customRoute || '';
+  document.getElementById('menuHidden').checked = !!override?.hidden;
+  document.getElementById('menuFeatured').checked = !!override?.featured;
+  state.selectedMenuKey = key;
+}
+
+function clearMenuOverrideEditor(){
+  state.selectedMenuKey = '';
+  fillMenuOverrideForm(null);
+}
+
+function upsertMenuOverrideFromForm(showToast = true){
+  const data = getMenuOverrideFromForm();
+  if (!data.key) {
+    if (showToast) toast('Selecione um menu existente.');
+    return;
+  }
+
+  const hasCustom = Boolean(data.customLabel || data.customRoute || data.hidden || data.featured);
+  const idx = state.menuOverrides.findIndex((item) => normalizeMenuKey(item.key) === data.key);
+
+  if (!hasCustom) {
+    if (idx >= 0) {
+      state.menuOverrides.splice(idx, 1);
+      if (showToast) toast('Override removido para este menu.');
+    } else if (showToast) {
+      toast('Nenhuma alteracao para salvar neste menu.');
+    }
+    renderMenuOverrides();
+    return;
+  }
+
+  const next = { ...data, updatedAt: new Date().toISOString() };
+  if (idx >= 0) state.menuOverrides[idx] = next; else state.menuOverrides.unshift(next);
+  state.selectedMenuKey = data.key;
+  renderMenuOverrides();
+  if (showToast) toast('Override de menu aplicado. Clique em Publicar mudancas.');
+}
+
+function renderMenuOverrides(){
+  const tbody = document.getElementById('menuOverridesBody');
+  const list = state.menuOverrides || [];
+  document.getElementById('menuCountLabel').textContent = list.length + ' overrides';
+
+  if (!list.length) {
+    tbody.innerHTML = '<tr><td colspan="4">Nenhum override aplicado.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = list.map((item) => {
+    const key = normalizeMenuKey(item.key);
+    const catalog = MENU_CATALOG.find((m) => normalizeMenuKey(m.key) === key);
+    const baseLabel = catalog?.label || key;
+    const selected = key === state.selectedMenuKey ? ' style="background:#eff6ff"' : '';
+    return `
+      <tr data-key="${esc(key)}"${selected}>
+        <td><strong>${esc(baseLabel)}</strong><br><span style="font-size:11px;color:#64748b">${esc(key)}</span></td>
+        <td>${esc(item.customLabel || '-')}</td>
+        <td>${esc(item.customRoute || '-')}</td>
+        <td>${item.hidden ? 'Sim' : 'Nao'}</td>
+      </tr>
+    `;
+  }).join('');
+
+  Array.from(tbody.querySelectorAll('tr[data-key]')).forEach((tr) => {
+    tr.addEventListener('click', () => {
+      const key = normalizeMenuKey(tr.getAttribute('data-key'));
+      const found = state.menuOverrides.find((item) => normalizeMenuKey(item.key) === key);
+      state.selectedMenuKey = key;
+      fillMenuOverrideForm(found || { key });
+      renderMenuOverrides();
+    });
+  });
+}
+
 async function loadConfig(){
   const r = await fetch('/api/saas/sistema/config', { headers: headers() });
   if (!r.ok) throw new Error('Falha ao carregar configuracoes da fabrica.');
@@ -277,21 +459,29 @@ async function loadConfig(){
 
   state.config = cfg;
   state.modules = Array.isArray(cfg?.factory?.modules) ? cfg.factory.modules : [];
+  state.menuOverrides = Array.isArray(cfg?.factory?.menuOverrides) ? cfg.factory.menuOverrides : [];
 
   document.getElementById('factoryTitle').value = cfg?.factory?.title || 'Fabrica de Inovacoes LDFP';
   document.getElementById('factoryDescription').value = cfg?.factory?.description || '';
 
+  renderMenuCatalog();
   clearModuleEditor();
   renderModules();
+  clearMenuOverrideEditor();
+  renderMenuOverrides();
 }
 
 async function publishFactory(){
-  saveModuleInState();
+  if (document.getElementById('mName').value.trim()) {
+    saveModuleInState(false);
+  }
+  upsertMenuOverrideFromForm(false);
 
   const payload = {
     factory: {
       title: document.getElementById('factoryTitle').value.trim(),
       description: document.getElementById('factoryDescription').value.trim(),
+      menuOverrides: state.menuOverrides,
       modules: state.modules
     }
   };
@@ -320,6 +510,13 @@ document.getElementById('newBtn').addEventListener('click', () => {
 
 document.getElementById('clearBtn').addEventListener('click', clearModuleEditor);
 document.getElementById('removeBtn').addEventListener('click', deleteSelectedModule);
+document.getElementById('menuApplyBtn').addEventListener('click', () => upsertMenuOverrideFromForm(true));
+document.getElementById('menuClearBtn').addEventListener('click', clearMenuOverrideEditor);
+document.getElementById('menuKeySelect').addEventListener('change', (e) => {
+  const key = normalizeMenuKey(e.target.value);
+  const found = state.menuOverrides.find((item) => normalizeMenuKey(item.key) === key);
+  fillMenuOverrideForm(found || { key });
+});
 document.getElementById('saveBtn').addEventListener('click', async () => {
   try { await publishFactory(); } catch (e) { toast(e.message || 'Erro ao publicar.'); }
 });

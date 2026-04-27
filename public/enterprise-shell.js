@@ -101,13 +101,44 @@
         return ROLE_FEATURES.visitante;
     }
 
+    let shellMenuOverridesMap = new Map();
+
+    function setShellMenuOverrides(config) {
+        const list = Array.isArray(config?.factory?.menuOverrides) ? config.factory.menuOverrides : [];
+        shellMenuOverridesMap = new Map(
+            list
+                .filter((item) => item && item.key)
+                .map((item) => [String(item.key).trim().toLowerCase(), item])
+        );
+    }
+
+    function getMenuOverrideByHref(href) {
+        const key = normalizePath(href).split('?')[0].toLowerCase();
+        return shellMenuOverridesMap.get(key) || null;
+    }
+
+    function applyMenuOverrideToItem(item) {
+        const override = getMenuOverrideByHref(item?.href);
+        if (!override) {
+            return item;
+        }
+
+        return {
+            ...item,
+            label: String(override.customLabel || '').trim() || item.label,
+            href: String(override.customRoute || '').trim() || item.href,
+            hidden: Boolean(override.hidden),
+            featured: Boolean(override.featured)
+        };
+    }
+
     function normalizeLinkItem(item) {
         if (Array.isArray(item)) {
             const [href, icon, label, feature] = item;
-            return { href, icon, label, feature };
+            return applyMenuOverrideToItem({ href, icon, label, feature });
         }
 
-        return item || {};
+        return applyMenuOverrideToItem(item || {});
     }
 
     function canAccessFeature(user, feature) {
@@ -250,6 +281,7 @@
     function filterLinksByRole(links, user) {
         return links
             .map(normalizeLinkItem)
+            .filter((item) => !item.hidden)
             .filter((item) => canAccessFeature(user, item.feature));
     }
 
@@ -702,6 +734,8 @@
             return;
         }
 
+        setShellMenuOverrides(config);
+
         const customConfig = user?.customConfig || {};
         const brandName = String(config?.branding?.brandName || '').trim();
         const workspaceTitle = customConfig?.perfilPersonalizadoAtivo
@@ -874,20 +908,29 @@
             roleLabel: body.dataset.shellRole || (getUserRole(getAuthUser()).charAt(0).toUpperCase() + getUserRole(getAuthUser()).slice(1))
         };
 
-        main.classList.add('enterprise-main');
-        body.classList.add('legacy-sidebar-mode');
-        body.insertAdjacentHTML('afterbegin', renderSidebar(activePath, getAuthUser()));
-        main.insertAdjacentHTML('afterbegin', renderHeader(config));
-        applyUserLabels();
-        bindMenuToggle();
-        bindPlanUpgradeGuards(getAuthUser(), activePath);
+        const bootShell = (configPayload) => {
+            setShellMenuOverrides(configPayload || {});
+
+            main.classList.add('enterprise-main');
+            body.classList.add('legacy-sidebar-mode');
+            body.insertAdjacentHTML('afterbegin', renderSidebar(activePath, getAuthUser()));
+            main.insertAdjacentHTML('afterbegin', renderHeader(config));
+            applyUserLabels();
+            bindMenuToggle();
+            bindPlanUpgradeGuards(getAuthUser(), activePath);
+
+            if (configPayload) {
+                applyGlobalSystemConfig(configPayload, getAuthUser());
+            }
+        };
 
         loadGlobalSystemConfig()
             .then((configPayload) => {
-                applyGlobalSystemConfig(configPayload, getAuthUser());
+                bootShell(configPayload);
             })
             .catch(() => {
                 // O shell continua funcional mesmo sem config global.
+                bootShell(null);
             });
     }
 
