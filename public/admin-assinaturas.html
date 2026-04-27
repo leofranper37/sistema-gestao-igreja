@@ -109,6 +109,7 @@ function render() {
     const dt = r.created_at ? new Date(r.created_at).toLocaleDateString('pt-BR') : '-';
     const stClass = r.status === 'pago' ? 's-pago' : (r.status === 'pendente' ? 's-pendente' : 's-rejeitado');
     const payBtn = r.status === 'pago' ? '' : `<button class="btn btn-success" style="padding:6px 10px;font-size:12px" onclick="markPaid(${r.id})">Marcar Pago</button>`;
+    const delBtn = r.status === 'pago' ? '' : `<button class="btn" style="padding:6px 10px;font-size:12px;background:#fee2e2;color:#991b1b;margin-left:4px" onclick="deleteRecord(${r.id})"><i class="fa-solid fa-trash"></i></button>`;
     return `<tr>
       <td>${esc(r.igreja_nome || '-')}</td>
       <td>${esc(r.descricao || '-')}<br><small style="color:#64748b">${esc(r.reference_code || '')}</small></td>
@@ -116,9 +117,21 @@ function render() {
       <td><span class="badge ${stClass}">${esc(r.status || '-')}</span></td>
       <td>${esc(r.plano || '-')}</td>
       <td>${dt}</td>
-      <td>${payBtn}</td>
+      <td>${payBtn}${delBtn}</td>
     </tr>`;
   }).join('');
+}
+
+async function deleteRecord(id) {
+  if (!confirm('Excluir esta fatura pendente? Esta ação não pode ser desfeita.')) return;
+  try {
+    const r = await fetch('/api/saas/assinaturas/' + id, {method:'DELETE', headers: hdr()});
+    if (!r.ok) throw new Error(await r.text());
+    await load();
+    toast('Fatura excluída', true);
+  } catch (e) {
+    toast('Erro ao excluir fatura', false);
+  }
 }
 
 async function markPaid(id) {

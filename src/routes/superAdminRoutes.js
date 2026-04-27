@@ -13,6 +13,7 @@ const {
     updatePlano,
     listSaasAssinaturas,
     markSaasAssinaturaPaga,
+    deleteSaasAssinatura,
     getSaasRetomada,
     updateSaasRetomada,
     createSaasRetomadaCheckpoint
@@ -42,6 +43,7 @@ router.put('/api/saas/planos/:slug', ...isSuperAdmin, updatePlano);
 // Assinaturas & Faturas
 router.get('/api/saas/assinaturas', ...isSuperAdmin, listSaasAssinaturas);
 router.put('/api/saas/assinaturas/:id/pago', ...isSuperAdmin, markSaasAssinaturaPaga);
+router.delete('/api/saas/assinaturas/:id', ...isSuperAdmin, deleteSaasAssinatura);
 
 // Retomada / Continuidade
 router.get('/api/saas/retomada', ...isSuperAdmin, getSaasRetomada);

@@ -496,6 +496,26 @@ async function markSaasAssinaturaPaga(req, res) {
     }
 }
 
+async function deleteSaasAssinatura(req, res) {
+    const id = Number(req.params.id);
+    if (!id) return res.status(400).json({ error: 'ID inválido.' });
+
+    try {
+        const [rows] = await pool.query(
+            `SELECT id, status FROM payment_links WHERE id = ? LIMIT 1`,
+            [id]
+        );
+        if (!rows.length) return res.status(404).json({ error: 'Fatura não encontrada.' });
+        if (rows[0].status === 'pago') {
+            return res.status(400).json({ error: 'Não é possível excluir uma fatura já paga.' });
+        }
+        await pool.query(`DELETE FROM payment_links WHERE id = ?`, [id]);
+        res.json({ ok: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}
+
 // ── Gatilho de Retomada (estado de continuidade) ──────────────────────────
 
 async function getSaasRetomada(req, res) {
@@ -581,6 +601,7 @@ module.exports = {
     updatePlano,
     listSaasAssinaturas,
     markSaasAssinaturaPaga,
+    deleteSaasAssinatura,
     getSaasRetomada,
     updateSaasRetomada,
     createSaasRetomadaCheckpoint
