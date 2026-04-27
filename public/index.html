@@ -221,6 +221,32 @@
             border-radius: 10px;
         }
 
+        .promo-offers {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(220px, 1fr));
+            gap: 10px;
+            margin-top: 14px;
+        }
+
+        .promo-offer-item {
+            border-radius: 10px;
+            border: 1px solid #1f2937;
+            background: rgba(11, 17, 32, 0.75);
+            color: #cbd5e1;
+            font-size: 13px;
+            padding: 10px 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .promo-offer-item i {
+            color: #f59e0b;
+            width: 14px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
         .promo-visual {
             background: radial-gradient(circle at 20% 20%, rgba(245, 158, 11, .35), transparent 56%), #0b1120;
             border: 1px solid #1f2937;
@@ -475,6 +501,10 @@
                 font-size: 26px;
             }
 
+            .promo-offers {
+                grid-template-columns: 1fr;
+            }
+
             .logo-container img {
                 height: 46px;
             }
@@ -628,20 +658,21 @@
     <section class="promo-main">
         <div class="landing-container">
             <div>
-                <div class="promo-chip"><i class="fa-solid fa-cross"></i> Cruz e Leo</div>
-                <h2 class="promo-title">Leo mostrando o <span>App do Membro</span> para toda a igreja</h2>
-                <p class="promo-sub">Uma propaganda direta na tela principal para fortalecer adocao: acompanhe agenda, credencial digital, pedidos de oracao e comunicados em segundos.</p>
-                <div class="promo-list">
-                    <span>CPF + senha</span>
-                    <span>Credencial digital</span>
-                    <span>Agenda em tempo real</span>
-                    <span>Mural da igreja</span>
+                <div class="promo-chip"><i class="fa-solid fa-mobile-screen-button"></i> App do Membro</div>
+                <h2 class="promo-title">Tudo o que o <span>App do Membro</span> oferece</h2>
+                <p class="promo-sub">Um app completo para conectar membros e lideranca com praticidade no dia a dia da igreja.</p>
+                <div class="promo-offers">
+                    <div class="promo-offer-item"><i class="fa-solid fa-id-card"></i> Credencial digital do membro</div>
+                    <div class="promo-offer-item"><i class="fa-solid fa-user-check"></i> Login com CPF e senha</div>
+                    <div class="promo-offer-item"><i class="fa-solid fa-calendar-days"></i> Agenda de cultos e eventos</div>
+                    <div class="promo-offer-item"><i class="fa-solid fa-bullhorn"></i> Mural de avisos e comunicados</div>
+                    <div class="promo-offer-item"><i class="fa-solid fa-hand-holding-heart"></i> Pedidos de oracao e acompanhamento</div>
+                    <div class="promo-offer-item"><i class="fa-solid fa-bell"></i> Atualizacoes em tempo real</div>
                 </div>
-                <a href="app_membro.html"><i class="fa-solid fa-mobile-screen-button"></i> Abrir App do Membro</a>
             </div>
             <div class="promo-visual">
-                <strong>Campanha ativa: Cruz e Leo</strong>
-                <p>Mostre o App do Membro com um visual real da tela para aumentar a adesao da igreja.</p>
+                <strong>Experiencia real do App do Membro</strong>
+                <p>Visualizacao da interface mobile para apresentar com clareza os recursos disponiveis para os membros.</p>
                 <div class="app-preview">
                     <div class="phone-mock" aria-hidden="true">
                         <div class="phone-screen">
