@@ -81,6 +81,12 @@ app.get(['/index.htm', '/INDEX.HTM'], (req, res) => {
     res.redirect(301, '/index.html');
 });
 
+app.get(['/criar-conta', '/criar-conta.html'], (req, res) => {
+    const queryIndex = req.originalUrl.indexOf('?');
+    const query = queryIndex >= 0 ? req.originalUrl.slice(queryIndex) : '';
+    res.redirect(302, `/criar_conta.html${query}`);
+});
+
 app.use((req, res, next) => {
     if (!maintenanceModeEnabled) {
         return next();

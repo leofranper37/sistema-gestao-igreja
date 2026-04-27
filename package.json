@@ -11,6 +11,8 @@
     "init:db": "node scripts/init-db.js",
     "check:db": "node scripts/check-db.js",
     "migrate": "node scripts/migrar-schema.js",
+    "backup:db": "node scripts/backup-db.js",
+    "restore:db": "node scripts/restore-db.js",
     "gatilho:init": "node scripts/gatilho-retomada.js init-today",
     "gatilho:save": "node scripts/gatilho-retomada.js save",
     "gatilho:resume": "node scripts/gatilho-retomada.js resume",

@@ -3,7 +3,7 @@
  * Handles caching, offline support, and background sync
  */
 
-const CACHE_NAME = 'ldfp-v4';
+const CACHE_NAME = 'ldfp-v5';
 const STATIC_ASSETS = [
     '/',
     '/index.html',

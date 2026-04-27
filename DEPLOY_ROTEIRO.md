@@ -1,5 +1,20 @@
 # 🚀 ROTEIRO DE DEPLOY - Sistema de Gestão Igreja
 
+## Ambiente Oficial (Decisão Atual)
+
+- Produção oficial: **Vercel**
+- Banco recomendado em produção: **PostgreSQL gerenciado (Neon)**
+- Contingência: **Railway** (usar apenas em incidente ou migração planejada)
+
+### Como validar em 10 segundos
+
+```powershell
+nslookup www.ldfp.com.br
+Invoke-WebRequest -Uri "https://www.ldfp.com.br" -Method Head -UseBasicParsing | Select-Object -ExpandProperty Headers
+```
+
+Se aparecer `vercel-dns` no DNS ou `Server: Vercel` nos headers, o ambiente ativo é Vercel.
+
 ## Objetivo
 Colocar o projeto "vivo" na nuvem com sincronização automática entre VS Code e o servidor online.
 
@@ -62,7 +77,7 @@ Se usares **Prisma** ou Base de Dados:
 2. Espera ~2-3 minutos pela construção
 3. Verás uma mensagem: **"Congratulations! Your project has been successfully deployed"**
 
-**✓ Verificação:** A Vercel dá-te um URL tipo `https://seu-projeto.vercel.app` - testa neste URL.
+**✓ Verificação:** A Vercel dá-te um URL tipo `https://sistema-gestao-igreja.vercel.app` - testa neste URL.
 
 ---
 
@@ -71,7 +86,7 @@ Se usares **Prisma** ou Base de Dados:
 ### Passo 3.1 - Adicionar o Domínio na Vercel
 1. No painel da Vercel, vai a **"Settings"** → **"Domains"**
 2. Clica em **"Add Domain"**
-3. Digita o teu domínio: `teusistema.com.br` (ou qual quer que seja)
+3. Digita os domínios: `ldfp.com.br` e `www.ldfp.com.br`
 
 ### Passo 3.2 - Configurar o DNS
 A Vercel vai-te mostrar os valores de DNS. Existem 2 opções:
@@ -86,7 +101,7 @@ ns4.vercel.com
 
 #### Opção B: Registos CNAME (se não conseguires usar Nameservers)
 ```
-CNAME: teusistema.com.br → cname.vercel.app
+CNAME: www.ldfp.com.br → cname.vercel.app
 A: 76.76.19.0
 AAAA: 2610:7e5c:bff0::0
 ```
@@ -101,7 +116,7 @@ AAAA: 2610:7e5c:bff0::0
 
 **⏱️ Tempo de espera:** Pode demorar 24-48 horas para o DNS propagar, mas geralmente é mais rápido.
 
-**✓ Verificação:** Quando o DNS estiver ativo, conseguirás aceder em `https://teusistema.com.br`
+**✓ Verificação:** Quando o DNS estiver ativo, conseguirás aceder em `https://ldfp.com.br` e `https://www.ldfp.com.br`
 
 ---
 
@@ -129,7 +144,7 @@ git push origin main
 - ✅ GitHub recebe o código
 - ✅ Vercel detecta a mudança automaticamente
 - ✅ Constrói a nova versão (~1-2 minutos)
-- ✅ Disponibiliza em `https://teusistema.com.br`
+- ✅ Disponibiliza em `https://www.ldfp.com.br`
 
 **Não precisas fazer mais nada!** Está tudo automático.
 
@@ -180,7 +195,7 @@ Antes de considerar o deploy completo:
 - [ ] Environment Variables adicionadas (se necessário)
 - [ ] Domínio adicionado na Vercel
 - [ ] DNS atualizado no Registro.br
-- [ ] Site acessível em `https://teusistema.com.br`
+- [ ] Site acessível em `https://ldfp.com.br` e `https://www.ldfp.com.br`
 - [ ] Testaste uma mudança pequena (commit + push) e viste atualizar automaticamente
 
 ---
@@ -194,6 +209,19 @@ Agora que tudo está online:
 3. **Adicionar Analytics** (Google Analytics ou Vercel Analytics)
 4. **Backups da Base de Dados** (verifica o teu provider de DB)
 5. **Monitorização** (Vercel avisa-te de errors automaticamente)
+
+---
+
+## Plano de Contingência (Railway)
+
+Usar Railway somente se ocorrer falha prolongada na Vercel ou necessidade de migração temporária.
+
+Passos rápidos:
+
+1. Confirmar que `railway.json` está atualizado.
+2. Configurar as mesmas variáveis críticas (`DATABASE_URL`, `JWT_SECRET`, `NODE_ENV`).
+3. Validar domínio temporário e CORS.
+4. Após normalização, retornar operação principal para Vercel.
 
 ---
 

@@ -50,46 +50,108 @@
         }
 
         /* FORM SIDE */
-        .co-form-col h1 { font-size: 26px; font-weight: 800; margin-bottom: 6px; }
+        .co-form-col {
+            background: linear-gradient(160deg, #131f35 0%, #0f1e30 100%);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 20px;
+            padding: 36px 36px 32px;
+        }
+        .co-form-col h1 { font-size: 28px; font-weight: 900; margin-bottom: 6px; letter-spacing: -0.5px; }
         .co-form-col h1 span { color: var(--accent); }
-        .co-form-col .co-subtitle { color: var(--muted); font-size: 14px; margin-bottom: 32px; }
+        .co-form-col .co-subtitle { color: var(--muted); font-size: 14px; margin-bottom: 32px; line-height: 1.6; }
 
         .co-section-label {
-            font-size: 11px; font-weight: 800; letter-spacing: 1px;
+            display: flex; align-items: center; gap: 8px;
+            font-size: 10px; font-weight: 800; letter-spacing: 1.2px;
             text-transform: uppercase; color: var(--muted);
             border-bottom: 1px solid var(--border);
-            padding-bottom: 8px; margin-bottom: 20px;
+            padding-bottom: 10px; margin-bottom: 20px;
         }
+        .co-section-label i { color: var(--accent); font-size: 13px; }
 
         .co-field { margin-bottom: 18px; }
-        .co-field label { display: block; font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; }
-        .co-field input {
-            width: 100%; padding: 12px 14px;
-            background: var(--panel); border: 1px solid var(--border);
-            border-radius: 9px; color: var(--text); font-size: 14px;
-            outline: none; transition: border-color .2s;
+        .co-field label {
+            display: block; font-size: 12px; font-weight: 700;
+            color: #64748b; margin-bottom: 7px; letter-spacing: .4px;
         }
-        .co-field input:focus { border-color: var(--accent); }
-        .co-field input::placeholder { color: #475569; }
+        .co-field input {
+            width: 100%; padding: 13px 16px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px; color: var(--text); font-size: 14px;
+            outline: none; transition: border-color .2s, background .2s, box-shadow .2s;
+        }
+        .co-field input:focus {
+            border-color: var(--accent);
+            background: rgba(245,158,11,0.05);
+            box-shadow: 0 0 0 3px rgba(245,158,11,0.12);
+        }
+        .co-field input::placeholder { color: #334155; }
 
         .co-field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        .co-field-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+
+        .co-field select, .co-field textarea {
+            width: 100%; padding: 13px 16px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px; color: var(--text); font-size: 14px;
+            outline: none; transition: border-color .2s, background .2s, box-shadow .2s;
+            font-family: inherit; appearance: none; -webkit-appearance: none;
+        }
+        .co-field select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2394a3b8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 38px; }
+        .co-field select option { background: #1e293b; color: #f1f5f9; }
+        .co-field textarea { resize: vertical; min-height: 90px; line-height: 1.55; }
+        .co-field select:focus, .co-field textarea:focus {
+            border-color: var(--accent);
+            background: rgba(245,158,11,0.05);
+            box-shadow: 0 0 0 3px rgba(245,158,11,0.12);
+        }
+
+        /* Toggle PF / PJ */
+        .co-tipo-toggle { display: flex; gap: 10px; margin-top: 2px; }
+        .co-tipo-btn {
+            flex: 1; padding: 11px 10px; border-radius: 10px; font-size: 13px; font-weight: 700;
+            border: 1.5px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.04);
+            color: var(--muted); cursor: pointer; transition: all .2s; text-align: center;
+        }
+        .co-tipo-btn.active {
+            background: rgba(245,158,11,0.15); border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        /* Banner login */
+        .co-login-banner {
+            display: flex; align-items: center; gap: 12px;
+            background: rgba(245,158,11,0.07); border: 1px solid rgba(245,158,11,0.2);
+            border-radius: 12px; padding: 14px 18px; margin-bottom: 28px;
+            font-size: 13px; color: var(--muted);
+        }
+        .co-login-banner i { color: var(--accent); font-size: 16px; flex-shrink: 0; }
+        .co-login-banner a { color: var(--accent); font-weight: 700; text-decoration: none; }
+        .co-login-banner a:hover { text-decoration: underline; }
+
+        /* Label required asterisk */
+        .req { color: #ef4444; margin-left: 2px; }
 
         .co-btn {
-            width: 100%; padding: 15px;
+            width: 100%; padding: 16px;
             background: linear-gradient(135deg, var(--accent), var(--accent-dark));
-            border: none; border-radius: 10px; color: #111;
-            font-size: 16px; font-weight: 800; cursor: pointer;
-            transition: filter .2s, transform .15s; margin-top: 8px;
+            border: none; border-radius: 11px; color: #111;
+            font-size: 16px; font-weight: 900; cursor: pointer; letter-spacing: .3px;
+            transition: filter .2s, transform .15s, box-shadow .2s; margin-top: 10px;
+            box-shadow: 0 8px 24px rgba(245,158,11,.28);
         }
-        .co-btn:hover { filter: brightness(1.08); transform: translateY(-1px); }
-        .co-btn:disabled { opacity: .6; cursor: not-allowed; filter: none; transform: none; }
+        .co-btn:hover { filter: brightness(1.08); transform: translateY(-2px); box-shadow: 0 12px 32px rgba(245,158,11,.38); }
+        .co-btn:disabled { opacity: .6; cursor: not-allowed; filter: none; transform: none; box-shadow: none; }
 
-        .co-status { margin-top: 12px; font-size: 13px; border-radius: 7px; padding: 10px 14px; display: none; }
+        .co-status { margin-top: 12px; font-size: 13px; border-radius: 9px; padding: 12px 16px; display: none; }
         .co-status.error { background: rgba(239,68,68,.12); border: 1px solid rgba(239,68,68,.3); color: #f87171; display: block; }
         .co-status.success { background: rgba(34,197,94,.1); border: 1px solid rgba(34,197,94,.3); color: var(--green); display: block; }
 
-        .co-terms { margin-top: 14px; font-size: 12px; color: var(--muted); text-align: center; line-height: 1.6; }
-        .co-terms a { color: var(--accent); text-decoration: none; }
+        .co-terms { margin-top: 16px; font-size: 12px; color: #475569; text-align: center; line-height: 1.7; }
+        .co-terms a { color: var(--accent); text-decoration: none; font-weight: 600; }
+        .co-terms a:hover { text-decoration: underline; }
 
         /* PLAN SIDE */
         .co-plan-card {
@@ -174,28 +236,142 @@
         <!-- COLUNA FORMULÁRIO -->
         <div class="co-form-col">
             <h1>Crie sua conta <span>LDFP</span></h1>
-            <p class="co-subtitle">Preencha os dados abaixo para começar. Sem cartão de crédito obrigatório no plano gratuito.</p>
+            <p class="co-subtitle">Preencha os dados abaixo para assinar o plano selecionado e começar a usar a plataforma.</p>
 
-            <div class="co-section-label">Dados da Igreja</div>
-
-            <div class="co-field">
-                <label>Nome da Igreja / Ministério</label>
-                <input id="igreja" type="text" placeholder="Ex: Igreja Batista Central..." required>
+            <!-- Banner já tem conta -->
+            <div class="co-login-banner">
+                <i class="fa-solid fa-circle-info"></i>
+                <span>Já está cadastrado? <a href="login.html">Clique aqui para fazer login</a></span>
             </div>
 
-            <div class="co-section-label" style="margin-top:28px;">Seu Acesso</div>
+            <!-- DADOS PESSOAIS -->
+            <div class="co-section-label"><i class="fa-solid fa-id-card"></i> Detalhes de Cobrança e Entrega</div>
+
+            <div class="co-field-row">
+                <div class="co-field">
+                    <label>Nome <span class="req">*</span></label>
+                    <input id="nome" type="text" placeholder="Nome" required>
+                </div>
+                <div class="co-field">
+                    <label>Sobrenome <span class="req">*</span></label>
+                    <input id="sobrenome" type="text" placeholder="Sobrenome" required>
+                </div>
+            </div>
 
             <div class="co-field">
-                <label>Seu Nome Completo</label>
-                <input id="nome" type="text" placeholder="Ex: Pr. Leonardo Pereira..." required>
+                <label>Endereço de e-mail <span class="req">*</span></label>
+                <input id="email" type="email" placeholder="Endereço de e-mail" required>
             </div>
+
             <div class="co-field">
-                <label>E-mail</label>
-                <input id="email" type="email" placeholder="seu@email.com" required>
+                <label>Telefone <span class="req">*</span></label>
+                <input id="telefone" type="tel" placeholder="(11) 99999-9999" oninput="mascaraTel(this)" required>
             </div>
+
+            <!-- TIPO DE PESSOA -->
             <div class="co-field">
-                <label>Crie uma Senha</label>
+                <label>Tipo de Pessoa <span class="req">*</span></label>
+                <div class="co-tipo-toggle">
+                    <button type="button" class="co-tipo-btn" id="btnPF" onclick="setTipo('PF')">Pessoa Física</button>
+                    <button type="button" class="co-tipo-btn active" id="btnPJ" onclick="setTipo('PJ')">Pessoa Jurídica</button>
+                </div>
+            </div>
+
+            <div class="co-field" id="campoCNPJ">
+                <label>CNPJ <span class="req">*</span></label>
+                <input id="cnpj" type="text" placeholder="00.000.000/0000-00" oninput="mascaraCNPJ(this)" maxlength="18">
+            </div>
+
+            <div class="co-field" id="campoCPF" style="display:none">
+                <label>CPF <span class="req">*</span></label>
+                <input id="cpf" type="text" placeholder="000.000.000-00" oninput="mascaraCPF(this)" maxlength="14">
+            </div>
+
+            <div class="co-field">
+                <label>Nome da Igreja ou Instituição <span class="req">*</span></label>
+                <input id="igreja" type="text" placeholder="Nome da Igreja ou Instituição" required>
+            </div>
+
+            <!-- ENDEREÇO -->
+            <div class="co-section-label" style="margin-top:28px;"><i class="fa-solid fa-location-dot"></i> Endereço</div>
+
+            <div class="co-field">
+                <label>País <span class="req">*</span></label>
+                <select id="pais">
+                    <option value="BR" selected>Brasil</option>
+                    <option value="PT">Portugal</option>
+                    <option value="US">Estados Unidos</option>
+                    <option value="outro">Outro</option>
+                </select>
+            </div>
+
+            <div class="co-field-row">
+                <div class="co-field">
+                    <label>CEP <span class="req">*</span></label>
+                    <input id="cep" type="text" placeholder="00000-000" oninput="mascaraCEP(this)" maxlength="9" required>
+                </div>
+                <div class="co-field" style="display:flex;align-items:flex-end;">
+                    <button type="button" onclick="buscarCEP()" style="width:100%;padding:13px 10px;background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.3);border-radius:10px;color:var(--accent);font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;">
+                        <i class="fa-solid fa-magnifying-glass"></i> Buscar CEP
+                    </button>
+                </div>
+            </div>
+
+            <div class="co-field">
+                <label>Endereço <span class="req">*</span></label>
+                <input id="endereco" type="text" placeholder="Rua, Avenida, etc." required>
+            </div>
+
+            <div class="co-field-row">
+                <div class="co-field">
+                    <label>Número <span style="color:#475569;font-weight:400;">(opcional)</span></label>
+                    <input id="numero" type="text" placeholder="Número">
+                </div>
+                <div class="co-field">
+                    <label>Bairro <span class="req">*</span></label>
+                    <input id="bairro" type="text" placeholder="Bairro" required>
+                </div>
+            </div>
+
+            <div class="co-field">
+                <label>Complemento <span style="color:#475569;font-weight:400;">(opcional)</span></label>
+                <input id="complemento" type="text" placeholder="Apartamento, suite, casa, etc.">
+            </div>
+
+            <div class="co-field-row">
+                <div class="co-field">
+                    <label>Cidade <span class="req">*</span></label>
+                    <input id="cidade" type="text" placeholder="Cidade" required>
+                </div>
+                <div class="co-field">
+                    <label>Estado <span class="req">*</span></label>
+                    <select id="estado">
+                        <option value="">Selecione</option>
+                        <option>AC</option><option>AL</option><option>AP</option><option>AM</option>
+                        <option>BA</option><option>CE</option><option>DF</option><option>ES</option>
+                        <option>GO</option><option>MA</option><option>MT</option><option>MS</option>
+                        <option>MG</option><option>PA</option><option>PB</option><option>PR</option>
+                        <option>PE</option><option>PI</option><option>RJ</option><option>RN</option>
+                        <option>RS</option><option>RO</option><option>RR</option><option>SC</option>
+                        <option selected>SP</option><option>SE</option><option>TO</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- ACESSO -->
+            <div class="co-section-label" style="margin-top:28px;"><i class="fa-solid fa-user-shield"></i> Acesso à Plataforma</div>
+
+            <div class="co-field">
+                <label>Criar uma senha para sua conta <span class="req">*</span></label>
                 <input id="senha" type="password" placeholder="Mínimo 8 caracteres" required>
+            </div>
+
+            <!-- OBSERVAÇÕES -->
+            <div class="co-section-label" style="margin-top:28px;"><i class="fa-solid fa-comment-dots"></i> Observações</div>
+
+            <div class="co-field">
+                <label>Observações do pedido <span style="color:#475569;font-weight:400;">(opcional)</span></label>
+                <textarea id="observacoes" placeholder="Alguma informação adicional sobre seu pedido..."></textarea>
             </div>
 
             <button id="btnCriar" type="button" class="co-btn" onclick="criarConta()">
@@ -316,27 +492,111 @@
 
         loadPlanos();
 
-        function extractErrorMessage(data, fallbackMessage) {
-            if (!data) {
-                return fallbackMessage;
-            }
+        // — Máscaras —
+        function mascaraTel(i) {
+            let v = i.value.replace(/\D/g,'');
+            if (v.length > 11) v = v.slice(0,11);
+            if (v.length > 10) v = v.replace(/(\d{2})(\d{5})(\d{4})/,'($1) $2-$3');
+            else if (v.length > 6) v = v.replace(/(\d{2})(\d{4})(\d*)/,'($1) $2-$3');
+            else if (v.length > 2) v = v.replace(/(\d{2})(\d*)/,'($1) $2');
+            i.value = v;
+        }
+        function mascaraCEP(i) {
+            let v = i.value.replace(/\D/g,'').slice(0,8);
+            if (v.length > 5) v = v.replace(/(\d{5})(\d*)/,'$1-$2');
+            i.value = v;
+        }
+        function mascaraCNPJ(i) {
+            let v = i.value.replace(/\D/g,'').slice(0,14);
+            v = v.replace(/(\d{2})(\d)/,'$1.$2');
+            v = v.replace(/(\d{3})(\d)/,'$1.$2');
+            v = v.replace(/(\d{3})(\d)/,'$1/$2');
+            v = v.replace(/(\d{4})(\d)/,'$1-$2');
+            i.value = v;
+        }
+        function mascaraCPF(i) {
+            let v = i.value.replace(/\D/g,'').slice(0,11);
+            v = v.replace(/(\d{3})(\d)/,'$1.$2');
+            v = v.replace(/(\d{3})(\d)/,'$1.$2');
+            v = v.replace(/(\d{3})(\d)/,'$1-$2');
+            i.value = v;
+        }
 
+        // — Toggle PF/PJ —
+        let tipoPessoa = 'PJ';
+        function setTipo(tipo) {
+            tipoPessoa = tipo;
+            document.getElementById('btnPF').classList.toggle('active', tipo === 'PF');
+            document.getElementById('btnPJ').classList.toggle('active', tipo === 'PJ');
+            document.getElementById('campoCNPJ').style.display = tipo === 'PJ' ? '' : 'none';
+            document.getElementById('campoCPF').style.display  = tipo === 'PF' ? '' : 'none';
+        }
+
+        // — Busca CEP via ViaCEP —
+        async function buscarCEP() {
+            const cep = document.getElementById('cep').value.replace(/\D/g,'');
+            if (cep.length !== 8) { alert('Digite um CEP com 8 dígitos.'); return; }
+            try {
+                const r = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+                const d = await r.json();
+                if (d.erro) { alert('CEP não encontrado.'); return; }
+                document.getElementById('endereco').value  = d.logradouro || '';
+                document.getElementById('bairro').value    = d.bairro     || '';
+                document.getElementById('cidade').value    = d.localidade || '';
+                const sel = document.getElementById('estado');
+                for (let o of sel.options) if (o.value === d.uf) { o.selected = true; break; }
+            } catch { alert('Erro ao consultar CEP. Tente novamente.'); }
+        }
+
+        function extractErrorMessage(data, fallbackMessage) {
+            if (!data) return fallbackMessage;
             return data.error || data.message || fallbackMessage;
+        }
+
+        function isMasterWorkspaceUser(user) {
+            const role = String(user?.role || user?.perfil || '').trim().toLowerCase();
+            const igreja = String(user?.igreja || '').trim().toLowerCase();
+            const superRoles = new Set(['super-admin', 'super_admin', 'superadmin', 'master', 'owner', 'root', 'super admin']);
+            return superRoles.has(role) || (role === 'admin' && igreja === 'ldfp master');
         }
 
         async function criarConta() {
             const status = document.getElementById('status');
-            const btn = document.getElementById('btnCriar');
-            const igreja = document.getElementById('igreja').value.trim();
-            const nome = document.getElementById('nome').value.trim();
-            const email = document.getElementById('email').value.trim();
-            const senha = document.getElementById('senha').value;
+            const btn    = document.getElementById('btnCriar');
+
+            const nome        = document.getElementById('nome').value.trim();
+            const sobrenome   = document.getElementById('sobrenome').value.trim();
+            const email       = document.getElementById('email').value.trim();
+            const telefone    = document.getElementById('telefone').value.trim();
+            const cnpj        = tipoPessoa === 'PJ' ? document.getElementById('cnpj').value.trim() : '';
+            const cpf         = tipoPessoa === 'PF' ? document.getElementById('cpf').value.trim()  : '';
+            const igreja      = document.getElementById('igreja').value.trim();
+            const cep         = document.getElementById('cep').value.trim();
+            const endereco    = document.getElementById('endereco').value.trim();
+            const numero      = document.getElementById('numero').value.trim();
+            const bairro      = document.getElementById('bairro').value.trim();
+            const complemento = document.getElementById('complemento').value.trim();
+            const cidade      = document.getElementById('cidade').value.trim();
+            const estado      = document.getElementById('estado').value;
+            const pais        = document.getElementById('pais').value;
+            const senha       = document.getElementById('senha').value;
+            const observacoes = document.getElementById('observacoes').value.trim();
 
             status.textContent = '';
             status.className = 'co-status';
 
-            if (!igreja || !nome || !email || !senha) {
-                status.textContent = 'Preencha todos os campos antes de continuar.';
+            if (!nome || !sobrenome || !email || !telefone || !igreja || !cep || !endereco || !bairro || !cidade || !estado || !senha) {
+                status.textContent = 'Preencha todos os campos obrigatórios antes de continuar.';
+                status.className = 'co-status error';
+                return;
+            }
+            if (tipoPessoa === 'PJ' && !cnpj) {
+                status.textContent = 'Informe o CNPJ da instituição.';
+                status.className = 'co-status error';
+                return;
+            }
+            if (tipoPessoa === 'PF' && !cpf) {
+                status.textContent = 'Informe o CPF.';
                 status.className = 'co-status error';
                 return;
             }
@@ -360,7 +620,15 @@
                 const resp = await fetch('/criar-conta', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ igreja, nome, email, senha })
+                    body: JSON.stringify({
+                        nome: nome + ' ' + sobrenome,
+                        email, senha, igreja, telefone,
+                        tipo_pessoa: tipoPessoa,
+                        cnpj, cpf,
+                        endereco: { cep, logradouro: endereco, numero, bairro, complemento, cidade, estado, pais },
+                        observacoes,
+                        plano: planoAtual?.slug || ''
+                    })
                 });
 
                 const data = await resp.json().catch(() => ({}));
@@ -380,10 +648,8 @@
                 status.textContent = '✅ Igreja cadastrada com sucesso! Redirecionando...';
                 status.className = 'co-status success';
                 setTimeout(() => {
-                    const role = window.getStoredAuth?.()?.user?.role || '';
-                    window.location.href = ['super-admin', 'master', 'owner'].includes(role)
-                        ? 'super-admin.htm'
-                        : 'dashboard.html';
+                    const user = window.getStoredAuth?.()?.user || {};
+                    window.location.href = isMasterWorkspaceUser(user) ? 'super-admin.htm' : 'dashboard.html';
                 }, 900);
             } catch (err) {
                 status.textContent = err.message || 'Erro inesperado ao criar conta.';

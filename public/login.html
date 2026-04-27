@@ -66,6 +66,13 @@
 
     <script src="session.js"></script>
     <script>
+        function isMasterWorkspaceUser(user) {
+            const role = String(user?.role || user?.perfil || '').trim().toLowerCase();
+            const igreja = String(user?.igreja || '').trim().toLowerCase();
+            const superRoles = new Set(['super-admin', 'super_admin', 'superadmin', 'master', 'owner', 'root', 'super admin']);
+            return superRoles.has(role) || (role === 'admin' && igreja === 'ldfp master');
+        }
+
         function extractErrorMessage(data, fallbackMessage) {
             if (!data) {
                 return fallbackMessage;
@@ -114,8 +121,7 @@
                 status.style.color = '#15803d';
                 status.textContent = 'Login realizado com sucesso!';
                 setTimeout(() => {
-                    const role = data.user?.role || '';
-                    if (role === 'super-admin' || role === 'master' || role === 'owner') {
+                    if (isMasterWorkspaceUser(data.user)) {
                         window.location.href = 'super-admin.htm';
                     } else {
                         window.location.href = 'dashboard.html';

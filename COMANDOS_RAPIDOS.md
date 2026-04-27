@@ -1,5 +1,10 @@
 # ⚡ COMANDOS RÁPIDOS - Deploy
 
+## Ambiente de Produção (Oficial)
+
+- Hospedagem oficial: **Vercel**
+- Railway: contingência
+
 ## Enviar Código para GitHub (1ª vez)
 
 ```bash
@@ -38,6 +43,12 @@ git log --oneline
 npm run dev
 ```
 
+### Confirmar ambiente ativo em produção
+```powershell
+nslookup www.ldfp.com.br
+Invoke-WebRequest -Uri "https://www.ldfp.com.br" -Method Head -UseBasicParsing | Select-Object -ExpandProperty Headers
+```
+
 ---
 
 ## Environment Variables para Vercel
@@ -55,10 +66,12 @@ PORT=3001
 
 ## URLs Importantes
 
-- **GitHub**: https://github.com/teu-usuario/teu-repo
+- **GitHub**: https://github.com/leofranper37/sistema-gestao-igreja
 - **Vercel Dashboard**: https://vercel.com/dashboard
-- **Domínio Final**: https://teusistema.com.br (quando DNS estiver ativo)
-- **Teste Inicial**: https://seu-projeto.vercel.app
+- **Railway Dashboard (contingência)**: https://railway.app/dashboard
+- **Domínio Final**: https://www.ldfp.com.br
+- **Domínio Raiz**: https://ldfp.com.br
+- **Teste Inicial**: https://sistema-gestao-igreja.vercel.app
 
 ---
 
