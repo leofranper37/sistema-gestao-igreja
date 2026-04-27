@@ -245,6 +245,103 @@
             line-height: 1.5;
         }
 
+        .app-preview {
+            display: grid;
+            grid-template-columns: 220px 1fr;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .phone-mock {
+            width: 210px;
+            background: linear-gradient(180deg, #0f172a 0%, #020617 100%);
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            border-radius: 28px;
+            padding: 10px;
+            box-shadow: 0 16px 34px rgba(0, 0, 0, 0.45);
+            position: relative;
+        }
+
+        .phone-mock::before {
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 74px;
+            height: 7px;
+            border-radius: 999px;
+            background: rgba(148, 163, 184, 0.35);
+        }
+
+        .phone-screen {
+            border-radius: 20px;
+            overflow: hidden;
+            background: linear-gradient(180deg, #0a1220 0%, #07101f 100%);
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            min-height: 360px;
+            color: #e2e8f0;
+        }
+
+        .app-header {
+            padding: 12px 12px 10px;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.16);
+            background: rgba(8, 16, 32, 0.85);
+        }
+
+        .app-header strong {
+            display: block;
+            font-size: 12px;
+            letter-spacing: .04em;
+            color: #f8fafc;
+        }
+
+        .app-header span {
+            display: block;
+            margin-top: 3px;
+            font-size: 11px;
+            color: #94a3b8;
+        }
+
+        .app-card {
+            margin: 10px;
+            padding: 10px;
+            border-radius: 12px;
+            background: #0f1b32;
+            border: 1px solid rgba(56, 189, 248, 0.24);
+        }
+
+        .app-card .line {
+            display: block;
+            height: 7px;
+            border-radius: 999px;
+            background: rgba(148, 163, 184, 0.32);
+            margin-top: 7px;
+        }
+
+        .app-card .line.wide { width: 100%; }
+        .app-card .line.mid { width: 72%; }
+        .app-card .line.short { width: 48%; }
+
+        .app-features {
+            display: grid;
+            gap: 8px;
+        }
+
+        .app-feature {
+            border-radius: 10px;
+            border: 1px solid rgba(148, 163, 184, 0.22);
+            background: rgba(15, 23, 42, 0.75);
+            padding: 8px 10px;
+            font-size: 12px;
+            color: #cbd5e1;
+        }
+
+        .app-feature i {
+            color: #f59e0b;
+            margin-right: 6px;
+        }
+
         .credibility-wrap {
             display: flex;
             flex-wrap: wrap;
@@ -363,6 +460,15 @@
 
             .promo-main .landing-container {
                 grid-template-columns: 1fr;
+            }
+
+            .app-preview {
+                grid-template-columns: 1fr;
+                justify-items: center;
+            }
+
+            .phone-mock {
+                width: min(220px, 100%);
             }
 
             .promo-title {
@@ -535,7 +641,36 @@
             </div>
             <div class="promo-visual">
                 <strong>Campanha ativa: Cruz e Leo</strong>
-                <p>Mostre este app em culto, celula e reunioes de lideranca para engajar membros no uso diario da plataforma.</p>
+                <p>Mostre o App do Membro com um visual real da tela para aumentar a adesao da igreja.</p>
+                <div class="app-preview">
+                    <div class="phone-mock" aria-hidden="true">
+                        <div class="phone-screen">
+                            <div class="app-header">
+                                <strong>App do Membro</strong>
+                                <span>Bem-vindo, Irmao Joao</span>
+                            </div>
+                            <div class="app-card">
+                                <span class="line wide"></span>
+                                <span class="line mid"></span>
+                                <span class="line short"></span>
+                            </div>
+                            <div class="app-card" style="border-color: rgba(245, 158, 11, 0.28); background:#10192b;">
+                                <span class="line wide"></span>
+                                <span class="line short"></span>
+                            </div>
+                            <div class="app-card" style="border-color: rgba(16, 185, 129, 0.28); background:#0f1c26;">
+                                <span class="line mid"></span>
+                                <span class="line wide"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="app-features">
+                        <div class="app-feature"><i class="fa-solid fa-id-card"></i> Credencial digital do membro</div>
+                        <div class="app-feature"><i class="fa-solid fa-calendar-days"></i> Agenda de cultos e eventos</div>
+                        <div class="app-feature"><i class="fa-solid fa-bullhorn"></i> Mural e comunicados em tempo real</div>
+                        <div class="app-feature"><i class="fa-solid fa-hand-holding-heart"></i> Pedidos de oracao e acompanhamento</div>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
