@@ -471,26 +471,33 @@ async function markSaasAssinaturaPaga(req, res) {
     if (!id) return res.status(400).json({ error: 'ID inválido.' });
 
     try {
+        const [links] = await pool.query(
+            `SELECT * FROM payment_links WHERE id = ? LIMIT 1`,
+            [id]
+        );
+        if (!links.length) return res.status(404).json({ error: 'Fatura não encontrada.' });
+        const link = links[0];
+
+        // Marca fatura como paga
         await pool.query(
-            `UPDATE payment_links
-             SET status = 'pago', paid_at = CURRENT_TIMESTAMP
+            `UPDATE payment_links SET status = 'pago', paid_at = CURRENT_TIMESTAMP WHERE id = ?`,
+            [id]
+        );
+
+        // Ativa a assinatura da igreja
+        const dias = Number(link.plano_duracao_dias || 30);
+        const proximoVencimento = new Date(Date.now() + dias * 24 * 60 * 60 * 1000);
+        await pool.query(
+            `UPDATE igrejas SET
+                plano = ?,
+                status_assinatura = 'ativa',
+                ultimo_pagamento = NOW(),
+                proximo_vencimento = ?
              WHERE id = ?`,
-            [id]
+            [link.plano_destino || link.plano_destino, proximoVencimento.toISOString(), link.igreja_id]
         );
 
-        const [rows] = await pool.query(
-            `SELECT id, status, paid_at
-             FROM payment_links
-             WHERE id = ?
-             LIMIT 1`,
-            [id]
-        );
-
-        if (!rows.length) {
-            return res.status(404).json({ error: 'Fatura não encontrada.' });
-        }
-
-        res.json(rows[0]);
+        res.json({ ok: true, igrejaId: link.igreja_id, plano: link.plano_destino, proximoVencimento });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
