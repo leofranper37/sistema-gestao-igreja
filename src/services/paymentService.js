@@ -114,15 +114,14 @@ async function gerarPix({ igrejaId, nomeIgreja, emailPagador, planoSlug, ciclo }
     const hasMpToken = !!mpToken && !mpToken.startsWith('APP_USR-COLE');
 
     if (!hasMpToken) {
-        const manualPixKey = process.env.PIX_KEY || process.env.PIX_CHAVE || process.env.MP_PIX_KEY;
-        if (!manualPixKey) {
-            throw new Error('Token do Mercado Pago não configurado e PIX_KEY também não definido. Configure MP_ACCESS_TOKEN ou PIX_KEY no deploy.');
-        }
+        const manualPixKey = process.env.PIX_KEY || process.env.PIX_CHAVE || process.env.MP_PIX_KEY || 'leopereita31@gmail.com';
+        const receiverName = process.env.PIX_RECEIVER_NAME || 'LDFP SISTEMA';
+        const receiverCity = process.env.PIX_RECEIVER_CITY || 'SAO PAULO';
 
         const payloadPix = buildManualPixPayload({
             key: manualPixKey,
-            name: process.env.PIX_RECEIVER_NAME || 'LDFP SISTEMA',
-            city: process.env.PIX_RECEIVER_CITY || 'SAO PAULO',
+            name: receiverName,
+            city: receiverCity,
             amount: valor,
             txid: referenceCode,
         });
