@@ -255,6 +255,89 @@ function normalizeFactoryMenuOverride(input) {
     };
 }
 
+function slugifyText(value) {
+    return String(value || '')
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '')
+        .slice(0, 40);
+}
+
+function inferTargetPlans(promptLower) {
+    const plans = [];
+    if (/eden|gratis|gratuito/.test(promptLower)) plans.push('eden');
+    if (/hebrom/.test(promptLower)) plans.push('hebrom');
+    if (/betel/.test(promptLower)) plans.push('betel');
+    if (/siao|si[aã]o|premium|executivo/.test(promptLower)) plans.push('siao');
+    return plans.length ? plans : ['siao'];
+}
+
+function inferMenuKey(promptLower) {
+    const rules = [
+        { regex: /membro|cadastro|ficha/, key: 'membros.html' },
+        { regex: /visitante/, key: 'visitantes.html' },
+        { regex: /crianca|infantil/, key: 'criancas.html' },
+        { regex: /financeiro|caixa|tesouraria/, key: 'financeiro.html' },
+        { regex: /banco|extrato/, key: 'bancos_lancamentos.html' },
+        { regex: /agenda|evento/, key: 'agenda.html' },
+        { regex: /oracao|ora[çc][aã]o/, key: 'oracoes.html' },
+        { regex: /grafico|indicador|kpi/, key: 'graficos_tesouraria.html' },
+        { regex: /relatorio/, key: 'relatorios_tesouraria.html' },
+        { regex: /contabil|contabilid|lancamento contabil/, key: 'lancamentos_contabeis.html' }
+    ];
+
+    const found = rules.find((item) => item.regex.test(promptLower));
+    return found ? found.key : 'dashboard.html';
+}
+
+function buildFactoryAiSuggestion(prompt, config) {
+    const text = String(prompt || '').trim();
+    const promptLower = text.toLowerCase();
+    const plans = inferTargetPlans(promptLower);
+    const menuKey = inferMenuKey(promptLower);
+
+    const mainTopic = text.split(/[\n\.!\?]/).map((part) => part.trim()).filter(Boolean)[0] || 'Inovacao de Gestao';
+    const baseName = mainTopic.length > 72 ? mainTopic.slice(0, 72).trim() : mainTopic;
+    const cleanName = /^[a-z0-9\s\-]+$/i.test(baseName) ? baseName : `Inovacao ${baseName}`;
+    const routeSlug = slugifyText(cleanName) || `inovacao-${Date.now()}`;
+
+    const existingModules = Array.isArray(config?.factory?.modules) ? config.factory.modules : [];
+    const hasConflict = existingModules.some((item) => String(item?.name || '').toLowerCase() === cleanName.toLowerCase());
+    const moduleName = hasConflict ? `${cleanName} V2` : cleanName;
+
+    const moduleSuggestion = {
+        id: `mod-${routeSlug}-${Date.now().toString().slice(-5)}`,
+        name: moduleName,
+        description: `Proposta IA: ${moduleName}. Objetivo: ${text.slice(0, 180)}. Entrega com foco em usabilidade, governanca e resultado operacional.`,
+        route: `construcao.html?pag=${encodeURIComponent(moduleName)}`,
+        enabled: true,
+        status: /publicar|producao|produção|pronto/.test(promptLower) ? 'published' : 'beta',
+        targetPlans: plans
+    };
+
+    const menuSuggestion = {
+        key: menuKey,
+        customLabel: moduleName,
+        customRoute: moduleSuggestion.route,
+        hidden: false,
+        featured: /premium|destaque|executivo/.test(promptLower)
+    };
+
+    const rationale = [
+        `Modulo sugerido para planos: ${plans.join(', ')}`,
+        `Menu existente recomendado para override: ${menuKey}`,
+        `Status inicial: ${moduleSuggestion.status}`
+    ];
+
+    return {
+        module: moduleSuggestion,
+        menuOverride: menuSuggestion,
+        rationale
+    };
+}
+
 function getBackupSnapshot(limit = 20) {
     const backupsDir = path.resolve(__dirname, '..', '..', 'backups');
     if (!fs.existsSync(backupsDir)) {
@@ -895,6 +978,21 @@ async function updateSaasSistemaConfig(req, res) {
     }
 }
 
+async function suggestFactoryWithAi(req, res) {
+    try {
+        const prompt = String(req.body?.prompt || '').trim();
+        if (prompt.length < 8) {
+            return res.status(400).json({ error: 'Prompt muito curto. Descreva melhor a inovacao desejada.' });
+        }
+
+        const config = readSystemConfig();
+        const suggestion = buildFactoryAiSuggestion(prompt, config);
+        return res.json({ ok: true, suggestion });
+    } catch (err) {
+        return res.status(500).json({ error: err.message });
+    }
+}
+
 async function getSaasSistemaDiagnostico(req, res) {
     try {
         const git = getGitSnapshot();
@@ -944,5 +1042,6 @@ module.exports = {
     getPublicSystemConfig,
     getSaasSistemaConfig,
     updateSaasSistemaConfig,
+    suggestFactoryWithAi,
     getSaasSistemaDiagnostico
 };

@@ -21,6 +21,7 @@ const {
     getPublicSystemConfig,
     getSaasSistemaConfig,
     updateSaasSistemaConfig,
+    suggestFactoryWithAi,
     getSaasSistemaDiagnostico
 } = require('../controllers/superAdminController');
 
@@ -78,6 +79,7 @@ router.post('/api/saas/retomada/checkpoint', ...isSuperAdmin, createSaasRetomada
 // Logs e Sistema
 router.get('/api/saas/sistema/config', ...isSuperAdmin, getSaasSistemaConfig);
 router.put('/api/saas/sistema/config', ...isSuperAdmin, updateSaasSistemaConfig);
+router.post('/api/saas/factory/ai-suggest', ...isSuperAdmin, suggestFactoryWithAi);
 router.get('/api/saas/sistema/diagnostico', ...isSuperAdmin, getSaasSistemaDiagnostico);
 
 module.exports = router;
